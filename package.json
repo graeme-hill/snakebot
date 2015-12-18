@@ -1,10 +1,9 @@
 {
   "name": "sushi-inc",
   "version": "1.0.0",
-  "description": "A little demo showing how easy it is to deploy, manage, & scale a NodeJS app on Heroku.",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Aaron McCall <aaron@andyet.net> (https://github.com/aaronmccall)",
