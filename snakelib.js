@@ -130,9 +130,7 @@ class GameState {
 
 function notImmediatelySuicidalMovement(gameState) {
     function isOK(x, y) {
-        gameState._gridCache.printOccupied();
-        let result = gameState.checkCell(x, y).constructor;
-        return result === OpenCell;
+        return gameState._gridCache.printOccupied() === OpenCell;
     }
 
     let myHead = gameState.mySnake.head();
