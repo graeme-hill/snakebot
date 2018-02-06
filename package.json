@@ -1,15 +1,19 @@
 {
-  "name": "sushi-inc",
+  "name": "snakebot",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "engines": {
+    "node": "6.x"
   },
-  "author": "Aaron McCall <aaron@andyet.net> (https://github.com/aaronmccall)",
-  "license": "ISC",
+  "author": "(>^_^)>",
+  "license": "MIT",
   "dependencies": {
-    "express": "^4.13.3",
-    "jade": "^1.11.0"
+    "body-parser": "^1.18.2",
+    "express": "^4.13.3"
+  },
+  "devDependencies": {
+    "foreman": "^2.0.0",
+    "nodemon": "^1.14.11"
   }
 }
