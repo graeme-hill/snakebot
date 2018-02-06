@@ -1,0 +1,1 @@
+sudo docker run -d -p 3000:3000 battlesnake/battle_snake
