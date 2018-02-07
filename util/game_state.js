@@ -51,6 +51,10 @@ class Snake {
     head() {
         return this.parts[0];
     }
+
+    length() {
+        return this.parts.length;
+    }
 }
 
 class SnakePart {
@@ -73,6 +77,7 @@ class GameState {
         this.width = world.width;
         this.height = world.height;
         this.snakes = {};
+        this.enemies = [];
         this.mySnake = null;
         this.food = world.food.data;
 
@@ -122,6 +127,9 @@ class GameState {
     _addSnake(snakeData) {
         const snake = new Snake(snakeData.id);
         this.snakes[snake.id] = snake;
+        if (snake.id !== this._world.you.id) {
+            this.enemies.push(snake);
+        }
         for (const partData of snakeData.body.data) {
             this._addSnakePart(snake, partData);
         }
