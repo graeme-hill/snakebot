@@ -70,11 +70,16 @@ class GameState {
         this.height = world.height;
         this.snakes = {};
         this.mySnake = null;
+        this.food = world.food.data;
 
         this._world = world;
         this._gridCache = new GridCache(world.width, world.height);
         this._addOtherSnakes();
         this._addMySnake();
+    }
+
+    hasFood() {
+        return !!this.food.length;
     }
 
     checkCell(x, y) {

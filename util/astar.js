@@ -1,4 +1,5 @@
 let helpers = require("./helpers");
+let { GameState, OpenCell } = require("./game_state");
 
 function getIndex(coord, gameState) {
 	return helpers.cellIndex(coord.x, coord.y, gameState.width);
@@ -52,29 +53,39 @@ function reconstructPath(cameFrom, currentIndex, width) {
 	return moves;
 }
 
-function getNeighbors(index, width, height) {
-	let coord = helpers.deconstructCellIndex(index, width);
+function indexIsSafe(index, gameState) {
+	let { x, y } = helpers.deconstructCellIndex(index, gameState.width);
+	let myTail = gameState.mySnake.tail();
+	let isMyTail = myTail.x === x && myTail.y === y;
+	return isMyTail || gameState.checkCell(x, y).constructor === OpenCell;
+}
+
+// This is for the special case where the AI will turn back on itself in the second move
+// of the game when it is only two cells long. That's an illegal move even though the
+// tail will no longer be in that position after the move.
+function is180(index, neighborIndex, gameState) {
+	let head = gameState.mySnake.head();
+	let tail = gameState.mySnake.tail();
+	let headIndex = helpers.cellIndex(head.x, head.y, gameState.width);
+	let tailIndex = helpers.cellIndex(tail.x, tail.y, gameState.width);
+	result = index === headIndex && neighborIndex == tailIndex;
+	return result;
+}
+
+function getNeighbors(index, gameState) {
+	let coord = helpers.deconstructCellIndex(index, gameState.width);
 	let result = [];
 
-	// left - only if not in first column
-	if (coord.x > 0) {
-		result.push(index - 1);
+	function addIfSafe(i) {
+		if (indexIsSafe(i, gameState) && !is180(index, i, gameState)) {
+			result.push(i);
+		}
 	}
 
-	// right - only if not in last column
-	if (coord.x < width - 1) {
-		result.push(index + 1);
-	}
-
-	// up - only if not on first row
-	if (coord.y > 0) {
-		result.push(index - width);
-	}
-
-	// down - only if not on last row
-	if (coord.y < height - 1) {
-		result.push(index + width);
-	}
+	addIfSafe(index + 1); // right
+	addIfSafe(index - 1); // left
+	addIfSafe(index + gameState.width); // down
+	addIfSafe(index - gameState.width); // up
 
 	return result;
 }
@@ -109,7 +120,6 @@ function shortestPath(start, goal, gameState) {
 	fScore[startIndex] = heuristicCostEstimate(start, goal);
 
 	while (openSet.size > 0) {
-		console.log("A* loop. open: " + openSet.size);
 		let currentIndex = lowestFScoreInSet(openSet, fScore);
 
 		if (currentIndex === goalIndex) {
@@ -119,7 +129,7 @@ function shortestPath(start, goal, gameState) {
 		openSet.delete(currentIndex);
 		closedSet.add(currentIndex);
 
-		let neighbors = getNeighbors(currentIndex, gameState.width, gameState.height);
+		let neighbors = getNeighbors(currentIndex, gameState);
 		for (let neighborIndex of neighbors) {
 
 			// Don't revisit the same node we've already been to.
@@ -145,7 +155,7 @@ function shortestPath(start, goal, gameState) {
 			cameFrom[neighborIndex] = currentIndex;
 			gScore[neighborIndex] = tentativeGScore;
 			fScore[neighborIndex] = gScore[neighborIndex] + heuristicCostEstimate(
-				snake.deconstructCellIndex(neighborIndex, gameState.width), goal);
+				helpers.deconstructCellIndex(neighborIndex, gameState.width), goal);
 		}
 	}
 

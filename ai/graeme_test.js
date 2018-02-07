@@ -14,7 +14,14 @@ function start(info) {
 
 function move(world) {
     let state = new GameState(world);
-    let direction = movement.notImmediatelySuicidal(state);
+    if (state.hasFood()) {
+        let foodCoord = movement.bestFoodOption(state);
+        let foodDirection = movement.getFood(foodCoord, state);
+        if (foodDirection) {
+            return foodDirection;
+        }
+    }
+    let direction = movement.chaseTail(state);
     return direction;
 }
 
