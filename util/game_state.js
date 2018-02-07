@@ -1,6 +1,4 @@
-function isArray(x) {
-    return x !== null && x !== undefined && x.constructor === Array;
-}
+let helpers = require("./helpers");
 
 /* Simulates a two dimensional dictionary. Really it's just a one dimension dictionary
  * where each cell in the 2D grid gets a unique id. Example IDs for a 3x3 grid:
@@ -16,30 +14,18 @@ class GridCache {
     }
 
     set(x, y, value) {
-        console.log("set " + x + ", " + y + " to " + this._cellIndex(x, y));
-        this._cache[this._cellIndex(x, y)] = value;
+        this._cache[helpers.cellIndex(x, y, this._width)] = value;
     }
 
     get(x, y) {
-        return this._cache[this._cellIndex(x, y)];
+        return this._cache[helpers.cellIndex(x, y, this._width)];
     }
 
     printOccupied() {
         for (let key in this._cache) {
             console.log(key);
-            console.log(this._deconstructCellIndex(key));
+            console.log(helpers.deconstructCellIndex(key, this._width));
         }
-    }
-
-    _deconstructCellIndex(index) {
-        return {
-            x: index % this._width,
-            y: Math.floor(index / this._width)
-        };
-    }
-    
-    _cellIndex(x, y) {
-        return this._width * y + x;
     }
 }
 
@@ -80,16 +66,19 @@ class OpenCell { }
  */
 class GameState {
     constructor(world) {
-        this._world = world;
-        this._gridCache = new GridCache(world.width, world.height);
+        this.width = world.width;
+        this.height = world.height;
         this.snakes = {};
         this.mySnake = null;
+
+        this._world = world;
+        this._gridCache = new GridCache(world.width, world.height);
         this._addOtherSnakes();
         this._addMySnake();
     }
 
     checkCell(x, y) {
-        if (x < 0 || this._world.width <= x || y < 0 || this._world.height <= y) {
+        if (x < 0 || this.width <= x || y < 0 || this.height <= y) {
             return new OutOfBounds();
         }
         let cellContent = this._gridCache.get(x, y);
@@ -98,7 +87,7 @@ class GameState {
 
     _addOtherSnakes() {
         let w = this._world;
-        if (w.snakes && isArray(w.snakes.data)) {
+        if (w.snakes && helpers.isArray(w.snakes.data)) {
             for (let snake of w.snakes.data) {
                 this._addSnake(snake);
             }
@@ -128,30 +117,6 @@ class GameState {
     }
 }
 
-function notImmediatelySuicidalMovement(gameState) {
-    function isOK(x, y) {
-        return gameState._gridCache.printOccupied() === OpenCell;
-    }
-
-    let myHead = gameState.mySnake.head();
-    let x = myHead.x;
-    let y = myHead.y;
-    if (isOK(x - 1, y)) {
-        return "left";
-    }
-    if (isOK(x + 1, y)) {
-        return "right";
-    }
-    if (isOK(x, y - 1)) {
-        return "up";
-    }
-    return "down";
-}
-
-function chaseTailMovement(gameState) {
-    // todo ...
-}
-
 module.exports = {
-    GameState, notImmediatelySuicidalMovement, chaseTailMovement
+    GameState, OpenCell, OutOfBounds, Snake, SnakePart
 };
