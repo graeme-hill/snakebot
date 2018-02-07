@@ -25,28 +25,11 @@ function lowestFScoreInSet(set, fScore) {
 	return lowestIndex;
 }
 
-function directionBetweenNodes(fromIndex, toIndex, width) {
-	let fromCoord = helpers.deconstructCellIndex(fromIndex, width);
-	let toCoord = helpers.deconstructCellIndex(toIndex, width);
-
-	// Find first sensible direction assuming that they are adjacent and not diagonal.
-	if (fromCoord.x < toCoord.x) {
-		return "right";
-	}
-	if (toCoord.x < fromCoord.x) {
-		return "left";
-	}
-	if (fromCoord.y < toCoord.y) {
-		return "down";
-	}
-	return "up";
-}
-
 function reconstructPath(cameFrom, currentIndex, width) {
 	let moves = [];
 	while (currentIndex in cameFrom) {
 		let nextIndex = cameFrom[currentIndex];
-		let direction = directionBetweenNodes(nextIndex, currentIndex, width);
+		let direction = helpers.directionBetweenNodes(nextIndex, currentIndex, width);
 		moves.unshift(direction);
 		currentIndex = nextIndex;
 	}

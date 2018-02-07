@@ -1,5 +1,9 @@
 let helpers = require("./helpers");
 
+function cloneWorld(world) {
+    return JSON.parse(JSON.stringify(world));
+}
+
 /* Simulates a two dimensional dictionary. Really it's just a one dimension dictionary
  * where each cell in the 2D grid gets a unique id. Example IDs for a 3x3 grid:
  *    0 1 2
@@ -76,6 +80,15 @@ class GameState {
         this._gridCache = new GridCache(world.width, world.height);
         this._addOtherSnakes();
         this._addMySnake();
+    }
+
+    // Makes a copy of this game state but from the perspective of the given enemy. This means
+    // that in code like "gameState.mySnake" MY actually refers to the enemy snake whose perspective
+    // we are simulating. Useful if you want to predict other pleyers' movements.
+    enemyCopy(enemy) {
+        let newWorld = cloneWorld(this._world);
+        newWorld.you = enemy;
+        return new GameState(newWorld);
     }
 
     hasFood() {
