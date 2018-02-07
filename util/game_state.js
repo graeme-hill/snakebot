@@ -26,7 +26,7 @@ class GridCache {
     }
 
     printOccupied() {
-        for (let key in this._cache) {
+        for (const key in this._cache) {
             console.log(key);
             console.log(helpers.deconstructCellIndex(key, this._width));
         }
