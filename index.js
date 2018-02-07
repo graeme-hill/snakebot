@@ -2,15 +2,19 @@ const express = require('express');
 const bodyParser = require('body-parser')
 const app = express();
 
+const DEFAULT_AI = "graeme_test";
+const DEFAULT_PORT = 5000;
+
 const portFromCommandLine = parseInt(process.argv[2]);
 const aiFromCommandLine = process.argv[3];
 
-app.set('port', (process.env.PORT || portFromCommandLine || 5000));
+app.set('port', (process.env.PORT || portFromCommandLine || DEFAULT_PORT));
 
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 
-const ai = require("./ai/graeme_test");
+const aiName = aiFromCommandLine || DEFAULT_AI;
+const ai = require("./ai/" + aiName);
 
 app.post('/start', (req, res) => {
     ai.start(req.body);
@@ -32,5 +36,5 @@ app.post('/move', (req, res) => {
 });
 
 app.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
+    console.log("snakebot running AI '" + aiName + "' on port " + app.get("port"));
 });
