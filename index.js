@@ -1,13 +1,16 @@
-let express = require('express');
-let bodyParser = require('body-parser')
-let app = express();
+const express = require('express');
+const bodyParser = require('body-parser')
+const app = express();
 
-app.set('port', (process.env.PORT || 5000));
+const portFromCommandLine = parseInt(process.argv[2]);
+const aiFromCommandLine = process.argv[3];
+
+app.set('port', (process.env.PORT || portFromCommandLine || 5000));
 
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 
-let ai = require("./ai/graeme_test");
+const ai = require("./ai/graeme_test");
 
 app.post('/start', (req, res) => {
     ai.start(req.body);

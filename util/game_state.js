@@ -1,4 +1,4 @@
-let helpers = require("./helpers");
+const helpers = require("./helpers");
 
 function cloneWorld(world) {
     return JSON.parse(JSON.stringify(world));
@@ -86,7 +86,7 @@ class GameState {
     // that in code like "gameState.mySnake" MY actually refers to the enemy snake whose perspective
     // we are simulating. Useful if you want to predict other pleyers' movements.
     enemyCopy(enemy) {
-        let newWorld = cloneWorld(this._world);
+        const newWorld = cloneWorld(this._world);
         newWorld.you = enemy;
         return new GameState(newWorld);
     }
@@ -99,37 +99,37 @@ class GameState {
         if (x < 0 || this.width <= x || y < 0 || this.height <= y) {
             return new OutOfBounds();
         }
-        let cellContent = this._gridCache.get(x, y);
+        const cellContent = this._gridCache.get(x, y);
         return cellContent ? cellContent : new OpenCell();
     }
 
     _addOtherSnakes() {
-        let w = this._world;
+        const w = this._world;
         if (w.snakes && helpers.isArray(w.snakes.data)) {
-            for (let snake of w.snakes.data) {
+            for (const snake of w.snakes.data) {
                 this._addSnake(snake);
             }
         }
     }
 
     _addMySnake() {
-        let w = this._world;
+        const w = this._world;
         if (w && w.you) {
             this.mySnake = this._addSnake(w.you);
         }
     }
 
     _addSnake(snakeData) {
-        let snake = new Snake(snakeData.id);
+        const snake = new Snake(snakeData.id);
         this.snakes[snake.id] = snake;
-        for (let partData of snakeData.body.data) {
+        for (const partData of snakeData.body.data) {
             this._addSnakePart(snake, partData);
         }
         return snake;
     }
 
     _addSnakePart(snake, partData) {
-        let part = new SnakePart(partData.x, partData.y);
+        const part = new SnakePart(partData.x, partData.y);
         snake.addPart(part);
         this._gridCache.set(part.x, part.y, snake);
     }

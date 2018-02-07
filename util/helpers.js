@@ -14,8 +14,8 @@ function cellIndex(x, y, width) {
 }
 
 function directionBetweenNodes(fromIndex, toIndex, width) {
-	let fromCoord = deconstructCellIndex(fromIndex, width);
-	let toCoord = deconstructCellIndex(toIndex, width);
+	const fromCoord = deconstructCellIndex(fromIndex, width);
+	const toCoord = deconstructCellIndex(toIndex, width);
 
 	// Find first sensible direction assuming that they are adjacent and not diagonal.
 	if (fromCoord.x < toCoord.x) {
