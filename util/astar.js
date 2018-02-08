@@ -38,11 +38,16 @@ function reconstructPath(cameFrom, currentIndex, width) {
 	return moves;
 }
 
-function indexIsSafe(index, gameState) {
-	const { x, y } = helpers.deconstructCellIndex(index, gameState.width);
-	const myTail = gameState.mySnake.tail();
-	const isMyTail = myTail.x === x && myTail.y === y;
-	return isMyTail || gameState.checkCell(x, y).constructor === OpenCell;
+function indexIsSafe(index, turn, gameState) {
+	const coord = helpers.deconstructCellIndex(index, gameState.width);
+	if (helpers.outOfBounds(coord, gameState)) {
+		return false;
+	}
+	const turnsUntilCouldBeVacant = gameState.map.turnsUntilVacant(coord);
+	return turnsUntilCouldBeVacant < turn;
+	// const myTail = gameState.mySnake.tail();
+	// const isMyTail = myTail.x === x && myTail.y === y;
+	// return isMyTail || gameState.checkCell(x, y).constructor === OpenCell;
 }
 
 function isAdjacent(aIndex, bIndex, gameState) {
@@ -59,11 +64,17 @@ function isAdjacent(aIndex, bIndex, gameState) {
 // of the game when it is only two cells long. That's an illegal move even though the
 // tail will no longer be in that position after the move.
 function is180(index, neighborIndex, gameState) {
-	const head = gameState.mySnake.head();
-	const tail = gameState.mySnake.tail();
+	const head = gameState.mySnake.parts[0];
+	const neck = gameState.mySnake.parts[1];
+
+	if (!neck) {
+		// just in case length of 1 is allowed
+		return false;
+	}
+
 	const headIndex = helpers.cellIndex(head.x, head.y, gameState.width);
-	const tailIndex = helpers.cellIndex(tail.x, tail.y, gameState.width);
-	return index === headIndex && neighborIndex == tailIndex;
+	const neckIndex = helpers.cellIndex(neck.x, neck.y, gameState.width);
+	return index === headIndex && neighborIndex == neckIndex;
 }
 
 function isCloseToHead(index, snake, gameState) {
@@ -81,12 +92,12 @@ function isCloseToEqualOrBiggerSnakeHead(index, gameState) {
 	return false;
 }
 
-function getNeighbors(index, gameState) {
+function getNeighbors(index, turn, gameState) {
 	const coord = helpers.deconstructCellIndex(index, gameState.width);
 	const result = [];
 
 	function addIfSafe(i) {
-		if (indexIsSafe(i, gameState) && !is180(index, i, gameState) && isAdjacent(index, i, gameState)) {
+		if (indexIsSafe(i, turn, gameState) && !is180(index, i, gameState) && isAdjacent(index, i, gameState)) {
 			result.push(i);
 		}
 	}
@@ -121,8 +132,15 @@ function shortestPath(start, goal, gameState) {
 	// For each node the cost of getting from the start to that node.
 	const gScore = {};
 
+	// Like gScore but just straight up turn count to get to each cell. gScore could
+	// be exagerrated to discourage certain risky paths.
+	const turns = {};
+
 	// Already at start so cost of going there is zero.
 	gScore[startIndex] = 0;
+	
+	// Start at turn 1 because it makes more sense in my head.
+	turns[startIndex] = 1;
 
 	// For each node the cost of getting from start to goal passing through that node.
 	// Depends on heuristics. Not guaranteed to be precise.
@@ -141,7 +159,7 @@ function shortestPath(start, goal, gameState) {
 		openSet.delete(currentIndex);
 		closedSet.add(currentIndex);
 
-		const neighbors = getNeighbors(currentIndex, gameState);
+		const neighbors = getNeighbors(currentIndex, turns[currentIndex], gameState);
 		for (const neighborIndex of neighbors) {
 
 			// Don't revisit the same node we've already been to.
@@ -159,7 +177,6 @@ function shortestPath(start, goal, gameState) {
 			if (isFirstMove) {
 				const couldGetEaten = isCloseToEqualOrBiggerSnakeHead(neighborIndex, gameState);
 				if (couldGetEaten) {
-					console.log("EVASIVE MANEUVERS");
 					dontGetEatenModifier = VERY_HIGH_COST;
 				}
 			}
@@ -177,6 +194,7 @@ function shortestPath(start, goal, gameState) {
 			// For now this is the best path to this node so record it.
 			cameFrom[neighborIndex] = currentIndex;
 			gScore[neighborIndex] = tentativeGScore;
+			turns[neighborIndex] = turns[currentIndex] + 1;
 			fScore[neighborIndex] = gScore[neighborIndex] + heuristicCostEstimate(
 				helpers.deconstructCellIndex(neighborIndex, gameState.width), goal);
 		}

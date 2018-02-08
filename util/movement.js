@@ -21,16 +21,47 @@ function notImmediatelySuicidal(gameState) {
     return "down";
 }
 
-// This should probably give the food with shortest path from my snake, but for now
-// just return the first one..
-function bestFoodOption(gameState) {
-    return gameState.food[0];
-}
+function bestFood(gameState) {
+    const me = gameState.mySnake;
+    let best = null;
+    for (const food of gameState.food) {
+        const myPath = astar.shortestPath(me.head(), food, gameState);
 
-function getFood(foodCoord, gameState) {
-    const myHead = gameState.mySnake.head();
-    const path = astar.shortestPath(myHead, foodCoord, gameState);
-    return path ? path[0] : null;
+        // if there is no path then move on
+        if (!myPath) {
+            continue;
+        }
+
+        // if this path isn't even better than another already found then move on
+        if (best !== null && myPath.length >= best.length) {
+            continue;
+        }
+        
+        const enemyWillWin = gameState.enemies.some(enemy => {
+            const enemyGameState = gameState.perspective(enemy);
+            const enemyPath = astar.shortestPath(enemy.head(), food, enemyGameState);
+
+            if (!enemyPath) {
+                return false;
+            }
+
+            if (enemyPath.length === myPath.length) {
+                return me.length() < enemy.length();
+            }
+
+            return enemyPath.length < myPath.length;
+        });
+
+        if (!enemyWillWin) {
+            best = myPath;
+        }
+    }
+    
+    if (best) {
+        return best[0];
+    } else {
+        return null;
+    }
 }
 
 function chaseTail(gameState) {
@@ -46,6 +77,5 @@ function chaseTail(gameState) {
 module.exports = {
     notImmediatelySuicidal,
     chaseTail,
-    bestFoodOption,
-    getFood
+    bestFood
 };

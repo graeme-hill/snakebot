@@ -13,19 +13,18 @@ function start(info) {
 function move(world) {
     const state = new GameState(world);
 
+    //state.map.printVacateGrid();
+
     // Check if there is any food worth going after.
-    const food = movement.bestFoodOption(state);
-    if (food) {
-        const foodDirection = movement.getFood(food, state);
-        if (foodDirection) {
-            logDecision(foodDirection, state, "food");
-            return foodDirection;
-        }
+    const foodDirection = movement.bestFood(state);
+    if (foodDirection) {
+        //logDecision(foodDirection, state, "food");
+        return foodDirection;
     }
 
     // Probably not gonna get the food so just defensively loop around.
     const direction = movement.chaseTail(state);
-    logDecision(direction, state, "chase");
+    //logDecision(direction, state, "chase");
     return direction;
 }
 

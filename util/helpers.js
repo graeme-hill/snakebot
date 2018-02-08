@@ -30,9 +30,14 @@ function directionBetweenNodes(fromIndex, toIndex, width) {
 	return "up";
 }
 
+function outOfBounds({ x, y }, gameState) {
+    return x < 0 || x >= gameState.width || y < 0 || y >= gameState.height;
+}
+
 module.exports = {
 	isArray,
 	deconstructCellIndex,
 	cellIndex,
-	directionBetweenNodes
+	directionBetweenNodes,
+	outOfBounds
 };

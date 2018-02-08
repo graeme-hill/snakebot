@@ -4,6 +4,7 @@ const app = express();
 
 const DEFAULT_AI = "graeme_test";
 const DEFAULT_PORT = 5000;
+const DISPLAY_TIMINGS = true;
 
 const portFromCommandLine = parseInt(process.argv[2]);
 const aiFromCommandLine = process.argv[3];
@@ -15,6 +16,12 @@ app.use(bodyParser.json());
 
 const aiName = aiFromCommandLine || DEFAULT_AI;
 const ai = require("./ai/" + aiName);
+
+function clock(start) {
+    if ( !start ) return process.hrtime();
+    var end = process.hrtime(start);
+    return Math.round((end[0]*1000) + (end[1]/1000000));
+}
 
 app.post('/start', (req, res) => {
     ai.start(req.body);
@@ -30,9 +37,15 @@ app.post('/start', (req, res) => {
 });
 
 app.post('/move', (req, res) => {
+    const start = clock();
     res.json({
         move: ai.move(req.body)
     });
+    const duration = clock(start);
+
+    if (DISPLAY_TIMINGS) {
+        console.log(duration + " millis");
+    }
 });
 
 app.listen(app.get('port'), function() {
