@@ -3,7 +3,8 @@ const movement = require("../util/movement");
 const { GameState } = require("../util/game_state");
 const helpers = require("../util/helpers");
 
-describe("chaseTail()", () => {
+// These are actually mostly testing astar.js but whatever.
+describe("chaseTail() - A* pathfinding", () => {
     it("should do simple loop left", () => {
         const state = new GameState(helpers.parseWorld([
             "_ _ _ _ _ _ _ _",

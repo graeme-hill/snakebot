@@ -25,7 +25,8 @@ function start(info) {
 function move(world) {
     const state = new GameState(world);
     const algorithms = [ hungry ]; // hungry
-    const possibleFutures = simulator.simulateFutures(state, 100, algorithms);
+    const possibleFutures = simulator.simulateFutures(
+        tate, 100, 100, algorithms);
     const best = bestMove(possibleFutures, state);
 
     return best;
@@ -49,7 +50,7 @@ function bestMove(futures, state) {
         if (currentWorst === undefined || thisScore < currentWorst.score) {
             worsts[future.algorithm.meta.name] = {
                 score: thisScore,
-                move: future.firstMove
+                move: future.moves[0]
             };
         }
         return worsts;

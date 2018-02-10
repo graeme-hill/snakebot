@@ -1,5 +1,3 @@
-const MAX_LOOKAHEAD = 100;
-
 class Countdown {
 	constructor(maxMillis) {
 		this._maxMillis = maxMillis;
@@ -26,7 +24,7 @@ function updateObituaries(oldManifest, newManifest, obituaries, turn) {
 	}
 }
 
-function simulate(myAlgo, enemyAlgo, initialState, countdown) {
+function simulate(myAlgo, enemyAlgo, initialState, countdown, maxTurns) {
 	//console.log("START OF SIM");
 	//initialState._gridCache.prettyPrint();
 	//initialState.map.printVacateGrid();
@@ -46,12 +44,12 @@ function simulate(myAlgo, enemyAlgo, initialState, countdown) {
 	const simulatedMoves = []
 
 	while (!countdown.expired()) {
-		turn++;
-
-		if (turn > MAX_LOOKAHEAD) {
-			terminationReason = "MAX_LOOKAHEAD";
+		if (turn >= maxTurns) {
+			terminationReason = "MAX_TURNS";
 			break;
 		}
+
+		turn++;
 
 		const myMove = {
 			id: currentState.mySnake.id,
@@ -95,17 +93,17 @@ function simulate(myAlgo, enemyAlgo, initialState, countdown) {
 		endState: currentState,
 		obituaries,
 		algorithm: myAlgo,
-		firstMove: simulatedMoves[0],
-		terminationReason
+		terminationReason,
+		moves: simulatedMoves
 	};
 
-	console.log("sim " + myAlgo.meta.name + "/" + enemyAlgo.meta.name + " " + turn + " turns starting w/ " + result.firstMove + " ending with " + terminationReason);
-	console.log(simulatedMoves);
+	//console.log("sim " + myAlgo.meta.name + "/" + enemyAlgo.meta.name + " " + turn + " turns starting w/ " + result.firstMove + " ending with " + terminationReason);
+	//console.log(simulatedMoves);
 
 	return result;
 }
 
-function simulateFutures(initialState, maxMillis, algorithms) {
+function simulateFutures(initialState, maxMillis, maxTurns, algorithms) {
 	const algorithmPairs = algorithms.map(a1 => algorithms.map(a2 => {
 		return {
 			myAlgorithm: a1,
@@ -119,7 +117,7 @@ function simulateFutures(initialState, maxMillis, algorithms) {
 	const timePerPair = maxMillis / algorithmPairs;
 
 	const futures = algorithmPairs.map(p =>
-		simulate(p.myAlgorithm, p.enemyAlgorithm, initialState, new Countdown(timePerPair)))
+		simulate(p.myAlgorithm, p.enemyAlgorithm, initialState, new Countdown(timePerPair), maxTurns))
 
 	return futures;
 }
