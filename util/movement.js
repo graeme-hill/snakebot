@@ -64,6 +64,32 @@ function bestFood(gameState) {
     }
 }
 
+function closestFood(gameState) {
+    const me = gameState.mySnake;
+    let best = null;
+    for (const food of gameState.food) {
+        const myPath = astar.shortestPath(me.head(), food, gameState);
+
+        // if there is no path then move on
+        if (!myPath) {
+            continue;
+        }
+
+        // if this path isn't even better than another already found then move on
+        if (best !== null && myPath.length >= best.length) {
+            continue;
+        }
+        
+        best = myPath;
+    }
+    
+    if (best) {
+        return best[0];
+    } else {
+        return null;
+    }
+}
+
 function chaseTail(gameState) {
     const myHead = gameState.mySnake.head();
     const myTail = gameState.mySnake.tail();
@@ -77,5 +103,6 @@ function chaseTail(gameState) {
 module.exports = {
     notImmediatelySuicidal,
     chaseTail,
-    bestFood
+    bestFood,
+    closestFood
 };

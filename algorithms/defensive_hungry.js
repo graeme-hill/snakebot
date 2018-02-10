@@ -6,12 +6,22 @@ function logDecision(direction, state, tag) {
     console.log(direction + " (" + coord + ") - " + tag);
 }
 
+const meta = {
+    color: "#FF0000",
+    secondary_color: "#000000",
+    head_url: "https://pre00.deviantart.net/1951/th/pre/f/2016/149/3/1/jigglypuff_by_crystal_ribbon-da48ylv.png",
+    name: "Defensive Hungry",
+    taunt: "yum yum",
+    head_type: "pixel",
+    tail_type: "pixel"
+};
+
 function start(info) {
     // I think there is nothing to do here unless we want to track some state throughout the game???
 }
 
-function move(world) {
-    const state = new GameState(world);
+function move(inState) {
+    const state = inState.constructor === GameState ? inState : new GameState(inState);
 
     //state.map.printVacateGrid();
 
@@ -28,4 +38,4 @@ function move(world) {
     return direction;
 }
 
-module.exports = { start, move };
+module.exports = { start, move, meta };
