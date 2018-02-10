@@ -109,11 +109,14 @@ class GameState {
         this.food = world.food.data;
 
         this._world = world;
-        this._gridCache = new GridCache(world.width, world.height);
+        this._buildCaches();
+    }
+
+    _buildCaches() {
+        this._gridCache = new GridCache(this.width, this.height);
         this._addOtherSnakes();
         this._addMySnake();
         this._perspectiveCopies = {};
-
         this.map = new MapInfo(this);
     }
 
@@ -128,8 +131,12 @@ class GameState {
             const snake = newState.snakes[id];
             const head = snake.head();
             const destination = coordAfterMove(head.x, head.y, direction);
-            if (this.checkCell(destination.x, destination.y).constructor !== OpenCell) {
-                // Died!
+            const turnsUntilDestinationVacant = this.map.turnsUntilVacant(destination);
+            if (turnsUntilDestinationVacant > 0) {
+                // It will take more than one turn for this cell to become vacant, therefore
+                // you're colliding and you are dead. We know that it's not a head on collision
+                // because the head moves every turn. Will need a separate condition to catch
+                // that (below).
                 newState._removeSnake(id);
             } else {
                 // Add new head pos.
@@ -144,25 +151,42 @@ class GameState {
                     y: newPart.y
                 });
 
-                // Move tail forward unless ate food.
-                const justAteSomeFood = newState.food.some(f => f.x === destination.x && f.y === destination.y);
-                if (!justAteSomeFood) {
-                    const [removed] = snake.parts.splice(snake.parts.length - 1);
-                    worldSnake.body.data.splice(worldSnake.body.data.length - 1, 1);
+                // Chop off end of tail
+                const [removed] = snake.parts.splice(snake.parts.length - 1);
+                worldSnake.body.data.splice(worldSnake.body.data.length - 1, 1);
 
-                    // If this part was in the cache and the cell is now vacant then update the cache. Note that
-                    // the cell will not be vacant if this is one of the first moves of the game where the snake
-                    // is all bunched up in one cell.
-                    const existingCached = newState._gridCache.get(removed.x, removed.y);
-                    const newEndOfTail = snake.parts[snake.parts.length - 1];
-                    const endOfTailMoved = newEndOfTail.x !== removed.x || newEndOfTail.y !== removed.y;
-                    if (existingCached && existingCached.id === id && endOfTailMoved) {
-                        newState._gridCache.clear(removed.x, removed.y);
-                    }
+                // If this part was in the cache and the cell is now vacant then update the
+                // cache. Note that the cell will not be vacant if this is one of the first
+                // moves of the game where the snake is all bunched up in one cell.
+                const existingCached = newState._gridCache.get(removed.x, removed.y);
+                const newEndOfTail = snake.parts[snake.parts.length - 1];
+                const endOfTailMoved = newEndOfTail.x !== removed.x || newEndOfTail.y !== removed.y;
+                if (existingCached && existingCached.id === id && endOfTailMoved) {
+                    newState._gridCache.clear(removed.x, removed.y);
                 }
+
+                // If just ate food then double up on new tail position so that it stays in
+                // place on next movement and grows the snake. Also remove that food from
+                // game state.
+                const justAteSomeFood = newState.food.some(f =>
+                    f.x === destination.x && f.y === destination.y);
+                if (justAteSomeFood) {
+                    const bunched = new SnakePart(newEndOfTail.x, newEndOfTail.y);
+                    bunched.snake = snake;
+                    worldSnake.body.data.push({
+                        object: "point",
+                        x: bunched.x,
+                        y: bunched.y
+                    });
+                    worldSnake.length = worldSnake.body.data.length;
+                    snake.parts.push(bunched);
+
+                    newState._removeFood(destination.x, destination.y);
+                }
+
                 newState.map.incrementalUpdate(snake, newPart, justAteSomeFood);
 
-                // Make sure the world you snake is up to date
+                // Make sure the world 'you' snake is up to date
                 if (!newState.mySnake) {
                     newState._world.you = null;
                 } else if (worldSnake.id === newState.mySnake.id) {
@@ -244,6 +268,18 @@ class GameState {
         return cellContent ? cellContent : new OpenCell();
     }
 
+    _removeFood(x, y) {
+        const index = this.food.findIndex(f => f.x === x && f.y === y);
+        if (index >= 0) {
+            this.food.splice(index, 1);
+        }
+
+        const worldIndex = this._world.food.data.findIndex(f => f.x === x && f.y === y);
+        if (worldIndex >= 0) {
+            this._world.food.data.splice(worldIndex, 1);
+        }
+    }
+
     _removeSnake(id) {
         const parts = this.snakes[id].parts;
 
@@ -253,7 +289,7 @@ class GameState {
             this._world.you = null;
         }
 
-        // If an enemy died then rmeove from enemies
+        // If an enemy died then remove from enemies
         const enemyIndex = this.enemies.findIndex(e => e.id === id);
         if (enemyIndex >= 0) {
             this.enemies.splice(enemyIndex, 1);
@@ -268,13 +304,11 @@ class GameState {
         delete this.snakes[id];
         this.map.removeSnake(parts);
 
-        // Remove whole tail from grid cache. Do not do anything with the
-        // head because snakes are removed when their head hits something, so
-        // we know there was already something there.
-        for (let i = 1; i < parts.length; i++) {
-            const part = parts[i];
-            this._gridCache.clear(part.x, part.y);
-        }
+        // With a snake removed there are several different conditions for updating the
+        // caches. eg: head-on-tail, head-on-head, head-on-self, two-heads-on-same-tail, etc
+        // so instead of trying to handle all of those it is easier to just rebuild them
+        // completely.
+        this._buildCaches();
     }
 
     _addOtherSnakes() {
@@ -356,11 +390,7 @@ class MapInfo {
     }
 
     turnsUntilVacant({ x, y }) {
-        try {
-            return this._cells[y][x].vacated || 0;
-        } catch (e) {
-            debugger;
-        }
+        return this._cells[y][x].vacated || 0;
     }
 
     printVacateGrid() {

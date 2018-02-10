@@ -55,7 +55,7 @@ function simulate(myAlgo, enemyAlgo, initialState, countdown, maxTurns) {
             id: currentState.mySnake.id,
             direction: myAlgo.move(currentState)
         };
-        const enemyMoves = initialState.enemies.map(enemy => {
+        const enemyMoves = currentState.enemies.map(enemy => {
             return {
                 id: enemy.id,
                 direction: enemyAlgo.move(currentState.perspective(enemy))
@@ -77,7 +77,6 @@ function simulate(myAlgo, enemyAlgo, initialState, countdown, maxTurns) {
         currentState = newState;
 
         if (currentState.isLoss()) {
-            debugger;
             terminationReason = "LOSS";
             break;
         }
