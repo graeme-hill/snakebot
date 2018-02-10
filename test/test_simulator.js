@@ -11,7 +11,7 @@ const tailChaseAlgorithm = {
     move: (state) => {
         return movement.chaseTail(state);
     }
-}
+};
 
 const eatFoodAlgorithm = {
     meta: {
@@ -25,31 +25,75 @@ const eatFoodAlgorithm = {
         const direction = movement.chaseTail(state);
         return direction;
     }
-}
+};
 
-describe("simulatorFutures()", () => {
-    it("should be able to tail chase forever", () => {
-        const state = new GameState(helpers.parseWorld([
-            "_ _ _ _ _ _",
-            "_ * _ _ _ _",
-            "_ _ _ > v _",
-            "_ _ _ _ 0 _",
-            "v _ _ _ _ _",
-            "> 1 _ _ _ _"
-        ]));
-        const algorithms = [ tailChaseAlgorithm ];
-        const possibleFutures = simulator.simulateFutures(
-            state, 100, 100, algorithms);
+const notAllThatFast = {
+    meta: {
+        name: "not_all_that_fast"
+    },
+    move: (state) => {
+        // count to a big number to create a minor, synchronous delay
+        let count = 0;
+        for (let i = 0; i < 10000000; i++) {
+            count++;
+        }
+        return movement.chaseTail(state);
+    }
+};
 
-        assert.lengthOf(possibleFutures, 1, "one future b/c one algorithm supplied");
-        
-        const future = possibleFutures[0];
-        
-        assert.equal(future.turnsSimulated, 100, "turns simulated");
-        assert.lengthOf(Object.keys(future.obituaries), 0, "no obituaries");
-        assert.equal(future.algorithm, tailChaseAlgorithm);
-        assert.equal(future.terminationReason, "MAX_TURNS");
+describe("simulateFutures() - stop when time runs out", () => {
+    const state = new GameState(helpers.parseWorld([
+        "_ _ _ _ _ _",
+        "_ * _ _ _ _",
+        "_ _ _ > v _",
+        "_ _ _ _ 0 _",
+        "v _ _ _ _ _",
+        "> 1 _ _ _ _"
+    ]));
 
+    const algorithms = [ notAllThatFast ];
+    const possibleFutures = simulator.simulateFutures(
+        state, 10, 1000, algorithms);
+    const future = possibleFutures[0];
+
+    it("should terminate due to OUT_OF_TIME", () =>
+        assert.equal(future.terminationReason, "OUT_OF_TIME"));
+
+    it("should not simulate every possible turn", () =>
+        assert.isBelow(future.turnsSimulated, 1000));
+});
+
+describe("simulateFutures() - simple tail chase", () => {
+    const state = new GameState(helpers.parseWorld([
+        "_ _ _ _ _ _",
+        "_ * _ _ _ _",
+        "_ _ _ > v _",
+        "_ _ _ _ 0 _",
+        "v _ _ _ _ _",
+        "> 1 _ _ _ _"
+    ]));
+    const algorithms = [ tailChaseAlgorithm ];
+    const possibleFutures = simulator.simulateFutures(
+        state, 10000000, 100, algorithms);
+
+    it("should only have one future", () =>
+        assert.lengthOf(possibleFutures, 1));
+    
+    const future = possibleFutures[0];
+    
+    it("should terminate due to MAX_TURNS", () =>
+        assert.equal(future.terminationReason, "MAX_TURNS"));
+
+    it("should simulate 100 turns", () =>
+        assert.equal(future.turnsSimulated, 100));
+
+    it("should have no deaths", () =>
+        assert.lengthOf(Object.keys(future.obituaries), 0))
+
+    it("should use the right algorithm", () =>
+        assert.equal(future.algorithm, tailChaseAlgorithm));
+
+    it ("should repeat same moves after loop starts", () => {
         const expectedMoves = [];
         for (let i = 0; i < 25; i++) {
             expectedMoves.push("left");
@@ -60,29 +104,40 @@ describe("simulatorFutures()", () => {
 
         assert.deepEqual(future.moves, expectedMoves);
     });
+});
 
-    it("should be able to eat food then tail chase", () => {
-        const state = new GameState(helpers.parseWorld([
-            "_ _ _ _ _ *",
-            "_ _ _ _ _ _",
-            "_ _ _ > v _",
-            "_ _ _ _ 0 _",
-            "v _ _ _ _ _",
-            "> 1 _ _ _ _"
-        ]));
-        const algorithms = [ eatFoodAlgorithm ];
-        const possibleFutures = simulator.simulateFutures(
-            state, 100, 100, algorithms);
+describe("simulateFutures() - eat then tail chase", () => {
+    const state = new GameState(helpers.parseWorld([
+        "_ _ _ _ _ *",
+        "_ _ _ _ _ _",
+        "_ _ _ > v _",
+        "_ _ _ _ 0 _",
+        "v _ _ _ _ _",
+        "> 1 _ _ _ _"
+    ]));
+    debugger;
+    const algorithms = [ eatFoodAlgorithm ];
+    const possibleFutures = simulator.simulateFutures(
+        state, 10000000, 100, algorithms);
 
-        assert.lengthOf(possibleFutures, 1, "one future b/c one algorithm supplied");
-        
-        const future = possibleFutures[0];
-        
-        assert.equal(future.terminationReason, "MAX_TURNS");
-        assert.equal(future.turnsSimulated, 100, "turns simulated");
-        assert.lengthOf(Object.keys(future.obituaries), 0, "no obituaries");
-        assert.equal(future.algorithm, eatFoodAlgorithm);
+    it("should only have one future", () =>
+        assert.lengthOf(possibleFutures, 1));
+    
+    const future = possibleFutures[0];
+    
+    it("should terminate due to MAX_TURNS", () =>
+        assert.equal(future.terminationReason, "MAX_TURNS"));
 
+    it("should simulate 100 turns", () =>
+        assert.equal(future.turnsSimulated, 100));
+
+    it("should have no deaths", () =>
+        assert.lengthOf(Object.keys(future.obituaries), 0))
+
+    it("should use the right algorithm", () =>
+        assert.equal(future.algorithm, eatFoodAlgorithm));
+
+    it ("should repeat same moves after loop starts", () => {
         const expectedMoves = [ "right", "up", "up", "up" ];
         for (let i = 0; i < 24; i++) {
             expectedMoves.push("left");
@@ -93,29 +148,39 @@ describe("simulatorFutures()", () => {
 
         assert.deepEqual(future.moves, expectedMoves);
     });
+});
 
-    it("should be able to lose food race then tail chase", () => {
-        const state = new GameState(helpers.parseWorld([
-            "* _ 1 < < _",
-            "_ _ _ _ _ _",
-            "_ _ _ _ _ _",
-            "_ _ _ _ _ _",
-            "0 _ _ _ _ _",
-            "^ < _ _ _ _"
-        ]));
-        const algorithms = [ eatFoodAlgorithm ];
-        const possibleFutures = simulator.simulateFutures(
-            state, 100, 100, algorithms);
+describe("simulateFutures() - fail at eating then tail chase", () => {
+    const state = new GameState(helpers.parseWorld([
+        "* _ 1 < < _",
+        "_ _ _ _ _ _",
+        "_ _ _ _ _ _",
+        "_ _ _ _ _ _",
+        "0 _ _ _ _ _",
+        "^ < _ _ _ _"
+    ]));
+    const algorithms = [ eatFoodAlgorithm ];
+    const possibleFutures = simulator.simulateFutures(
+        state, 100, 100, algorithms);
 
-        assert.lengthOf(possibleFutures, 1, "one future b/c one algorithm supplied");
-        
-        const future = possibleFutures[0];
-        
-        assert.equal(future.terminationReason, "MAX_TURNS");
-        assert.equal(future.turnsSimulated, 100, "turns simulated");
-        assert.lengthOf(Object.keys(future.obituaries), 0, "no obituaries");
-        assert.equal(future.algorithm, eatFoodAlgorithm);
+    it("should only have one future", () =>
+        assert.lengthOf(possibleFutures, 1));
+    
+    const future = possibleFutures[0];
 
+    it("should terminate due to MAX_TURNS", () =>
+        assert.equal(future.terminationReason, "MAX_TURNS"));
+
+    it("should simulate 100 turns", () =>
+        assert.equal(future.turnsSimulated, 100));
+
+    it("should have no deaths", () =>
+        assert.lengthOf(Object.keys(future.obituaries), 0))
+
+    it("should use the right algorithm", () =>
+        assert.equal(future.algorithm, eatFoodAlgorithm));
+
+    it ("should repeat same moves after loop starts", () => {
         const expectedMoves = [ "up", "up" ];
         for (let i = 0; i < 24; i++) {
             expectedMoves.push("right");

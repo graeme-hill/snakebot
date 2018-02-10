@@ -11,17 +11,14 @@ function requireSnake(id, snakes) {
 }
 
 describe("cellIndex()", () => {
-    it("works with zero", () => {
-        assert.equal(helpers.cellIndex(0, 0, 8), 0);
-    });
+    it("works with zero", () =>
+        assert.equal(helpers.cellIndex(0, 0, 8), 0));
 
-    it("works at end of row", () => {
-        assert.equal(helpers.cellIndex(7, 2, 8), 23);
-    });
+    it("works at end of row", () =>
+        assert.equal(helpers.cellIndex(7, 2, 8), 23));
 
-    it("works in middle of row", () => {
-        assert.equal(helpers.cellIndex(4, 3, 8), 28);
-    });
+    it("works in middle of row", () =>
+        assert.equal(helpers.cellIndex(4, 3, 8), 28));
 });
 
 describe("deconstructCellIndex()", () => {
@@ -41,27 +38,29 @@ describe("deconstructCellIndex()", () => {
     });
 });
 
-describe("parseWorld()", () => {
-    it("works with a couple of snakeroos", () => {
-        const world = helpers.parseWorld([
-            "_ _ _ _ _ _ _ _",
-            "_ _ _ v _ _ _ _",
-            "_ _ _ > v _ _ _",
-            "_ _ _ _ 0 _ _ _",
-            "_ * _ _ _ _ _ _",
-            "_ _ _ _ _ _ _ _",
-            "_ _ _ v < < < _",
-            "_ _ _ 1 _ _ _ _"
-        ]);
+describe("parseWorld() - a couple snakeroos", () => {
+    const world = helpers.parseWorld([
+        "_ _ _ _ _ _ _ _",
+        "_ _ _ v _ _ _ _",
+        "_ _ _ > v _ _ _",
+        "_ _ _ _ 0 _ _ _",
+        "_ * _ _ _ _ _ _",
+        "_ _ _ _ _ _ _ _",
+        "_ _ _ v < < < _",
+        "_ _ _ 1 _ _ _ _"
+    ]);
 
-        const youFromSnakes = world.snakes.data.find(s => s.id === world.you.id);
+    const youFromSnakes = world.snakes.data.find(s => s.id === world.you.id);
 
-        assert.equal(world.snakes.data.length, 2, "two snakes");
-        assert.deepEqual(world.you, youFromSnakes, "identify 'you'")
+    it("should have two snakes", () =>
+        assert.equal(world.snakes.data.length, 2));
+    it("should identify 'you'", () =>
+        assert.deepEqual(world.you, youFromSnakes));
 
-        const snake0 = requireSnake(0, world.snakes);
-        const snake1 = requireSnake(1, world.snakes);
+    const snake0 = requireSnake(0, world.snakes);
+    const snake1 = requireSnake(1, world.snakes);
 
+    it("should have valid snake0", () => {
         assert.deepEqual(snake0, {
             body: {
                 data: [
@@ -74,8 +73,10 @@ describe("parseWorld()", () => {
             length: 4,
             id: "0",
             health: 100
-        }, "first snake");
+        });
+    });
 
+    it("should have valid snake1", () => {
         assert.deepEqual(snake1, {
             body: {
                 data: [
@@ -89,15 +90,19 @@ describe("parseWorld()", () => {
             length: 5,
             id: "1",
             health: 100
-        }, "second snake");
+        });
+    });
 
-        assert.equal(world.width, 8, "width");
-        assert.equal(world.height, 8, "height");
+    it("should have correct world width", () =>
+        assert.equal(world.width, 8));
+    it("should have correct world height", () =>
+        assert.equal(world.height, 8));
 
+    it("should have correct food", () => {
         assert.deepEqual(world.food, {
             data: [
                 { object: "point", x: 1, y: 4 }
             ]
-        }, "food");
+        });
     });
 });

@@ -114,7 +114,7 @@ function simulateFutures(initialState, maxMillis, maxTurns, algorithms) {
     }, []);
 
     // Equally divide simulation time between all the timelines.
-    const timePerPair = maxMillis / algorithmPairs;
+    const timePerPair = maxMillis / algorithmPairs.length;
 
     const futures = algorithmPairs.map(p =>
         simulate(p.myAlgorithm, p.enemyAlgorithm, initialState, new Countdown(timePerPair), maxTurns))

@@ -69,7 +69,6 @@ function parseWorld(stringy) {
     }
 
     function makeSnakeParts(row, col, parts) {
-        debugger;
         parts = parts || [];
         parts = parts.concat([makePart(row, col)]);
         const next = findNextPart(row, col);
