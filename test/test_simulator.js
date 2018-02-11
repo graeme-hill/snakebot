@@ -115,7 +115,7 @@ describe("simulateFutures() - eat then tail chase", () => {
         "v _ _ _ _ _",
         "> 1 _ _ _ _"
     ]));
-    debugger;
+
     const algorithms = [ eatFoodAlgorithm ];
     const possibleFutures = simulator.simulateFutures(
         state, 10000000, 100, algorithms);
@@ -132,7 +132,12 @@ describe("simulateFutures() - eat then tail chase", () => {
         assert.equal(future.turnsSimulated, 100));
 
     it("should have no deaths", () =>
-        assert.lengthOf(Object.keys(future.obituaries), 0))
+        assert.lengthOf(Object.keys(future.obituaries), 0));
+
+    it("should have valid food history", () =>
+        assert.deepEqual(future.foodsEaten, {
+            "0": [4]
+        }));
 
     it("should use the right algorithm", () =>
         assert.equal(future.algorithm, eatFoodAlgorithm));
@@ -175,7 +180,12 @@ describe("simulateFutures() - fail at eating then tail chase", () => {
         assert.equal(future.turnsSimulated, 100));
 
     it("should have no deaths", () =>
-        assert.lengthOf(Object.keys(future.obituaries), 0))
+        assert.lengthOf(Object.keys(future.obituaries), 0));
+
+    it("should have valid food history", () =>
+        assert.deepEqual(future.foodsEaten, {
+            "1": [2]
+        }));
 
     it("should use the right algorithm", () =>
         assert.equal(future.algorithm, eatFoodAlgorithm));
@@ -192,5 +202,55 @@ describe("simulateFutures() - fail at eating then tail chase", () => {
         expectedMoves.push("down");
 
         assert.deepEqual(future.moves, expectedMoves);
+    });
+});
+
+describe("bestMove() - prefer circling over death", () => {
+    const state = new GameState(helpers.parseWorld([
+        "_ _ _ _ _ v",
+        "_ _ _ _ _ v",
+        "_ _ _ _ _ v",
+        "_ _ _ _ _ 0",
+        "_ _ > > 1 _",
+        "_ _ _ _ _ *"
+    ]));
+    const algorithms = [ tailChaseAlgorithm, eatFoodAlgorithm ];
+    const possibleFutures = simulator.simulateFutures(
+        state, 100000000, 100, algorithms);
+
+    it("should have 4 futures", () =>
+        assert.lengthOf(possibleFutures, 4));
+    
+    const bestMove = simulator.bestMove(possibleFutures, state);
+
+    it("should choose the non-suicidal future", () => {
+        assert.equal(bestMove, "left");
+    });
+});
+
+describe("bestMove() - prefer easy food over aimless wandering", () => {
+    const state = new GameState(helpers.parseWorld([
+        "> > 1 _ _ v",
+        "v _ _ _ _ v",
+        "v _ _ _ _ v",
+        "2 _ _ _ _ 0",
+        "_ _ _ _ _ _",
+        "_ _ _ _ _ *"
+    ]));
+    const algorithms = [ tailChaseAlgorithm, eatFoodAlgorithm ];
+    const possibleFutures = simulator.simulateFutures(
+        state, 100, 100, algorithms);
+
+    it("should have 4 futures", () =>
+        assert.lengthOf(possibleFutures, 4));
+    
+    const bestMove = simulator.bestMove(possibleFutures, state);
+
+    if (bestMove !== "down") {
+        debugger;
+    }
+
+    it("should choose the foody future", () => {
+        assert.equal(bestMove, "down");
     });
 });

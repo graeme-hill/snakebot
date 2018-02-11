@@ -126,13 +126,29 @@ class GameState {
         const newWorld = cloneWorld(this._world);
         const newState = new GameState(newWorld);
 
+        // // Find moves that result in death
+        // const notDeadMoves = [];
+
+        // for (const { id, direction } of moves) {
+        //     const snake = newState.snakes[id];
+        //     const head = snake.head();
+        //     const destination = coordAfterMove(head.x, head.y, direction);
+        //     const turnsUntilDestinationVacant = this.map.turnsUntilVacant(destination);
+        //     if (turnsUntilDestinationVacant > 0) {
+        //         newState.
+        //     } else {
+        //         notDeadMoves.push({ id, direction });
+        //     }
+        // }
+
         // Shift snake parts
         for (const { id, direction } of moves) {
             const snake = newState.snakes[id];
             const head = snake.head();
             const destination = coordAfterMove(head.x, head.y, direction);
             const turnsUntilDestinationVacant = this.map.turnsUntilVacant(destination);
-            if (turnsUntilDestinationVacant > 0) {
+            const outOfBounds = helpers.outOfBounds(destination, this);
+            if (turnsUntilDestinationVacant > 0 || outOfBounds) {
                 // It will take more than one turn for this cell to become vacant, therefore
                 // you're colliding and you are dead. We know that it's not a head on collision
                 // because the head moves every turn. Will need a separate condition to catch
@@ -214,7 +230,6 @@ class GameState {
 
                 const otherHeadPos = otherSnake.head();
                 if (myHeadPos.x === otherHeadPos.x && myHeadPos.y === otherHeadPos.y) {
-                    debugger;
                     const myLength = newState.snakes[id].length();
                     const otherLength = newState.snakes[otherId].length();
                     if (myLength <= otherLength) {
@@ -328,15 +343,20 @@ class GameState {
     }
 
     _addSnake(snakeData) {
-        const snake = new Snake(snakeData.id);
-        this.snakes[snake.id] = snake;
-        if (snake.id !== this._world.you.id) {
-            this.enemies.push(snake);
+        try {
+            const snake = new Snake(snakeData.id);
+            this.snakes[snake.id] = snake;
+            if (this._world.you && snake.id !== this._world.you.id) {
+                this.enemies.push(snake);
+            }
+            for (const partData of snakeData.body.data) {
+                this._addSnakePart(snake, partData);
+            }
+            return snake;
+        } catch (e) {
+            debugger;
+            throw e;
         }
-        for (const partData of snakeData.body.data) {
-            this._addSnakePart(snake, partData);
-        }
-        return snake;
     }
 
     _addSnakePart(snake, partData) {
@@ -390,6 +410,9 @@ class MapInfo {
     }
 
     turnsUntilVacant({ x, y }) {
+        if (helpers.outOfBounds({ x, y }, this._gameState)) {
+            return 0;
+        }
         return this._cells[y][x].vacated || 0;
     }
 

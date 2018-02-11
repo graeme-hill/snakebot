@@ -24,49 +24,12 @@ function start(info) {
 
 function move(world) {
     const state = new GameState(world);
-    const algorithms = [ hungry ]; // hungry
+    const algorithms = [ hungry, dumb_dog ];
     const possibleFutures = simulator.simulateFutures(
-        tate, 100, 100, algorithms);
-    const best = bestMove(possibleFutures, state);
+        state, 100, 100, algorithms);
+    const best = simulator.bestMove(possibleFutures, state);
 
     return best;
-}
-
-function scoreFuture(future, state) {
-    const POINTS_PER_TURN = 100;
-
-    const myObituary = future.obituaries[state.mySnake.id];
-    const survivedTurns = myObituary !== undefined ? myObituary : future.turnsSimulated;
-    const score = survivedTurns * POINTS_PER_TURN;
-
-    return score;
-}
-
-// The best future is the one whose worst case scenario is the least bad
-function bestMove(futures, state) {
-    const worstCasePerAlgorithm = futures.reduce((worsts, future) => {
-        const currentWorst = worsts[future.algorithm.meta.name];
-        const thisScore = scoreFuture(future, state);
-        if (currentWorst === undefined || thisScore < currentWorst.score) {
-            worsts[future.algorithm.meta.name] = {
-                score: thisScore,
-                move: future.moves[0]
-            };
-        }
-        return worsts;
-    }, {});
-
-    const best = Object.keys(worstCasePerAlgorithm).reduce((bestScoredMove, scoredMoveKey) => {
-        const scoredMove = worstCasePerAlgorithm[scoredMoveKey];
-        if (!bestScoredMove || scoredMove.score < bestScoredMove.score) {
-            return scoredMove;
-        }
-        return bestScoredMove;
-    }, null);
-
-    console.log(best);
-
-    return best.move;
 }
 
 module.exports = { start, move, meta };
