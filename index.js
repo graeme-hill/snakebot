@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser')
 const app = express();
 
-const DEFAULT_ALGORITHM = "defensive_hungry";
+const DEFAULT_ALGORITHM = "cpp_test";
 const DEFAULT_PORT = 5000;
 const DISPLAY_TIMINGS = true;
 
