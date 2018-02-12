@@ -5,7 +5,7 @@ void Point::prettyPrint()
     std::cout << x << "," << y;
 }
 
-void Snake::prettyPrint()
+void World::Snake::prettyPrint()
 {
     std::cout << id;
     if (health < 10)
@@ -43,4 +43,53 @@ void World::prettyPrint()
         point.prettyPrint();
         std::cout << std::endl;
     }
+}
+
+void Snake::addPart(SnakePart part)
+{
+    part.setSnake(this);
+    _parts.push_back(part);
+}
+
+GameState::GameState(World w) :
+    _width(w.width),
+    _height(w.height),
+    _food(w.food),
+    _myId(w.you)
+    _world(w)
+{ }
+
+Snake *GameState::mySnake()
+{
+    for (auto &snake : _snakes)
+    {
+        if (snake.id() == _myId)
+        {
+            return &snake;
+        }
+    }
+
+    return nullptr;
+}
+
+void Cell::vacate(Snake *snake, uint32_t turn)
+{
+    _snake = snake;
+    if (turn > _vacated)
+    {
+        _vacated = turn;
+    }
+}
+
+void Cell::decrementVacate()
+{
+    if (_vacated > 0)
+    {
+        _vacated--;
+    }
+}
+
+void Cell::resetVacate()
+{
+    _vacated = 0;
 }
