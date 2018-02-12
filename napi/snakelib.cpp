@@ -24,6 +24,16 @@ void Snake::prettyPrint()
     std::cout << "<<";
 }
 
+Point Snake::head()
+{
+    return parts.at(0);
+}
+
+Point Snake::tail()
+{
+    return parts.at(parts.size() - 1);
+}
+
 void World::prettyPrint()
 {
     std::cout << "width: " << width << std::endl;
@@ -45,18 +55,13 @@ void World::prettyPrint()
     }
 }
 
-void Snake::addPart(SnakePart part)
-{
-    part.setSnake(this);
-    _parts.push_back(part);
-}
-
 GameState::GameState(World w) :
     _width(w.width),
     _height(w.height),
     _food(w.food),
-    _mySnake(nullptr)
-    _world(w)
+    _mySnake(nullptr),
+    _world(w),
+    _map(*this)
 {
     for (auto &snake : w.snakes)
     {
@@ -76,15 +81,7 @@ GameState::GameState(World w) :
 
 Snake *GameState::mySnake()
 {
-    for (auto &snake : _snakes)
-    {
-        if (snake.id() == _myId)
-        {
-            return &snake;
-        }
-    }
-
-    return nullptr;
+    return _mySnake;
 }
 
 void Cell::vacate(Snake *snake, uint32_t turn)
@@ -113,7 +110,7 @@ Map::Map(GameState &gameState) :
     _gameState(gameState),
     _cells(gameState.width() * gameState.height())
 {
-    updateVacateTurns();
+    update();
 }
 
 uint32_t Map::turnsUntilVacant(Point p)
@@ -131,13 +128,13 @@ void Map::update()
     }
 }
 
-void updateVacateTurnsForSnake(Snake &snake)
+void Map::updateVacateTurnsForSnake(Snake *snake)
 {
-    for (uint32_t i = 0; i < snake.parts.size(); i++)
+    for (uint32_t i = 0; i < snake->parts.size(); i++)
     {
-        Point p = snake.parts.at(i);
-        uint32_t vacated = snake.parts.size() - i - 1;
+        Point p = snake->parts.at(i);
+        uint32_t vacated = snake->parts.size() - i - 1;
         uint32_t index = cellIndex(p, _gameState);
-        _cells[index].vacate(vacated);
+        _cells[index].vacate(snake, vacated);
     }
 }

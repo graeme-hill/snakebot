@@ -28,6 +28,10 @@ struct Snake
     std::vector<Point> parts;
 
     void prettyPrint();
+
+    Point head();
+
+    Point tail();
 };
 
 struct World
@@ -59,28 +63,7 @@ public:
     virtual Direction move(World) = 0;
 };
 
-class Map;
-
-class GameState
-{
-public:
-    GameState(World w);
-    uint32_t width() { return _width; }
-    uint32_t height() { return _height; }
-    World &world() { return _world; }
-    std::unordered_map<std::string, Snake *> &snakes() { return _snakes; }
-    Snake *mySnake();
-
-private:
-    uint32_t _width;
-    uint32_t _height;
-    std::vector<Point> _food;
-    std::unordered_map<std::string, Snake *> _snakes;
-    std::vector<Snake *> _enemies;
-    Snake *_mySnake;
-    World _world;
-    Map _map;
-};
+class GameState;
 
 class Cell
 {
@@ -102,13 +85,34 @@ class Map
 public:
     Map(GameState &gameState);
     uint32_t turnsUntilVacant(Point p);
+    void update();
 
 private:
-    void update();
-    void updateVacateTurnsForSnake(Snake &snake);
+    void updateVacateTurnsForSnake(Snake *snake);
 
     GameState &_gameState;
     std::vector<Cell> _cells;
+};
+
+class GameState
+{
+public:
+    GameState(World w);
+    uint32_t width() { return _width; }
+    uint32_t height() { return _height; }
+    World &world() { return _world; }
+    std::unordered_map<std::string, Snake *> &snakes() { return _snakes; }
+    Snake *mySnake();
+
+private:
+    uint32_t _width;
+    uint32_t _height;
+    std::vector<Point> _food;
+    std::unordered_map<std::string, Snake *> _snakes;
+    std::vector<Snake *> _enemies;
+    Snake *_mySnake;
+    World _world;
+    Map _map;
 };
 
 inline Point coordAfterMove(Point p, Direction dir)
