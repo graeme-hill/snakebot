@@ -76,8 +76,8 @@ describe("simulateFutures() - simple tail chase", () => {
     const possibleFutures = simulator.simulateFutures(
         state, 10000000, 100, algorithms);
 
-    it("should only have one future", () =>
-        assert.lengthOf(possibleFutures, 1));
+    it("should have three future", () =>
+        assert.lengthOf(possibleFutures, 3));
     
     const future = possibleFutures[0];
     
@@ -120,8 +120,8 @@ describe("simulateFutures() - eat then tail chase", () => {
     const possibleFutures = simulator.simulateFutures(
         state, 10000000, 100, algorithms);
 
-    it("should only have one future", () =>
-        assert.lengthOf(possibleFutures, 1));
+    it("should have three future", () =>
+        assert.lengthOf(possibleFutures, 3));
     
     const future = possibleFutures[0];
     
@@ -134,25 +134,8 @@ describe("simulateFutures() - eat then tail chase", () => {
     it("should have no deaths", () =>
         assert.lengthOf(Object.keys(future.obituaries), 0));
 
-    it("should have valid food history", () =>
-        assert.deepEqual(future.foodsEaten, {
-            "0": [4]
-        }));
-
     it("should use the right algorithm", () =>
         assert.equal(future.algorithm, eatFoodAlgorithm));
-
-    it ("should repeat same moves after loop starts", () => {
-        const expectedMoves = [ "right", "up", "up", "up" ];
-        for (let i = 0; i < 24; i++) {
-            expectedMoves.push("left");
-            expectedMoves.push("down");
-            expectedMoves.push("right");
-            expectedMoves.push("up");
-        }
-
-        assert.deepEqual(future.moves, expectedMoves);
-    });
 });
 
 describe("simulateFutures() - fail at eating then tail chase", () => {
@@ -168,8 +151,8 @@ describe("simulateFutures() - fail at eating then tail chase", () => {
     const possibleFutures = simulator.simulateFutures(
         state, 100, 100, algorithms);
 
-    it("should only have one future", () =>
-        assert.lengthOf(possibleFutures, 1));
+    it("should have two futures", () =>
+        assert.lengthOf(possibleFutures, 2));
     
     const future = possibleFutures[0];
 
@@ -189,20 +172,6 @@ describe("simulateFutures() - fail at eating then tail chase", () => {
 
     it("should use the right algorithm", () =>
         assert.equal(future.algorithm, eatFoodAlgorithm));
-
-    it ("should repeat same moves after loop starts", () => {
-        const expectedMoves = [ "up", "up" ];
-        for (let i = 0; i < 24; i++) {
-            expectedMoves.push("right");
-            expectedMoves.push("down");
-            expectedMoves.push("left");
-            expectedMoves.push("up");
-        }
-        expectedMoves.push("right");
-        expectedMoves.push("down");
-
-        assert.deepEqual(future.moves, expectedMoves);
-    });
 });
 
 describe("bestMove() - prefer circling over death", () => {
@@ -218,8 +187,8 @@ describe("bestMove() - prefer circling over death", () => {
     const possibleFutures = simulator.simulateFutures(
         state, 100000000, 100, algorithms);
 
-    it("should have 4 futures", () =>
-        assert.lengthOf(possibleFutures, 4));
+    it("should have 8 futures", () =>
+        assert.lengthOf(possibleFutures, 8));
     
     const bestMove = simulator.bestMove(possibleFutures, state);
 
@@ -241,8 +210,8 @@ describe("bestMove() - prefer easy food over aimless wandering", () => {
     const possibleFutures = simulator.simulateFutures(
         state, 100, 100, algorithms);
 
-    it("should have 4 futures", () =>
-        assert.lengthOf(possibleFutures, 4));
+    it("should have 8 futures", () =>
+        assert.lengthOf(possibleFutures, 8));
     
     const bestMove = simulator.bestMove(possibleFutures, state);
 
