@@ -52,9 +52,9 @@ Point makePoint(napi_env env, napi_value jsFood)
     return { x, y };
 }
 
-World::Snake makeSnake(napi_env env, napi_value jsSnake)
+Snake makeSnake(napi_env env, napi_value jsSnake)
 {
-    World::Snake snake {};
+    Snake snake {};
 
     napi_value idProp;
     napi_create_string_utf8(env, "id", NAPI_AUTO_LENGTH, &idProp);
@@ -151,11 +151,11 @@ World makeWorld(napi_env env, napi_value jsWorld)
         napi_value jsSnakeObj;
         napi_get_element(env, jsSnakesArray, i, &jsSnakeObj);
 
-        World::Snake snake = makeSnake(env, jsSnakeObj);
+        Snake snake = makeSnake(env, jsSnakeObj);
         world.snakes.push_back(snake);
     }
 
-    World::Snake youSnake = makeSnake(env, jsYou);
+    Snake youSnake = makeSnake(env, jsYou);
     world.you = youSnake.id;
 
     return world;

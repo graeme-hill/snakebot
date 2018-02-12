@@ -21,21 +21,17 @@ struct Point
     void prettyPrint();
 };
 
-    // uint32_t length() const { return parts.length; }
-    // Point tail() const { return parts.at(parts.size() - 1); }
-    // Point head() const { return parts.at(0); }
+struct Snake
+{
+    std::string id;
+    uint32_t health;
+    std::vector<Point> parts;
+
+    void prettyPrint();
+};
 
 struct World
 {
-    struct Snake
-    {
-        std::string id;
-        uint32_t health;
-        std::vector<Point> parts;
-
-        void prettyPrint();
-    };
-
     std::vector<Point> food;
     std::vector<Snake> snakes;
     uint32_t width;
@@ -63,47 +59,6 @@ public:
     virtual Direction move(World) = 0;
 };
 
-Point coordAfterMove(Point p, Direction dir)
-{
-    switch (dir)
-    {
-        case Direction::Up: return { p.x, p.y - 1 };
-        case Direction::Down: return { p.x, p.y + 1 };
-        case Direction::Left: return { p.x - 1, p.y };
-        default: return { p.x + 1, p.y };
-    }
-}
-
-class Snake;
-
-class SnakePart
-{
-public:
-    SnakePart(Point p) : _point(p), _snake(nullptr) { }
-    Point point() { return _point; }
-    Snake *snake() { return _snake; }
-    void setSnake(Snake *s) { _snake = s; }
-
-private:
-    Point _point;
-    Snake *_snake;
-};
-
-class Snake
-{
-public:
-    Snake(std::string id) : _id(id) { }
-    void addPart(SnakePart part);
-    size_t length() const { return _parts.size(); }
-    Point &tail() { return _parts.at(_parts.size() - 1); }
-    Point &head() { return _parts.at(0); }
-    std::string id() { return _id; }
-
-private:
-    std::string _id;
-    std::vector<SnakePart> _parts;
-};
-
 class Map;
 
 class GameState
@@ -113,15 +68,16 @@ public:
     uint32_t width() { return _width; }
     uint32_t height() { return _height; }
     World &world() { return _world; }
-    std::vector<Snake> &snakes() { return _snakes; }
+    std::unordered_map<std::string, Snake *> &snakes() { return _snakes; }
     Snake *mySnake();
 
 private:
     uint32_t _width;
     uint32_t _height;
     std::vector<Point> _food;
-    std::vector<Snake> _snakes;
-    std::string _myId;
+    std::unordered_map<std::string, Snake *> _snakes;
+    std::vector<Snake *> _enemies;
+    Snake *_mySnake;
     World _world;
     Map _map;
 };
@@ -143,5 +99,46 @@ private:
 
 class Map
 {
+public:
+    Map(GameState &gameState);
+    uint32_t turnsUntilVacant(Point p);
 
+private:
+    void update();
+    void updateVacateTurnsForSnake(Snake &snake);
+
+    GameState &_gameState;
+    std::vector<Cell> _cells;
 };
+
+inline Point coordAfterMove(Point p, Direction dir)
+{
+    switch (dir)
+    {
+        case Direction::Up: return { p.x, p.y - 1 };
+        case Direction::Down: return { p.x, p.y + 1 };
+        case Direction::Left: return { p.x - 1, p.y };
+        default: return { p.x + 1, p.y };
+    }
+}
+
+inline uint32_t cellIndex(Point p, uint32_t width)
+{
+    return width * p.y + p.x;
+}
+
+inline uint32_t cellIndex(Point p, GameState &gameState)
+{
+    return cellIndex(p, gameState.width());
+}
+
+inline Point deconstructCellIndex(uint32_t index, uint32_t width)
+{
+    return { index % width, index / width };
+}
+
+inline bool outOfBounds(Point p, GameState &gameState)
+{
+    // Since x and y are unsigned so they wrap and become very large numbers.
+    return p.x < gameState.width() && p.y < gameState.height();
+}
