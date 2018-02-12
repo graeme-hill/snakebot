@@ -59,6 +59,12 @@ app.post('/move', (req, res) => {
     }
 });
 
+app.get('/', (req, res) => {
+    res.json({
+        activeAlgorithm: algorithm.meta
+    });
+});
+
 app.listen(app.get('port'), function() {
     console.log("snakebot running AI '" + algorithmKey + "' on port " + app.get("port"));
 });
