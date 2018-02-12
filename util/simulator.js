@@ -1,4 +1,5 @@
 const { Snake, GameState } = require("./game_state");
+const movement = require("./movement");
 
 class Countdown {
     constructor(maxMillis) {
@@ -37,7 +38,11 @@ function updateFoodsEaten(oldState, newState, foodsEaten, turn) {
     }
 }
 
-function* simulate(myAlgo, enemyAlgo, initialState) {
+function groupName(algorithm, firstMoves) {
+    return algorithm.meta.name + "->" + firstMoves.join(",");
+}
+
+function* simulate(myAlgo, enemyAlgo, initialState, firstMoves) {
     function makeCurrentResult() {
         return {
             turnsSimulated: turn,
@@ -46,9 +51,16 @@ function* simulate(myAlgo, enemyAlgo, initialState) {
             foodsEaten,
             algorithm: myAlgo,
             terminationReason,
-            moves: simulatedMoves
+            moves: simulatedMoves,
+            group
         };
     }
+
+    function getMyMove(turn) {
+        return firstMoves[turn - 1] || myAlgo.move(currentState);
+    }
+
+    const group = groupName(myAlgo, firstMoves);
 
     // Keep track of how far into the future we have gone
     let turn = 0;
@@ -69,18 +81,14 @@ function* simulate(myAlgo, enemyAlgo, initialState) {
 
     // This loop could go forever if the primary snake stays alive, but since
     // it yields on each iteration the caller can choose how long to keep 
-    // going.
-    while (true /*!countdown.expired()*/) {
-        // if (turn >= maxTurns) {
-        //     terminationReason = "MAX_TURNS";
-        //     break;
-        // }
-
+    // going. If the caller is the one that decides to stop then it is also
+    // responsible for setting a termination reason.
+    while (true) {
         turn++;
 
         const myMove = {
             id: currentState.mySnake.id,
-            direction: myAlgo.move(currentState)
+            direction: getMyMove(turn, currentState)
         };
         const enemyMoves = currentState.enemies.map(enemy => {
             return {
@@ -105,11 +113,6 @@ function* simulate(myAlgo, enemyAlgo, initialState) {
             break;
         }
 
-        if (currentState.isWin()) {
-            terminationReason = "WIN";
-            break;
-        }
-
         const currentResult = makeCurrentResult();
         yield currentResult;
     }
@@ -118,7 +121,7 @@ function* simulate(myAlgo, enemyAlgo, initialState) {
     return result;
 }
 
-function runSimulations(algorithmPairs, initialState, maxMillis, maxTurns) {
+function runSimulations(algorithmPairs, initialState, maxMillis, maxTurns, firstMoves) {
     let turn = 0;
     const countdown = new Countdown(maxMillis);
 
@@ -139,7 +142,7 @@ function runSimulations(algorithmPairs, initialState, maxMillis, maxTurns) {
 
     const numberedSimulations = algorithmPairs.map((pair, i) => ({
         index: i,
-        sim: simulate(pair.myAlgorithm, pair.enemyAlgorithm, initialState)
+        sim: simulate(pair.myAlgorithm, pair.enemyAlgorithm, initialState, firstMoves)
     }));
         
     // Initial results in case zero turns are simulated for some reason
@@ -148,9 +151,10 @@ function runSimulations(algorithmPairs, initialState, maxMillis, maxTurns) {
         endState: initialState,
         obituaries: {},
         foodsEaten: {},
-        algorithm: algorithmPairs[s.index],
+        algorithm: algorithmPairs[s.index].myAlgorithm,
         terminationReason: null,
-        moves: []
+        moves: [],
+        group: groupName(algorithmPairs[s.index].myAlgorithm, firstMoves)
     }));
 
     const completedSimulations = new Set();
@@ -175,26 +179,32 @@ function runSimulations(algorithmPairs, initialState, maxMillis, maxTurns) {
         result.terminationReason = coerceTerminationReason(result.terminationReason);
     }
 
+    console.log("simulated " + turn + " turns");
+
     return results;    
 }
 
 function simulateFutures(initialState, maxMillis, maxTurns, algorithms) {
-    const algorithmPairs = algorithms.map(a1 => algorithms.map(a2 => {
-        return {
-            myAlgorithm: a1,
-            enemyAlgorithm: a2
-        };
-    })).reduce((l, r) => {
+    const algorithmPairs = algorithms.map(a1 => algorithms.map(a2 => ({
+        myAlgorithm: a1,
+        enemyAlgorithm: a2
+    }))).reduce((l, r) => {
         return l.concat(r);
     }, []);
 
-    // Equally divide simulation time between all the timelines.
-    const timePerPair = maxMillis / algorithmPairs.length;
+    const possibleFirstMoves = movement.notImmediatelySuicidalMoves(initialState);
 
-    const futures = runSimulations(algorithmPairs, initialState, maxMillis, maxTurns);
+    if (possibleFirstMoves.length === 0) {
+        // dang... gonna die no matter what. I guess I'll try anyways maybe the simulator
+        // find a way to take someone else out with me.
+        return runSimulations(algorithmPairs, initialState, maxMillis, maxTurns, []);
 
-    // const futures = algorithmPairs.map(p =>
-    //     simulate(p.myAlgorithm, p.enemyAlgorithm, initialState, new Countdown(timePerPair), maxTurns))
+    }
+
+    let futures = [];
+    for (const firstMove of possibleFirstMoves) {
+        futures = futures.concat(runSimulations(algorithmPairs, initialState, maxMillis, maxTurns, [firstMove]));
+    }
 
     return futures;
 }
@@ -215,11 +225,11 @@ function scoreFuture(future, state) {
 
 // The best future is the one whose worst case scenario is the least bad
 function bestMove(futures, state) {
-    const worstCasePerAlgorithm = futures.reduce((worsts, future) => {
-        const currentWorst = worsts[future.algorithm.meta.name];
+    const worstCasePerGroup = futures.reduce((worsts, future) => {
+        const currentWorst = worsts[future.group];
         const thisScore = scoreFuture(future, state);
         if (currentWorst === undefined || thisScore < currentWorst.score) {
-            worsts[future.algorithm.meta.name] = {
+            worsts[future.group] = {
                 score: thisScore,
                 move: future.moves[0]
             };
@@ -227,8 +237,8 @@ function bestMove(futures, state) {
         return worsts;
     }, {});
 
-    const best = Object.keys(worstCasePerAlgorithm).reduce((bestScoredMove, scoredMoveKey) => {
-        const scoredMove = worstCasePerAlgorithm[scoredMoveKey];
+    const best = Object.keys(worstCasePerGroup).reduce((bestScoredMove, scoredMoveKey) => {
+        const scoredMove = worstCasePerGroup[scoredMoveKey];
         if (!bestScoredMove || scoredMove.score > bestScoredMove.score) {
             return scoredMove;
         }

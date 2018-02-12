@@ -1,24 +1,35 @@
 const { OpenCell } = require("./game_state");
 const astar = require("./astar");
+const helpers = require("./helpers");
 
-function notImmediatelySuicidal(gameState) {
+function notImmediatelySuicidalMoves(gameState) {
     function isOK(x, y) {
-        return gameState.checkCell(x, y).constructor === OpenCell;
+        return !helpers.outOfBounds({ x, y }, gameState)
+            && gameState.map.turnsUntilVacant({ x, y }) === 0;
     }
 
     const myHead = gameState.mySnake.head();
     const x = myHead.x;
     const y = myHead.y;
+    const moves = [];
     if (isOK(x - 1, y)) {
-        return "left";
+        moves.push("left");
     }
     if (isOK(x + 1, y)) {
-        return "right";
+        moves.push("right");
     }
     if (isOK(x, y - 1)) {
-        return "up";
+        moves.push("up");
     }
-    return "down";
+    if (isOK(x, y + 1)) {
+        moves.push("down");
+    }
+
+    return moves;
+}
+
+function notImmediatelySuicidal(gameState) {
+    return notImmediatelySuicidalMoves(gameState)[0] || "down";
 }
 
 function bestFood(gameState) {
@@ -102,6 +113,7 @@ function chaseTail(gameState) {
 
 module.exports = {
     notImmediatelySuicidal,
+    notImmediatelySuicidalMoves,
     chaseTail,
     bestFood,
     closestFood

@@ -26,7 +26,7 @@ function move(world) {
     const state = new GameState(world);
     const algorithms = [ hungry, dumb_dog ];
     const possibleFutures = simulator.simulateFutures(
-        state, 100, 100, algorithms);
+        state, 100, 50, algorithms);
     const best = simulator.bestMove(possibleFutures, state);
 
     return best;
