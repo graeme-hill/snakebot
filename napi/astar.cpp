@@ -170,7 +170,7 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
 
     openSet.insert(startIndex);
     std::cout << "***2.1.2.1\n";
-    gScore[startIndex] = 0;
+    //gScore[startIndex] = 0;
     std::cout << "***2.1.2.2\n";
     fScore[startIndex] = heuristicCostEstimate(start, goal);
     std::cout << "***2.1.2.3\n";
