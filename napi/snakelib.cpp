@@ -151,7 +151,6 @@ void Map::updateVacateTurnsForSnake(Snake *snake)
         Point p = snake->parts.at(i);
         uint32_t vacated = snake->parts.size() - i - 1;
         uint32_t index = cellIndex(p, _gameState);
-        p.prettyPrint();
         _cells[index].vacate(snake, vacated);
     }
 }

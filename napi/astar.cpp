@@ -169,8 +169,6 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
     fScore[startIndex] = heuristicCostEstimate(start, goal);
     turns[startIndex] = 1;
 
-    int temp = 0;
-
     while (!openSet.empty())
     {
         uint32_t currentIndex = lowestFScoreInSet(openSet, fScore);
