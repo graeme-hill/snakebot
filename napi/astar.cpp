@@ -8,31 +8,33 @@
 
 uint32_t heuristicCostEstimate(Point start, Point goal)
 {
+    std::cout << "heuristicCostEstimate" << std::endl;
     return absDiff(start.x, goal.x) + absDiff(start.y, goal.y);
 }
 
-std::unordered_set<uint32_t>::const_iterator lowestFScoreInSet(
+uint32_t lowestFScoreInSet(
     std::unordered_set<uint32_t> &set, std::unordered_map<uint32_t, uint32_t> &fScore)
 {
     uint32_t lowest = 0;
-    std::unordered_set<uint32_t>::const_iterator lowestIter = set.end();
-    bool first = false;
+    uint32_t lowestIndex = 0;
+    bool first = true;
 
     for (auto index : set)
     {
-        std::unordered_set<uint32_t>::const_iterator iter = set.find(index);
-        if (iter != set.end())
+        auto iter = fScore.find(index);
+        if (iter != fScore.end())
         {
-            uint32_t score = *iter;
+            uint32_t score = iter->second;
             if (first || score < lowest)
             {
                 lowest = score;
-                lowestIter = iter;
+                lowestIndex = index;
+                first = false;
             }
         }
     }
 
-    return lowestIter;
+    return lowestIndex;
 }
 
 std::vector<Direction> reconstructPath(
@@ -59,6 +61,7 @@ bool indexIsSafe(uint32_t index, uint32_t turn, GameState &state)
         return false;
     }
     uint32_t turnsUntilCouldBeVacant = state.map().turnsUntilVacant(coord);
+    std::cout << "(v=" << turnsUntilCouldBeVacant << "/" << turn << ")";
     return turnsUntilCouldBeVacant < turn;
 }
 
@@ -112,13 +115,22 @@ bool isCloseToEqualOrBiggerSnakeHead(uint32_t index, GameState &state)
 
 bool isOkNeighbor(uint32_t index, uint32_t other, uint32_t turn, GameState &state)
 {
-    return indexIsSafe(other, turn, state)
+    std::cout << "isOkNeighbor(" << index << ", " << other << ", " << turn << ", ...) -> ";
+    
+    bool result = indexIsSafe(other, turn, state)
         && !is180(index, other, state)
         && isAdjacent(index, other, state);
+
+    std::cout << indexIsSafe(other, turn, state) << "|";
+    std::cout << !is180(index, other, state) << "|";
+    std::cout << isAdjacent(index, other, state) << std::endl;
+
+    return result;
 }
 
 std::vector<uint32_t> getNeighbors(uint32_t index, uint32_t turn, GameState &state)
 {
+    std::cout << "getNeighbors\n";
     std::vector<uint32_t> result;
 
     uint32_t right = index + 1;
@@ -134,10 +146,24 @@ std::vector<uint32_t> getNeighbors(uint32_t index, uint32_t turn, GameState &sta
     return result;
 }
 
+uint32_t getGScore(std::unordered_map<uint32_t, uint32_t> &gScore, uint32_t index)
+{
+    auto iter = gScore.find(index);
+    if (iter == gScore.end())
+    {
+        return VERY_HIGH_COST;
+    }
+    else
+    {
+        return iter->second;
+    }
+}
+
 std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
 {
+    std::cout << "shortestPath()\n"; 
     uint32_t startIndex = cellIndex(start, state);
-    uint32_t goalIndex = cellIndex(start, state);
+    uint32_t goalIndex = cellIndex(goal, state);
 
     bool isFirstMove = false;
     std::unordered_set<uint32_t> closedSet;
@@ -147,32 +173,53 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
     std::unordered_map<uint32_t, uint32_t> fScore;
     std::unordered_map<uint32_t, uint32_t> turns;
 
+    openSet.insert(startIndex);
     gScore[startIndex] = 0;
     fScore[startIndex] = heuristicCostEstimate(start, goal);
-    turns[startIndex] = 0;
+    turns[startIndex] = 1;
+
+    int temp = 0;
 
     while (!openSet.empty())
     {
-        uint32_t currentIndex = *lowestFScoreInSet(openSet, fScore);
+        uint32_t currentIndex = lowestFScoreInSet(openSet, fScore);
 
+        // TEMP TEMP TEMP
+        if (currentIndex == 0)
+        {
+            std::cout << "currentIndex=0!!\n";
+            break;
+        }
+        temp++;
+        if (temp > 100)
+            break;
+        ///////////////////
+
+        std::cout << "currentIndex: " << currentIndex << std::endl;
         if (currentIndex == goalIndex)
         {
+            std::cout << "AT GOAL\n";
             return reconstructPath(cameFrom, currentIndex, state.width());
         }
 
+        std::cout << "remove " << currentIndex << " from open set\n";
         openSet.erase(currentIndex);
         closedSet.insert(currentIndex);
 
         std::vector<uint32_t> neighbors = getNeighbors(currentIndex, turns[currentIndex], state);
         for (uint32_t neighborIndex : neighbors)
         {
+
+            std::cout << "neighbor: " << neighborIndex << std::endl;
             if (closedSet.find(neighborIndex) != closedSet.end())
             {
+                std::cout << "BEEN HERE\n";
                 continue;
             }
 
             if (openSet.find(neighborIndex) == closedSet.end())
             {
+                std::cout << "add " << neighborIndex << " to open set\n";
                 openSet.insert(neighborIndex);
             }
 
@@ -186,10 +233,11 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
                 }
             }
 
-            uint32_t tentativeGScore = gScore[currentIndex] + 1 + dontGetEatenModifier;
+            uint32_t tentativeGScore = getGScore(gScore, currentIndex) + 1 + dontGetEatenModifier;
 
-            if (tentativeGScore >= gScore[neighborIndex])
+            if (tentativeGScore >= getGScore(gScore, neighborIndex))
             {
+                std::cout << "gscore too low\n";
                 continue;
             }
 

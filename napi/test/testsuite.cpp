@@ -108,7 +108,7 @@ void outOfBoundsTests()
     assertTrue(!outOfBounds({0, 0}, state), "outOfBoundsTests() - in bounds");
 }
 
-void astarTests()
+void astarTests1()
 {
     GameState state(parseWorld({
         "> > 0 _",
@@ -118,7 +118,40 @@ void astarTests()
     }));
 
     auto path = shortestPath({2,0}, {3,1}, state);
-    assertEqual(path.size(), 2, "astarTests() - simple case path length");
+    assertEqual(path.size(), 2, "astarTests1() - simple case path length");
+
+    // Doesn't matter whether it goes down,right or right,down.
+    if (path[0] == Direction::Down)
+    {
+        assertTrue(path[0] == Direction::Down, "astarTests1() - down first");
+        assertTrue(path[1] == Direction::Right, "astarTests1() - right second");
+    }
+    else
+    {
+        assertTrue(path[0] == Direction::Right, "astarTests1() - right first");
+        assertTrue(path[1] == Direction::Down, "astarTests1() - down second");
+    }
+}
+
+void astarTests2()
+{
+    GameState state(parseWorld({
+        "> > 0 _",
+        "_ v 1 _",
+        "_ > ^ _",
+        "_ _ _ _"
+    }));
+
+    // Expected path will be right,down,down,left,left,left
+    auto path = shortestPath({2,0}, {0,2}, state);
+    assertEqual(path.size(), 6, "astarTests2() - path length");
+
+    assertEqual(path[0], Direction::Right, "astarTests2() - right");
+    assertEqual(path[1], Direction::Down, "astarTests2() - down");
+    assertEqual(path[2], Direction::Down, "astarTests2() - down");
+    assertEqual(path[3], Direction::Left, "astarTests2() - left");
+    assertEqual(path[4], Direction::Left, "astarTests2() - left");
+    assertEqual(path[5], Direction::Left, "astarTests2() - left");
 }
 
 void TestSuite::run()
@@ -126,5 +159,6 @@ void TestSuite::run()
     outOfBoundsTests();
     basicGameStateTests();
     mapTests();
-    astarTests();
+    astarTests1();
+    astarTests2();
 }

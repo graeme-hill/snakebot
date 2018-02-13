@@ -47,6 +47,13 @@ void assertEqual(uint32_t actual, uint32_t expected, std::string message)
 	assertEqual(jsActual, jsExpected, message);	
 }
 
+void assertEqual(Direction actual, Direction expected, std::string message)
+{
+    std::string actualStr = directionToString(actual);
+    std::string expectedStr = directionToString(expected);
+    assertEqual(actualStr, expectedStr, message);
+}
+
 void assertTrue(bool actual, std::string message)
 {
 	napi_env env = Interop::env();

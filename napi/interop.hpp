@@ -29,6 +29,8 @@ void assertEqual(std::string actual, std::string expected, std::string message);
 
 void assertEqual(uint32_t actual, uint32_t expected, std::string message);
 
+void assertEqual(Direction actual, Direction expected, std::string message);
+
 void assertTrue(bool actual, std::string message);
 
 Point makePoint(napi_env env, napi_value jsFood);
