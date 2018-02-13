@@ -119,7 +119,6 @@ bool isOkNeighbor(uint32_t index, uint32_t other, uint32_t turn, GameState &stat
 
 std::vector<uint32_t> getNeighbors(uint32_t index, uint32_t turn, GameState &state)
 {
-    Point coord = deconstructCellIndex(index, state);
     std::vector<uint32_t> result;
 
     uint32_t right = index + 1;
