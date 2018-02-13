@@ -188,12 +188,35 @@ void astarTests4()
 
     // Expected path will be down,right,right,right
     std::vector<Direction> path = shortestPath({1,2}, {4,3}, state);
-    assertEqual(path.size(), 4, "astarTests3() - path length");
+    assertEqual(path.size(), 4, "astarTests4() - path length");
 
     assertEqual(path.at(0), Direction::Down, "astarTests4() - down");
     assertEqual(path.at(1), Direction::Right, "astarTests4() - right");
     assertEqual(path.at(2), Direction::Right, "astarTests4() - right");
     assertEqual(path.at(3), Direction::Right, "astarTests4() - right");
+}
+
+void astarTests5()
+{
+    GameState state(parseWorld({
+        "_ _ v < _ _",
+        "v _ 1 _ _ _",
+        "> 0 _ * _ _",
+        "_ _ _ _ _ _",
+        "_ _ _ _ _ _",
+        "_ _ _ _ _ _",
+    }));
+
+    std::vector<Direction> path = shortestPath({1,2}, {3,2}, state);
+    assertEqual(path.size(), 4, "astarTests5() - path length");
+
+    assertEqual(path.at(0), Direction::Down, "astarTests5() - down to avoid getting eaten");
+    assertEqual(path.at(1), Direction::Right, "astarTests5() - right");
+    if (path.size() > 2)
+    {
+        assertEqual(path.at(2), Direction::Right, "astarTests5() - right");
+        assertEqual(path.at(3), Direction::Up, "astarTests5() - up");
+    }
 }
 
 void closestFoodTest1()
@@ -245,6 +268,7 @@ void TestSuite::run()
     astarTests2();
     astarTests3();
     astarTests4();
+    astarTests5();
     closestFoodTest1();
     closestFoodTest2();
     closestFoodTest3();
