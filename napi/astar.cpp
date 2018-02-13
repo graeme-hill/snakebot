@@ -100,11 +100,9 @@ bool isCloseToHead(uint32_t index, Snake *snake, GameState &state)
 
 bool isCloseToEqualOrBiggerSnakeHead(uint32_t index, GameState &state)
 {
-    std::cout << "isCloseToEqualOrBiggerSnakeHead\n";
     auto enemies = state.enemies();
     for (Snake *otherSnake : enemies)
     {
-        otherSnake->head().prettyPrint();
         bool otherSnakeIsTooBigToEat = state.mySnake()->length() <= otherSnake->length();
         if (otherSnakeIsTooBigToEat && isCloseToHead(index, otherSnake, state))
         {
