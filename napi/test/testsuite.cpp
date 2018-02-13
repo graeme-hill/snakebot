@@ -92,8 +92,24 @@ void mapTests()
     assertEqual(map.turnsUntilVacant({3,4}), 0, "mapTests() - empty cell vacant");
 }
 
+void outOfBoundsTests()
+{
+    GameState state(parseWorld({
+        "> > 0 _",
+        "_ * _ *",
+        "_ 1 _ _",
+        "_ ^ < <",
+        "_ _ _ _"
+    }));
+
+    assertTrue(outOfBounds({4, 0}, state), "outOfBoundsTests() - off right edge");
+    assertTrue(outOfBounds({0, 5}, state), "outOfBoundsTests() - off bottom edge");
+    assertTrue(!outOfBounds({0, 0}, state), "outOfBoundsTests() - in bounds");
+}
+
 void TestSuite::run()
 {
+    outOfBoundsTests();
     basicGameStateTests();
     mapTests();
 }

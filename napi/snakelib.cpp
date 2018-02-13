@@ -121,6 +121,21 @@ uint32_t Map::turnsUntilVacant(Point p)
         : _cells.at(cellIndex(p, _gameState)).vacated();
 }
 
+void Map::printVacateGrid()
+{
+    std::cout << "--- vacate grid ---" << std::endl;
+    for (uint32_t row = 0; row < _gameState.height(); row++)
+    {
+        for (uint32_t col = 0; col < _gameState.width(); col++)
+        {
+            uint32_t index = cellIndex({ col, row }, _gameState);
+            std::cout << _cells[index].vacated() << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "-------------------" << std::endl;
+}
+
 void Map::update()
 {
     for (auto &pair : _gameState.snakes())
@@ -136,6 +151,7 @@ void Map::updateVacateTurnsForSnake(Snake *snake)
         Point p = snake->parts.at(i);
         uint32_t vacated = snake->parts.size() - i - 1;
         uint32_t index = cellIndex(p, _gameState);
+        p.prettyPrint();
         _cells[index].vacate(snake, vacated);
     }
 }

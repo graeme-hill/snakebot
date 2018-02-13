@@ -87,8 +87,15 @@ class Map
 {
 public:
     Map(GameState &gameState);
+
+    // delete move and copy ctors for now to avoid accidental copies
+    Map(const Map &) = delete;
+    Map(Map &&) = delete;
+
     uint32_t turnsUntilVacant(Point p);
     void update();
+
+    void printVacateGrid();
 
 private:
     void updateVacateTurnsForSnake(Snake *snake);
@@ -101,6 +108,11 @@ class GameState
 {
 public:
     GameState(World w);
+
+    // delete move and copy ctors for now to avoid accidental copies
+    GameState(const GameState &) = delete;
+    GameState(GameState &&) = delete;
+
     uint32_t width() { return _width; }
     uint32_t height() { return _height; }
     World &world() { return _world; }
@@ -149,7 +161,7 @@ inline Point deconstructCellIndex(uint32_t index, uint32_t width)
 inline bool outOfBounds(Point p, GameState &gameState)
 {
     // Since x and y are unsigned so they wrap and become very large numbers.
-    return p.x < gameState.width() && p.y < gameState.height();
+    return p.x >= gameState.width() || p.y >= gameState.height();
 }
 
 std::string directionToString(Direction direction);
