@@ -138,3 +138,14 @@ void Map::updateVacateTurnsForSnake(Snake *snake)
         _cells[index].vacate(snake, vacated);
     }
 }
+
+std::string directionToString(Direction direction)
+{
+    switch (direction)
+    {
+        case Direction::Up: return "up";
+        case Direction::Down: return "down";
+        case Direction::Left: return "left";
+        default: return "right";
+    }
+}

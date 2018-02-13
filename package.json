@@ -22,7 +22,8 @@
     "scripts": {
         "start": "node index.js",
         "test": "mocha test",
-        "build": "node-gyp configure build"
+        "build": "node-gyp configure build",
+        "clean": "node-gyp clean"
     },
     "gypfile": true
 }

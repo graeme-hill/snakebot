@@ -28,9 +28,7 @@ struct Snake
     std::vector<Point> parts;
 
     void prettyPrint();
-
     Point head();
-
     Point tail();
 };
 
@@ -146,3 +144,5 @@ inline bool outOfBounds(Point p, GameState &gameState)
     // Since x and y are unsigned so they wrap and become very large numbers.
     return p.x < gameState.width() && p.y < gameState.height();
 }
+
+std::string directionToString(Direction direction);

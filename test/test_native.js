@@ -38,6 +38,9 @@ describe("C++ tests", () => {
     cpp.test({
         assertEqual: (actual, expected, message) => {
             it(message, () => assert.equal(actual, expected));
+        },
+        parseWorld: (rows) => {
+            return helpers.parseWorld(rows);
         }
     });
 });
