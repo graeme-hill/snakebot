@@ -15,7 +15,8 @@ command:
 npm install --global --production windows-build-tools
 ```
 
-If you don't want to run an algorithm implemented in C++ then it should still work with just node.
+If you don't want to run an algorithm implemented in C++ then it should still work with just node; however
+if you run the whole set of tests you'll get errors if it can't load the C++ library.
 
 ## Building
 
