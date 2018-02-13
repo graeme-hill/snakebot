@@ -20,12 +20,10 @@ Metadata Test::meta()
 
 Direction Test::move(World world)
 {
-
-
     std::cout << "***1\n";
-
-    size_t hash = std::hash<uint32_t>()(12);
-    std::cout << hash << std::endl;
+    std::unordered_map<std::string, std::string> tt;
+    tt["asdf"] = "asdf";
+    std::cout << tt["asdf"] << std::endl;
 
     GameState state(world);
     std::cout << "***2\n";
