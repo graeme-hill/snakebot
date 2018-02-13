@@ -2,6 +2,8 @@
 #include "../movement.hpp"
 #include "../astar.hpp"
 
+#include <unordered_map>
+
 Metadata Test::meta()
 {
     return {
@@ -17,7 +19,13 @@ Metadata Test::meta()
 
 Direction Test::move(World world)
 {
+
+
     std::cout << "***1\n";
+
+    std::unordered_map<int, int> ints;
+    ints.emplace(1, 2);
+
     GameState state(world);
     std::cout << "***2\n";
     auto directions = closestFood(state);
