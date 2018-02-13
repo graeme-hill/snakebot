@@ -40,16 +40,25 @@ uint32_t lowestFScoreInSet(
 std::vector<Direction> reconstructPath(
     std::unordered_map<uint32_t, uint32_t> &cameFrom, uint32_t currentIndex, uint32_t width)
 {
+    std::cout << "reconstructPath\n";
     std::vector<Direction> moves;
     auto iter = cameFrom.find(currentIndex);
     while (iter != cameFrom.end())
     {
+        std::cout << "loop\n";
         uint32_t nextIndex = iter->second;
         Direction direction = directionBetweenNodes(nextIndex, currentIndex, width);
         moves.insert(moves.begin(), direction);
         currentIndex = nextIndex;
         iter = cameFrom.find(currentIndex);
     }
+    std::cout << "done reconstructPath\n";
+
+    for (auto d : moves)
+    {
+        std::cout << directionToString(d) << ",";
+    }
+    std::cout << "\n";
     return moves;
 }
 
@@ -199,7 +208,9 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
         if (currentIndex == goalIndex)
         {
             std::cout << "AT GOAL\n";
-            return reconstructPath(cameFrom, currentIndex, state.width());
+            std::vector<Direction> path = reconstructPath(cameFrom, currentIndex, state.width());
+            std::cout << "built path\n";
+            return path;
         }
 
         std::cout << "remove " << currentIndex << " from open set\n";
