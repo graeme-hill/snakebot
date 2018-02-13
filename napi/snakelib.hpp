@@ -107,6 +107,7 @@ public:
     std::unordered_map<std::string, Snake *> &snakes() { return _snakes; }
     std::vector<Point> &food() { return _food; }
     Snake *mySnake();
+    Map &map() { return _map; }
 
 private:
     uint32_t _width;

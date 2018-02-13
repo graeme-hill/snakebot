@@ -32,9 +32,6 @@ void basicGameStateTests()
     assertTrue(snake0->parts[0] == snake0->head(), "basicGameStateTests() - head() is first");
     assertTrue(snake0->parts[2] == snake0->tail(), "basicGameStateTests() - tail() is last");
 
-    snake0->prettyPrint();
-    snake1->prettyPrint();
-
     assertTrue(snake0->parts[0] == Point{2,0}, "basicGameStateTests() - snake0 part0");
     assertTrue(snake0->parts[1] == Point{1,0}, "basicGameStateTests() - snake0 part1");
     assertTrue(snake0->parts[2] == Point{0,0}, "basicGameStateTests() - snake0 part2");
@@ -59,7 +56,44 @@ void basicGameStateTests()
     }
 }
 
+void mapTests()
+{
+    GameState state(parseWorld({
+        "> > 0 _",
+        "_ * _ *",
+        "_ 1 _ _",
+        "_ ^ < <",
+        "_ _ _ _"
+    }));
+
+    Map &map = state.map();
+
+    assertEqual(map.turnsUntilVacant({0,0}), 0, "mapTests() - snake0 part vacant after 0 turns");
+    assertEqual(map.turnsUntilVacant({1,0}), 1, "mapTests() - snake0 part vacant after 1 turn");
+    assertEqual(map.turnsUntilVacant({2,0}), 2, "mapTests() - snake0 part vacant after 2 turns");
+
+    assertEqual(map.turnsUntilVacant({3,3}), 0, "mapTests() - snake1 part vacant after 0 turns");
+    assertEqual(map.turnsUntilVacant({2,3}), 1, "mapTests() - snake1 part vacant after 1 turn");
+    assertEqual(map.turnsUntilVacant({1,3}), 2, "mapTests() - snake1 part vacant after 2 turns");
+    assertEqual(map.turnsUntilVacant({1,2}), 3, "mapTests() - snake1 part vacant after 3 turns");
+
+    assertEqual(map.turnsUntilVacant({3,0}), 0, "mapTests() - empty cell vacant");
+    assertEqual(map.turnsUntilVacant({0,1}), 0, "mapTests() - empty cell vacant");
+    assertEqual(map.turnsUntilVacant({1,1}), 0, "mapTests() - empty cell vacant");
+    assertEqual(map.turnsUntilVacant({2,1}), 0, "mapTests() - empty cell vacant");
+    assertEqual(map.turnsUntilVacant({3,1}), 0, "mapTests() - empty cell vacant");
+    assertEqual(map.turnsUntilVacant({0,2}), 0, "mapTests() - empty cell vacant");
+    assertEqual(map.turnsUntilVacant({2,2}), 0, "mapTests() - empty cell vacant");
+    assertEqual(map.turnsUntilVacant({3,2}), 0, "mapTests() - empty cell vacant");
+    assertEqual(map.turnsUntilVacant({0,3}), 0, "mapTests() - empty cell vacant");
+    assertEqual(map.turnsUntilVacant({0,4}), 0, "mapTests() - empty cell vacant");
+    assertEqual(map.turnsUntilVacant({1,4}), 0, "mapTests() - empty cell vacant");
+    assertEqual(map.turnsUntilVacant({2,4}), 0, "mapTests() - empty cell vacant");
+    assertEqual(map.turnsUntilVacant({3,4}), 0, "mapTests() - empty cell vacant");
+}
+
 void TestSuite::run()
 {
     basicGameStateTests();
+    mapTests();
 }
