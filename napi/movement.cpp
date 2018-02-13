@@ -9,16 +9,18 @@ PointDirection closestFood(GameState &state)
 
     for (auto food : state.food())
     {
+        std::cout << "***2.1\n";
         std::vector<Direction> myPath = shortestPath(me->head(), food, state);
+        std::cout << "***2.1\n";
 
         if (myPath.empty())
         {
-        	continue;
+            continue;
         }
 
         if (myPath.size() >= best.size() && foundAnything)
         {
-        	continue;
+            continue;
         }
 
         foundAnything = true;
@@ -27,10 +29,10 @@ PointDirection closestFood(GameState &state)
 
     if (!best.empty())
     {
-    	return  PointDirection{ true, best.at(0) };
+        return  PointDirection{ true, best.at(0) };
     }
     else
     {
-    	return PointDirection{ false, Direction::Left };
+        return PointDirection{ false, Direction::Left };
     }
 }

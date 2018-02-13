@@ -5,6 +5,6 @@
 class Test : public Algorithm
 {
 public:
-	Metadata meta() override;
-	Direction move(World world) override;
+    Metadata meta() override;
+    Direction move(World world) override;
 };
