@@ -17,6 +17,8 @@ Metadata Test::meta()
 
 Direction Test::move(World world)
 {
+	std::cout << "***1\n";
+
 	GameState state(world);
 	auto directions = closestFood(state);
 	if (directions.possible)
