@@ -113,6 +113,9 @@ function getNeighbors(index, turn, gameState) {
 // Partially stolen from the pseudo-code in the wikipedia page for A*:
 // https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
 function shortestPath(start, goal, gameState) {
+
+	std::cout << "***2.1.1\n";
+
 	const startIndex = getIndex(start, gameState);
 	const goalIndex = getIndex(goal, gameState);
 
@@ -149,7 +152,10 @@ function shortestPath(start, goal, gameState) {
 	// fScore for start node is 100% heuristic.
 	fScore[startIndex] = heuristicCostEstimate(start, goal);
 
+	std::cout << "***2.1.2\n";
+
 	while (openSet.size > 0) {
+		std::cout << "***2.1.3\n";
 		const currentIndex = lowestFScoreInSet(openSet, fScore);
 
 		if (currentIndex === goalIndex) {
@@ -159,9 +165,11 @@ function shortestPath(start, goal, gameState) {
 		openSet.delete(currentIndex);
 		closedSet.add(currentIndex);
 
+		std::cout << "***2.1.4\n";
+
 		const neighbors = getNeighbors(currentIndex, turns[currentIndex], gameState);
 		for (const neighborIndex of neighbors) {
-
+			std::cout << "***2.1.5\n";
 			// Don't revisit the same node we've already been to.
 			if (closedSet.has(neighborIndex)) {
 				continue;
