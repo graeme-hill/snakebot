@@ -2,10 +2,15 @@
 
 #include "snakelib.hpp"
 
-struct PointDirection
+struct MaybeDirection
 {
-	bool possible;
-	Direction direction;
+	bool hasValue;
+	Direction value;
 };
 
-PointDirection closestFood(GameState &state);
+MaybeDirection closestFood(GameState &state);
+
+std::vector<Direction> notImmediatelySuicidalMoves(GameState &state);
+
+MaybeDirection notImmediatelySuicidal(GameState &gameState);
+

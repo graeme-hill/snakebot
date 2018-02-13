@@ -219,6 +219,26 @@ void astarTests5()
     }
 }
 
+void astarTests6()
+{
+    // Created this test based on a real scenario that caused an infinite loop
+    // because both initial choices are dangerous.
+
+    GameState state(parseWorld({
+        "_ v < < < _ _ _",
+        "_ > > v ^ _ _ _",
+        "_ v _ 1 _ _ _ _",
+        "_ v 0 _ _ _ _ *",
+        "_ > ^ _ _ _ _ _",
+        "_ _ _ _ _ _ _ _",
+        "_ _ _ _ _ _ _ _",
+        "_ _ _ _ _ _ _ _"
+    }));
+
+    std::vector<Direction> path = shortestPath({2,3}, {7,3}, state);
+    assertEqual(path.size(), 5, "astarTests6() - path length");
+}
+
 void closestFoodTest1()
 {
     GameState state(parseWorld({
@@ -228,9 +248,9 @@ void closestFoodTest1()
         "_ _ * _"
     }));
 
-    auto directions = closestFood(state);
-    assertTrue(directions.possible, "closestFoodTest1() - can find food");
-    assertTrue(directions.direction == Direction::Down, "closestFoodTest1() - down");
+    auto direction = closestFood(state);
+    assertTrue(direction.hasValue, "closestFoodTest1() - can find food");
+    assertTrue(direction.value == Direction::Down, "closestFoodTest1() - down");
 }
 
 void closestFoodTest2()
@@ -242,8 +262,8 @@ void closestFoodTest2()
         "_ _ 1 *"
     }));
 
-    auto directions = closestFood(state);
-    assertTrue(!directions.possible, "closestFoodTest2() - inaccessible food");
+    auto direction = closestFood(state);
+    assertTrue(!direction.hasValue, "closestFoodTest2() - inaccessible food");
 }
 
 void closestFoodTest3()
@@ -255,8 +275,35 @@ void closestFoodTest3()
         "_ _ 1 _"
     }));
 
-    auto directions = closestFood(state);
-    assertTrue(!directions.possible, "closestFoodTest3() - no food");
+    auto direction = closestFood(state);
+    assertTrue(!direction.hasValue, "closestFoodTest3() - no food");
+}
+
+void notImmediatelySuicidalTest1()
+{
+    GameState state(parseWorld({
+        "> > > 1",
+        "> 0 v <",
+        "_ _ v _",
+        "_ _ 2 _"
+    }));
+
+    auto direction = notImmediatelySuicidal(state);
+    assertTrue(direction.hasValue, "notImmediatelySuicidalTest1() - hasValue");
+    assertTrue(direction.value == Direction::Down, "notImmediatelySuicidalTest1() - down");
+}
+
+void notImmediatelySuicidalTest2()
+{
+    GameState state(parseWorld({
+        "> > > 1",
+        "> 0 v <",
+        "> v v _",
+        "_ 3 2 _"
+    }));
+
+    auto direction = notImmediatelySuicidal(state);
+    assertTrue(!direction.hasValue, "notImmediatelySuicidalTest2() - !hasValue");
 }
 
 void TestSuite::run()
@@ -269,7 +316,10 @@ void TestSuite::run()
     astarTests3();
     astarTests4();
     astarTests5();
+    astarTests6();
     closestFoodTest1();
     closestFoodTest2();
     closestFoodTest3();
+    notImmediatelySuicidalTest1();
+    notImmediatelySuicidalTest2();
 }

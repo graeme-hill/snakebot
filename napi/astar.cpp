@@ -5,6 +5,8 @@
 #include <map>
 
 #define VERY_HIGH_COST 1000
+#define INFINITY_COST 1000000
+#define MAX_ITERATIONS 10000
 
 uint32_t heuristicCostEstimate(Point start, Point goal)
 {
@@ -143,7 +145,7 @@ uint32_t getGScore(std::map<uint32_t, uint32_t> &gScore, uint32_t index)
     auto iter = gScore.find(index);
     if (iter == gScore.end())
     {
-        return VERY_HIGH_COST;
+        return INFINITY_COST;
     }
     else
     {
@@ -151,8 +153,30 @@ uint32_t getGScore(std::map<uint32_t, uint32_t> &gScore, uint32_t index)
     }
 }
 
+void printSet(std::string name, std::unordered_set<uint32_t> set)
+{
+    std::cout << name << ": ";
+    for (auto i : set)
+    {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
+}
+
+void printMap(std::string name, std::map<uint32_t, uint32_t> map)
+{
+    std::cout << name << ": ";
+    for (auto p : map)
+    {
+        std::cout << p.first << "->" << p.second << " ";
+    }
+    std::cout << std::endl;
+}
+
 std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
 {
+    uint32_t safety = 0;
+
     uint32_t startIndex = cellIndex(start, state);
     uint32_t goalIndex = cellIndex(goal, state);
 
@@ -172,6 +196,13 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
 
     while (!openSet.empty())
     {
+        // Make sure to never get stuck in loop.
+        if (safety++ > MAX_ITERATIONS)
+        {
+            std::cout << "Out of control loop in A*! Quitting after max iterations." << std::endl;
+            break;
+        }
+
         uint32_t currentIndex = lowestFScoreInSet(openSet, fScore);
         if (currentIndex == goalIndex)
         {

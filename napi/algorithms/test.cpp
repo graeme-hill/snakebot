@@ -21,10 +21,12 @@ Metadata Test::meta()
 Direction Test::move(World world)
 {
     GameState state(world);
-    auto directions = closestFood(state);
-    if (directions.possible)
+    auto direction = closestFood(state);
+    if (direction.hasValue)
     {
-        return directions.direction;
+        return direction.value;
     }
-    return Direction::Left;
+
+    auto alt = notImmediatelySuicidal(state);
+    return alt.value;
 }
