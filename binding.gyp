@@ -7,7 +7,8 @@
             	"napi/snakelib.cpp",
             	"napi/algorithms/test.cpp",
                 "napi/test/testsuite.cpp",
-                "napi/interop.cpp"
+                "napi/interop.cpp",
+                "napi/astar.cpp"
             ]
         }
     ]

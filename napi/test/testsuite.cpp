@@ -1,5 +1,6 @@
 #include "testsuite.hpp"
 #include "../interop.hpp"
+#include "../astar.hpp"
 #include <iostream>
 
 void basicGameStateTests()
@@ -107,9 +108,23 @@ void outOfBoundsTests()
     assertTrue(!outOfBounds({0, 0}, state), "outOfBoundsTests() - in bounds");
 }
 
+void astarTests()
+{
+    GameState state(parseWorld({
+        "> > 0 _",
+        "_ _ _ _",
+        "_ _ _ _",
+        "_ _ _ _"
+    }));
+
+    auto path = shortestPath({2,0}, {3,1}, state);
+    assertEqual(path.size(), 2, "astarTests() - simple case path length");
+}
+
 void TestSuite::run()
 {
     outOfBoundsTests();
     basicGameStateTests();
     mapTests();
+    astarTests();
 }

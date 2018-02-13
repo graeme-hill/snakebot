@@ -8,6 +8,7 @@
 #include <array>
 #include <unordered_map>
 #include <memory>
+#include <algorithm>
 
 enum class Direction
 {
@@ -35,6 +36,7 @@ struct Snake
     void prettyPrint();
     Point head();
     Point tail();
+    uint32_t length() { return parts.size(); }
 };
 
 struct World
@@ -117,6 +119,7 @@ public:
     uint32_t height() { return _height; }
     World &world() { return _world; }
     std::unordered_map<std::string, Snake *> &snakes() { return _snakes; }
+    std::vector<Snake *> &enemies() { return _enemies; }
     std::vector<Point> &food() { return _food; }
     Snake *mySnake();
     Map &map() { return _map; }
@@ -158,10 +161,31 @@ inline Point deconstructCellIndex(uint32_t index, uint32_t width)
     return { index % width, index / width };
 }
 
+inline Point deconstructCellIndex(uint32_t index, GameState &state)
+{
+    return deconstructCellIndex(index, state.width());
+}
+
 inline bool outOfBounds(Point p, GameState &gameState)
 {
     // Since x and y are unsigned so they wrap and become very large numbers.
     return p.x >= gameState.width() || p.y >= gameState.height();
+}
+
+inline Direction directionBetweenNodes(uint32_t fromIndex, uint32_t toIndex, uint32_t width)
+{
+    auto from = deconstructCellIndex(fromIndex, width);
+    auto to = deconstructCellIndex(toIndex, width);
+
+    if (from.x < to.x) return Direction::Right;
+    if (to.x < from.x) return Direction::Left;
+    if (from.y < to.y) return Direction::Down;
+    return Direction::Up;
+}
+
+inline uint32_t absDiff(uint32_t a, uint32_t b)
+{
+    return std::max(a, b) - std::min(a, b);
 }
 
 std::string directionToString(Direction direction);
