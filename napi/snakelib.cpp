@@ -165,3 +165,16 @@ std::string directionToString(Direction direction)
         default: return "right";
     }
 }
+
+namespace std
+{
+    template <>
+    class hash<Point>
+    {
+    public :
+        size_t operator()(const Point &p) const
+        {
+            return hash<uint32_t>()(p.x) ^ hash<uint32_t>()(p.y);
+        }
+    };
+};

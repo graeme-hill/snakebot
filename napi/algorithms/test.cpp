@@ -2,6 +2,7 @@
 #include "../movement.hpp"
 #include "../astar.hpp"
 
+#include <functional>
 #include <unordered_map>
 
 Metadata Test::meta()
@@ -23,8 +24,8 @@ Direction Test::move(World world)
 
     std::cout << "***1\n";
 
-    std::unordered_map<int, int> ints;
-    ints.emplace(1, 2);
+    size_t hash = std::hash<uint32_t>()(12);
+    std::cout << hash << std::endl;
 
     GameState state(world);
     std::cout << "***2\n";

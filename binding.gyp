@@ -10,6 +10,16 @@
                 "napi/interop.cpp",
                 "napi/astar.cpp",
                 "napi/movement.cpp"
+            ],
+            "cflags": [
+                "-std=c++17"
+            ],
+            "cflags_cc!": [ "-fno-rtti" ],
+            "conditions": [
+                [
+                    'OS=="mac"',
+                    { "xcode_settings": { "GCC_ENABLE_CPP_RTTI": "YES" } }
+                ]
             ]
         }
     ]
