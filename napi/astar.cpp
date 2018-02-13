@@ -153,8 +153,6 @@ uint32_t getGScore(std::map<uint32_t, uint32_t> &gScore, uint32_t index)
 
 std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
 {
-    std::cout << "***2.1.1\n";
-
     uint32_t startIndex = cellIndex(start, state);
     uint32_t goalIndex = cellIndex(goal, state);
 
@@ -166,24 +164,15 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
     std::map<uint32_t, uint32_t> fScore;
     std::map<uint32_t, uint32_t> turns;
 
-    std::cout << "***2.1.2\n";
-
     openSet.insert(startIndex);
-    std::cout << "***2.1.2.1\n";
     gScore.emplace(startIndex, 0);
-    std::cout << "***2.1.2.2\n";
     auto estimate = heuristicCostEstimate(start, goal);
     fScore.emplace(startIndex, estimate);
-    std::cout << "***2.1.2.3\n";
     turns.emplace(startIndex, 1);
-
-    std::cout << "***2.1.3\n";
 
     while (!openSet.empty())
     {
-        std::cout << "***2.1.4\n";
         uint32_t currentIndex = lowestFScoreInSet(openSet, fScore);
-        std::cout << "***2.1.5\n";
         if (currentIndex == goalIndex)
         {
             std::vector<Direction> path = reconstructPath(cameFrom, currentIndex, state.width());
@@ -196,7 +185,6 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
         std::vector<uint32_t> neighbors = getNeighbors(currentIndex, turns[currentIndex], state);
         for (uint32_t neighborIndex : neighbors)
         {
-            std::cout << "***2.1.6\n";
             if (closedSet.find(neighborIndex) != closedSet.end())
             {
                 continue;

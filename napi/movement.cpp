@@ -9,9 +9,7 @@ PointDirection closestFood(GameState &state)
 
     for (auto food : state.food())
     {
-        std::cout << "***2.1\n";
         std::vector<Direction> myPath = shortestPath(me->head(), food, state);
-        std::cout << "***2.2\n";
 
         if (myPath.empty())
         {
