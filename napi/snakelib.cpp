@@ -63,16 +63,17 @@ GameState::GameState(World w) :
     _world(w),
     _map(*this)
 {
-    for (auto &snake : w.snakes)
+    for (size_t i = 0; i < _world.snakes.size(); i++)
     {
-        _snakes[snake.id] = &snake;
-        if (snake.id == _world.you)
+        Snake *snake = &_world.snakes[i];
+        _snakes[snake->id] = snake;
+        if (snake->id == _world.you)
         {
-            _mySnake = &snake;
+            _mySnake = snake;
         }
         else
         {
-            _enemies.push_back(&snake);
+            _enemies.push_back(snake);
         }
     }
 

@@ -93,7 +93,7 @@ Point makePoint(napi_env env, napi_value jsFood)
     napi_get_named_property(env, jsFood, "x", &jsX);
 
     napi_value jsY;
-    napi_get_named_property(env, jsFood, "x", &jsY);
+    napi_get_named_property(env, jsFood, "y", &jsY);
 
     uint32_t x;
     napi_get_value_uint32(env, jsX, &x);
@@ -124,7 +124,6 @@ Snake makeSnake(napi_env env, napi_value jsSnake)
     size_t idBufferSize;
     napi_get_value_string_utf8(env, jsId, idBuffer, 100, &idBufferSize);
     snake.id = std::string(idBuffer);
-    std::cout << "((" << snake.id << "))" << std::endl;
 
     napi_get_value_uint32(env, jsHealth, &snake.health);
 

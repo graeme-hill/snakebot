@@ -21,6 +21,11 @@ struct Point
     void prettyPrint();
 };
 
+inline bool operator==(const Point &a, const Point &b)
+{
+    return a.x == b.x && a.y == b.y;
+}
+
 struct Snake
 {
     std::string id;
@@ -100,6 +105,7 @@ public:
     uint32_t height() { return _height; }
     World &world() { return _world; }
     std::unordered_map<std::string, Snake *> &snakes() { return _snakes; }
+    std::vector<Point> &food() { return _food; }
     Snake *mySnake();
 
 private:

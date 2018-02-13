@@ -1,10 +1,3 @@
-/* This file serves as the entry point to C++ snakebot implementation and it
- * should be the only place that uses N-API. The move() function gets called
- * from JS and it takes care of converting the JS world object into a C++
- * object that the rest of the code can use. All other cpp/hpp files should
- * just use standard C++.
- */
-
 #include "interop.hpp"
 #include "snakelib.hpp"
 #include "algorithms/test.hpp"
