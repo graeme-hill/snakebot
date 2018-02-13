@@ -8,7 +8,8 @@
             	"napi/algorithms/test.cpp",
                 "napi/test/testsuite.cpp",
                 "napi/interop.cpp",
-                "napi/astar.cpp"
+                "napi/astar.cpp",
+                "napi/movement.cpp"
             ]
         }
     ]

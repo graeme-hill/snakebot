@@ -17,7 +17,7 @@ describe("move()", () => {
     ]);
 
     it("should return a direction", () =>
-        assert.equal(cpp.move(world, "test"), "left"));
+        assert.include(["left","right","up","down"], cpp.move(world, "test")));
 });
 
 describe("meta()", () => {

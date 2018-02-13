@@ -1,6 +1,7 @@
 #include "testsuite.hpp"
 #include "../interop.hpp"
 #include "../astar.hpp"
+#include "../movement.hpp"
 #include <iostream>
 
 void basicGameStateTests()
@@ -121,15 +122,15 @@ void astarTests1()
     assertEqual(path.size(), 2, "astarTests1() - simple case path length");
 
     // Doesn't matter whether it goes down,right or right,down.
-    if (path[0] == Direction::Down)
+    if (path.at(0) == Direction::Down)
     {
-        assertTrue(path[0] == Direction::Down, "astarTests1() - down first");
-        assertTrue(path[1] == Direction::Right, "astarTests1() - right second");
+        assertTrue(path.at(0) == Direction::Down, "astarTests1() - down first");
+        assertTrue(path.at(1) == Direction::Right, "astarTests1() - right second");
     }
     else
     {
-        assertTrue(path[0] == Direction::Right, "astarTests1() - right first");
-        assertTrue(path[1] == Direction::Down, "astarTests1() - down second");
+        assertTrue(path.at(0) == Direction::Right, "astarTests1() - right first");
+        assertTrue(path.at(1) == Direction::Down, "astarTests1() - down second");
     }
 }
 
@@ -146,12 +147,12 @@ void astarTests2()
     auto path = shortestPath({2,0}, {0,2}, state);
     assertEqual(path.size(), 6, "astarTests2() - path length");
 
-    assertEqual(path[0], Direction::Right, "astarTests2() - right");
-    assertEqual(path[1], Direction::Down, "astarTests2() - down");
-    assertEqual(path[2], Direction::Down, "astarTests2() - down");
-    assertEqual(path[3], Direction::Left, "astarTests2() - left");
-    assertEqual(path[4], Direction::Left, "astarTests2() - left");
-    assertEqual(path[5], Direction::Left, "astarTests2() - left");
+    assertEqual(path.at(0), Direction::Right, "astarTests2() - right");
+    assertEqual(path.at(1), Direction::Down, "astarTests2() - down");
+    assertEqual(path.at(2), Direction::Down, "astarTests2() - down");
+    assertEqual(path.at(3), Direction::Left, "astarTests2() - left");
+    assertEqual(path.at(4), Direction::Left, "astarTests2() - left");
+    assertEqual(path.at(5), Direction::Left, "astarTests2() - left");
 }
 
 void astarTests3()
@@ -160,18 +161,18 @@ void astarTests3()
         "_ _ _ _ _ _",
         "_ _ 1 _ _ _",
         "v _ ^ 2 _ _",
-        "> 1 ^ ^ _ _",
+        "> 0 ^ ^ _ _",
         "_ _ _ ^ _ _",
         "_ _ _ _ _ _",
     }));
 
     // Expected path will be right,right,right
-    auto path = shortestPath({1,3}, {4,3}, state);
+    std::vector<Direction> path = shortestPath({1,3}, {4,3}, state);
     assertEqual(path.size(), 3, "astarTests3() - path length");
 
-    assertEqual(path[0], Direction::Right, "astarTests3() - right");
-    assertEqual(path[1], Direction::Right, "astarTests3() - right");
-    assertEqual(path[2], Direction::Right, "astarTests3() - right");
+    assertEqual(path.at(0), Direction::Right, "astarTests3() - right");
+    assertEqual(path.at(1), Direction::Right, "astarTests3() - right");
+    assertEqual(path.at(2), Direction::Right, "astarTests3() - right");
 }
 
 void astarTests4()
@@ -179,7 +180,7 @@ void astarTests4()
     GameState state(parseWorld({
         "_ _ _ _ _ _",
         "v _ 1 _ _ _",
-        "> 1 ^ 2 _ _",
+        "> 0 ^ 2 _ _",
         "_ _ ^ ^ _ _",
         "_ _ ^ ^ _ _",
         "_ _ _ ^ _ _",
@@ -187,18 +188,52 @@ void astarTests4()
 
     // Expected path will be down,right,right,right
     std::vector<Direction> path = shortestPath({1,2}, {4,3}, state);
-    std::cout << "got path\n";
     assertEqual(path.size(), 4, "astarTests3() - path length");
 
-    std::cout << "a\n";
     assertEqual(path.at(0), Direction::Down, "astarTests4() - down");
-    std::cout << "b\n";
     assertEqual(path.at(1), Direction::Right, "astarTests4() - right");
-    std::cout << "c\n";
     assertEqual(path.at(2), Direction::Right, "astarTests4() - right");
-    std::cout << "d\n";
     assertEqual(path.at(3), Direction::Right, "astarTests4() - right");
-    std::cout << "e\n";
+}
+
+void closestFoodTest1()
+{
+    GameState state(parseWorld({
+        "> > 0 _",
+        "_ _ _ _",
+        "1 < < _",
+        "_ _ * _"
+    }));
+
+    auto directions = closestFood(state);
+    assertTrue(directions.possible, "closestFoodTest1() - can find food");
+    assertTrue(directions.direction == Direction::Down, "closestFoodTest1() - down");
+}
+
+void closestFoodTest2()
+{
+    GameState state(parseWorld({
+        "> > 0 _",
+        "_ > > v",
+        "_ _ v <",
+        "_ _ 1 *"
+    }));
+
+    auto directions = closestFood(state);
+    assertTrue(!directions.possible, "closestFoodTest2() - inaccessible food");
+}
+
+void closestFoodTest3()
+{
+    GameState state(parseWorld({
+        "> > 0 _",
+        "_ _ _ _",
+        "_ _ v <",
+        "_ _ 1 _"
+    }));
+
+    auto directions = closestFood(state);
+    assertTrue(!directions.possible, "closestFoodTest3() - no food");
 }
 
 void TestSuite::run()
@@ -210,4 +245,7 @@ void TestSuite::run()
     astarTests2();
     astarTests3();
     astarTests4();
+    closestFoodTest1();
+    closestFoodTest2();
+    closestFoodTest3();
 }

@@ -8,7 +8,6 @@
 
 uint32_t heuristicCostEstimate(Point start, Point goal)
 {
-    std::cout << "heuristicCostEstimate" << std::endl;
     return absDiff(start.x, goal.x) + absDiff(start.y, goal.y);
 }
 
@@ -40,25 +39,17 @@ uint32_t lowestFScoreInSet(
 std::vector<Direction> reconstructPath(
     std::unordered_map<uint32_t, uint32_t> &cameFrom, uint32_t currentIndex, uint32_t width)
 {
-    std::cout << "reconstructPath\n";
     std::vector<Direction> moves;
     auto iter = cameFrom.find(currentIndex);
     while (iter != cameFrom.end())
     {
-        std::cout << "loop\n";
         uint32_t nextIndex = iter->second;
         Direction direction = directionBetweenNodes(nextIndex, currentIndex, width);
         moves.insert(moves.begin(), direction);
         currentIndex = nextIndex;
         iter = cameFrom.find(currentIndex);
     }
-    std::cout << "done reconstructPath\n";
 
-    for (auto d : moves)
-    {
-        std::cout << directionToString(d) << ",";
-    }
-    std::cout << "\n";
     return moves;
 }
 
@@ -70,7 +61,6 @@ bool indexIsSafe(uint32_t index, uint32_t turn, GameState &state)
         return false;
     }
     uint32_t turnsUntilCouldBeVacant = state.map().turnsUntilVacant(coord);
-    std::cout << "(v=" << turnsUntilCouldBeVacant << "/" << turn << ")";
     return turnsUntilCouldBeVacant < turn;
 }
 
@@ -124,22 +114,15 @@ bool isCloseToEqualOrBiggerSnakeHead(uint32_t index, GameState &state)
 
 bool isOkNeighbor(uint32_t index, uint32_t other, uint32_t turn, GameState &state)
 {
-    std::cout << "isOkNeighbor(" << index << ", " << other << ", " << turn << ", ...) -> ";
-    
     bool result = indexIsSafe(other, turn, state)
         && !is180(index, other, state)
         && isAdjacent(index, other, state);
-
-    std::cout << indexIsSafe(other, turn, state) << "|";
-    std::cout << !is180(index, other, state) << "|";
-    std::cout << isAdjacent(index, other, state) << std::endl;
 
     return result;
 }
 
 std::vector<uint32_t> getNeighbors(uint32_t index, uint32_t turn, GameState &state)
 {
-    std::cout << "getNeighbors\n";
     std::vector<uint32_t> result;
 
     uint32_t right = index + 1;
@@ -170,7 +153,6 @@ uint32_t getGScore(std::unordered_map<uint32_t, uint32_t> &gScore, uint32_t inde
 
 std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
 {
-    std::cout << "shortestPath()\n"; 
     uint32_t startIndex = cellIndex(start, state);
     uint32_t goalIndex = cellIndex(goal, state);
 
@@ -193,27 +175,12 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
     {
         uint32_t currentIndex = lowestFScoreInSet(openSet, fScore);
 
-        // TEMP TEMP TEMP
-        if (currentIndex == 0)
-        {
-            std::cout << "currentIndex=0!!\n";
-            break;
-        }
-        temp++;
-        if (temp > 100)
-            break;
-        ///////////////////
-
-        std::cout << "currentIndex: " << currentIndex << std::endl;
         if (currentIndex == goalIndex)
         {
-            std::cout << "AT GOAL\n";
             std::vector<Direction> path = reconstructPath(cameFrom, currentIndex, state.width());
-            std::cout << "built path\n";
             return path;
         }
 
-        std::cout << "remove " << currentIndex << " from open set\n";
         openSet.erase(currentIndex);
         closedSet.insert(currentIndex);
 
@@ -221,16 +188,13 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
         for (uint32_t neighborIndex : neighbors)
         {
 
-            std::cout << "neighbor: " << neighborIndex << std::endl;
             if (closedSet.find(neighborIndex) != closedSet.end())
             {
-                std::cout << "BEEN HERE\n";
                 continue;
             }
 
-            if (openSet.find(neighborIndex) == closedSet.end())
+            if (openSet.find(neighborIndex) == openSet.end())
             {
-                std::cout << "add " << neighborIndex << " to open set\n";
                 openSet.insert(neighborIndex);
             }
 
@@ -248,7 +212,6 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
 
             if (tentativeGScore >= getGScore(gScore, neighborIndex))
             {
-                std::cout << "gscore too low\n";
                 continue;
             }
 

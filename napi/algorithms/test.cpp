@@ -1,4 +1,6 @@
 #include "test.hpp"
+#include "../movement.hpp"
+#include "../astar.hpp"
 
 Metadata Test::meta()
 {
@@ -15,5 +17,11 @@ Metadata Test::meta()
 
 Direction Test::move(World world)
 {
+	GameState state(world);
+	auto directions = closestFood(state);
+	if (directions.possible)
+	{
+		return directions.direction;
+	}
 	return Direction::Left;
 }
