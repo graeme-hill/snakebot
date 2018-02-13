@@ -36,6 +36,30 @@ MaybeDirection closestFood(GameState &state)
     }
 }
 
+// MaybeDirection bestFood(GameState &state)
+// {
+//     Snake *me = state.mySnake();
+//     Direction bestDirection;
+//     uint32_t bestLength;
+//     bool foundOne = false;
+
+//     for (Point food : state.food())
+//     {
+//         auto myPath = shortestPath(me->head(), food, state);
+
+//         if (myPath.empty())
+//             continue;
+
+//         if (foundOne && myPath.size() >= bestLength)
+//             continue;
+
+//         for (Snake *enemy : me->enemies())
+//         {
+//             GameState
+//         }
+//     }
+// }
+
 bool is180(Point p, GameState &state)
 {
     // If length of snake is 1 then nothing to worry about (... I think... might wanna test that)
@@ -93,5 +117,20 @@ MaybeDirection notImmediatelySuicidal(GameState &state)
     else
     {
         return MaybeDirection{ true, moves.at(0) };
+    }
+}
+
+MaybeDirection chaseTail(GameState &state)
+{
+    Point myHead = state.mySnake()->head();
+    Point myTail = state.mySnake()->tail();
+    std::vector<Direction> path = shortestPath(myHead, myTail, state);
+    if (!path.empty())
+    {
+        return MaybeDirection { true, path.at(0) };
+    }
+    else
+    {
+        return MaybeDirection { false, Direction::Left };
     }
 }

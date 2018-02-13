@@ -21,10 +21,16 @@ Metadata Test::meta()
 Direction Test::move(World world)
 {
     GameState state(world);
-    auto direction = closestFood(state);
-    if (direction.hasValue)
+    auto foodDir = closestFood(state);
+    if (foodDir.hasValue)
     {
-        return direction.value;
+        return foodDir.value;
+    }
+
+    auto chaseDir = chaseTail(state);
+    if (chaseDir.hasValue)
+    {
+        return chaseDir.value;
     }
 
     auto alt = notImmediatelySuicidal(state);
