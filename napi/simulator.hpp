@@ -29,12 +29,6 @@ struct Future
     std::vector<Direction> moves;
 };
 
-struct SnakeMove
-{
-    Snake *snake;
-    Direction direction;
-}
-
 class Simulation
 {
 public:
@@ -50,6 +44,8 @@ public:
 
 private:
     Direction getMyMove();
+    void updateObituaries(GameState *newState);
+    void updateFoodsEaten(GameState *newState);
 
     AlgorithmBranch _branch;
     uint32_t _maxTurns;

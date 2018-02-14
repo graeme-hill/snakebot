@@ -95,6 +95,38 @@ GameState &GameState::perspective(Snake *enemy)
     return *_perspectiveCopies[enemy->id];
 }
 
+std::unique_ptr<GameState> GameState::newStateAfterMoves(
+    std::vector<SnakeMove> &moves)
+{
+    World newWorld = _world;
+    std::unique_ptr<GameState> newState(new GameState(newWorld));
+
+    // Shift snake parts
+    for (SnakeMove move : moves)
+    {
+        Snake *snake = move.snake;
+        Direction direction = move.direction;
+        Point head = snake->head();
+        Point destination = coordAfterMove(head, direction);
+        uint32_t turnsUntilDestinationVacant = _map.turnsUntilVacant(
+            destination);
+        bool oob = outOfBounds(destination, *this);
+        if (turnsUntilDestinationVacant > 0 || oob)
+        {
+            newState.removeSnake(snake);
+        }
+        else
+        {
+            
+        }
+    }
+}
+
+void GameState::removeSnake(Snake *snake)
+{
+    // TODO ...
+}
+
 Snake *GameState::mySnake()
 {
     return _mySnake;
@@ -102,7 +134,15 @@ Snake *GameState::mySnake()
 
 void Cell::vacate(Snake *snake, uint32_t turn)
 {
-    _snake = snake;
+    if (turn > 0)
+    {
+        _snake = snake;
+    }
+    else
+    {
+        _snake = nullptr;
+    }
+
     if (turn > _vacated)
     {
         _vacated = turn;
@@ -115,11 +155,17 @@ void Cell::decrementVacate()
     {
         _vacated--;
     }
+
+    if (_vacated == 0)
+    {
+        _snake = nullptr;
+    }
 }
 
 void Cell::resetVacate()
 {
     _vacated = 0;
+    _snake = nullptr;
 }
 
 Map::Map(GameState &gameState) :
@@ -134,6 +180,13 @@ uint32_t Map::turnsUntilVacant(Point p)
     return outOfBounds(p, _gameState)
         ? 0
         : _cells.at(cellIndex(p, _gameState)).vacated();
+}
+
+Snake *Map::getSnake(Point p)
+{
+    return outOfBounds(p, _gameState)
+        ? nullptr
+        : _cells.at(cellIndex(p, _gameState)).snake();
 }
 
 void Map::printVacateGrid()

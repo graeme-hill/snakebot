@@ -39,6 +39,12 @@ struct Snake
     uint32_t length() { return parts.size(); }
 };
 
+struct SnakeMove
+{
+    Snake *snake;
+    Direction direction;
+};
+
 struct World
 {
     std::vector<Point> food;
@@ -95,6 +101,7 @@ public:
     Map(Map &&) = delete;
 
     uint32_t turnsUntilVacant(Point p);
+    Snake *getSnake(Point p);
     void update();
 
     void printVacateGrid();
@@ -125,6 +132,8 @@ public:
     Map &map() { return _map; }
 
     GameState &perspective(Snake *enemy);
+    std::unique_ptr<GameState> newStateAfterMoves(
+        std::vector<SnakeMove> &moves);
 
 private:
     uint32_t _width;
@@ -189,6 +198,17 @@ inline Direction directionBetweenNodes(uint32_t fromIndex, uint32_t toIndex, uin
 inline uint32_t absDiff(uint32_t a, uint32_t b)
 {
     return std::max(a, b) - std::min(a, b);
+}
+
+inline Point coordAfterMove(Point p, Direction dir)
+{
+    switch (dir)
+    {
+        case Direction::Up: return Point{ p.x, p.y - 1 };
+        case Direction::Down: return Point{ p.x, p.y + 1 };
+        case Direction::Left: return Point{ p.x - 1, p.y };
+        default: return Point{ p.x + 1, p.y };
+    }
 }
 
 std::string directionToString(Direction direction);
