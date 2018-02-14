@@ -80,6 +80,21 @@ GameState::GameState(World w) :
     _map.update();
 }
 
+GameState &GameState::perspective(Snake *enemy)
+{
+    auto iter = _perspectiveCopies.find(enemy->id);
+    if (iter != _perspectiveCopies.end())
+    {
+        return *iter->second; 
+    }
+
+    World newWorld = _world;
+    newWorld.you = enemy->id;
+    std::unique_ptr<GameState> newState(new GameState(newWorld));
+    _perspectiveCopies.insert({ enemy->id, std::move(newState) });
+    return *_perspectiveCopies[enemy->id];
+}
+
 Snake *GameState::mySnake()
 {
     return _mySnake;

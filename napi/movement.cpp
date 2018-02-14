@@ -36,29 +36,59 @@ MaybeDirection closestFood(GameState &state)
     }
 }
 
-// MaybeDirection bestFood(GameState &state)
-// {
-//     Snake *me = state.mySnake();
-//     Direction bestDirection;
-//     uint32_t bestLength;
-//     bool foundOne = false;
+MaybeDirection bestFood(GameState &state)
+{
+    Snake *me = state.mySnake();
+    Direction bestDirection = Direction::Left;
+    uint32_t bestLength;
+    bool foundOne = false;
 
-//     for (Point food : state.food())
-//     {
-//         auto myPath = shortestPath(me->head(), food, state);
+    for (Point food : state.food())
+    {
+        auto myPath = shortestPath(me->head(), food, state);
 
-//         if (myPath.empty())
-//             continue;
+        if (myPath.empty())
+            continue;
 
-//         if (foundOne && myPath.size() >= bestLength)
-//             continue;
+        if (foundOne && myPath.size() >= bestLength)
+            continue;
 
-//         for (Snake *enemy : me->enemies())
-//         {
-//             GameState
-//         }
-//     }
-// }
+        bool enemyWillWin = false;
+        for (Snake *enemy : state.enemies())
+        {
+            GameState &enemyState = state.perspective(enemy);
+            auto enemyPath = shortestPath(enemy->head(), food, enemyState);
+
+            if (enemyPath.empty())
+            {
+                continue;
+            }
+
+            if (enemyPath.size() == myPath.size())
+            {
+                enemyWillWin = me->length() < enemy->length();
+            }
+            else
+            {
+                enemyWillWin = enemyPath.size() < myPath.size();
+            }
+
+            if (enemyWillWin)
+            {
+                break;
+            }
+        }
+
+        if (!enemyWillWin)
+        {
+            foundOne = true;
+            bestLength = myPath.size();
+            bestDirection = myPath.at(0);
+        }
+    }
+
+    return MaybeDirection{ foundOne, bestDirection };
+}
 
 bool is180(Point p, GameState &state)
 {

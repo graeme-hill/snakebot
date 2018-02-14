@@ -279,6 +279,46 @@ void closestFoodTest3()
     assertTrue(!direction.hasValue, "closestFoodTest3() - no food");
 }
 
+void bestFoodTest1()
+{
+    GameState state(parseWorld({
+        "> > 0 _",
+        "_ _ _ _",
+        "_ * v <",
+        "* _ 1 _"
+    }));
+
+    auto foodDir = bestFood(state);
+    assertTrue(!foodDir.hasValue, "bestFoodTest1() - no easy food");
+}
+
+void bestFoodTest2()
+{
+    GameState state(parseWorld({
+        "> > 0 _",
+        "_ * _ _",
+        "_ * v <",
+        "* _ 1 _"
+    }));
+
+    auto foodDir = bestFood(state);
+    assertTrue(foodDir.hasValue, "bestFoodTest2() - one easy food");
+    assertTrue(foodDir.value == Direction::Down, "bestFoodTest2() - down");
+}
+
+void bestFoodTest3()
+{
+    GameState state(parseWorld({
+        "> > 0 _",
+        "_ _ _ _",
+        "_ _ v <",
+        "_ _ 1 _"
+    }));
+
+    auto foodDir = bestFood(state);
+    assertTrue(!foodDir.hasValue, "bestFoodTest3() - no food at all");
+}
+
 void notImmediatelySuicidalTest1()
 {
     GameState state(parseWorld({
@@ -320,6 +360,9 @@ void TestSuite::run()
     closestFoodTest1();
     closestFoodTest2();
     closestFoodTest3();
+    bestFoodTest1();
+    bestFoodTest2();
+    bestFoodTest3();
     notImmediatelySuicidalTest1();
     notImmediatelySuicidalTest2();
 }

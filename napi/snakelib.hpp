@@ -124,11 +124,14 @@ public:
     Snake *mySnake();
     Map &map() { return _map; }
 
+    GameState &perspective(Snake *enemy);
+
 private:
     uint32_t _width;
     uint32_t _height;
     std::vector<Point> _food;
     std::unordered_map<std::string, Snake *> _snakes;
+    std::unordered_map<std::string, std::unique_ptr<GameState>> _perspectiveCopies;
     std::vector<Snake *> _enemies;
     Snake *_mySnake;
     World _world;

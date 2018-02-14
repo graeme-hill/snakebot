@@ -10,7 +10,7 @@ struct MaybeDirection
 
 MaybeDirection closestFood(GameState &state);
 
-// MaybeDirection bestFood(GameState &state);
+MaybeDirection bestFood(GameState &state);
 
 std::vector<Direction> notImmediatelySuicidalMoves(GameState &state);
 

@@ -21,7 +21,7 @@ Metadata Test::meta()
 Direction Test::move(World world)
 {
     GameState state(world);
-    auto foodDir = closestFood(state);
+    auto foodDir = bestFood(state);
     if (foodDir.hasValue)
     {
         return foodDir.value;
