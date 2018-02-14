@@ -32,6 +32,7 @@ struct Snake
     std::string id;
     uint32_t health;
     std::vector<Point> parts;
+    bool dead;
 
     void prettyPrint();
     Point head();
@@ -136,6 +137,8 @@ public:
         std::vector<SnakeMove> &moves);
 
 private:
+    void removeSnake(Snake *snake);
+
     uint32_t _width;
     uint32_t _height;
     std::vector<Point> _food;
@@ -178,10 +181,15 @@ inline Point deconstructCellIndex(uint32_t index, GameState &state)
     return deconstructCellIndex(index, state.width());
 }
 
-inline bool outOfBounds(Point p, GameState &gameState)
+inline bool outOfBounds(Point p, uint32_t width)
 {
     // Since x and y are unsigned so they wrap and become very large numbers.
-    return p.x >= gameState.width() || p.y >= gameState.height();
+    return p.x >= width || p.y >= width;
+}
+
+inline bool outOfBounds(Point p, GameState &gameState)
+{
+    return outOfBounds(p, gameState.width());
 }
 
 inline Direction directionBetweenNodes(uint32_t fromIndex, uint32_t toIndex, uint32_t width)
@@ -200,15 +208,6 @@ inline uint32_t absDiff(uint32_t a, uint32_t b)
     return std::max(a, b) - std::min(a, b);
 }
 
-inline Point coordAfterMove(Point p, Direction dir)
-{
-    switch (dir)
-    {
-        case Direction::Up: return Point{ p.x, p.y - 1 };
-        case Direction::Down: return Point{ p.x, p.y + 1 };
-        case Direction::Left: return Point{ p.x - 1, p.y };
-        default: return Point{ p.x + 1, p.y };
-    }
-}
-
 std::string directionToString(Direction direction);
+
+void applyMoves(World &world, std::vector<SnakeMove> &moves);

@@ -18,39 +18,49 @@ Simulation::Simulation(
         {0, {}, {}, branch.pair.myAlgorithm, TerminationReason::Unknown, {}})
 { }
 
+GameState &Simulation::currentState()
+{
+    if (_newestState)
+    {
+        return *_newestState;
+    }
+    else
+    {
+        return *_currentState;
+    }
+}
+
 bool Simulation::next()
 {
     _turn++;
+    GameState &currentState = currentState();
 
     // My move.
-    SnakeMove myMove = { _currentState->mySnake(), getMyMove() };
+    SnakeMove myMove = { currentState->mySnake(), getMyMove(currentState) };
     std::vector<Direction> moves { myMove };
     _result.moves.push_back(myMove.direction);
 
     // Enemy moves.
-    for (Snake *enemy : _currentState->enemies())
+    for (Snake *enemy : currentState->enemies())
     {
-        GameState &enemyState = _currentState->perspective(enemy);
+        GameState &enemyState = currentState->perspective(enemy);
         Direction direction = _branch.pair.enemyAlgorithm->move(enemyState);
         moves.push_back({ enemy, direction });
     }
 
-    GameState *newState;
-    currentState->newStateAfterMoves(moves, &newState);
+    _newestState = currentState->newStateAfterMoves(moves);
 
-    updateObituaries(newState);
-    updateFoodsEaten(newState);
+    updateObituaries(*_newestState, currentState);
+    updateFoodsEaten(*_newestState, currentState);
 
-    _currentState = newState;
-
-    if (_currentState->isLoss())
+    if (_newestState->isLoss())
     {
         _result.terminationReason = TerminationReason::Loss;
         return true;
     }
 }
 
-Direction Simulation::getMyMove()
+Direction Simulation::getMyMove(GameState &state)
 {
     if (turn <= _branch.firstMoves.size())
     {
@@ -58,27 +68,27 @@ Direction Simulation::getMyMove()
     }
     else
     {
-        return _branch.pair.myAlgorithm.move(*_currentState);
+        return _branch.pair.myAlgorithm.move(state);
     }
 }
 
-void Simulation::updateObituaries(GameState *newState)
+void Simulation::updateObituaries(GameState &newState, GameState &oldState)
 {
-    for (Snake *snake : _currentState->snakes())
+    for (Snake *snake : oldState.snakes())
     {
-        auto newIter = newState->snakes().find(snake->id);
-        if (newIter == newState->snakes().end())
+        auto newIter = newState.snakes().find(snake->id);
+        if (newIter == newState.snakes().end())
         {
             _result.obituaries[snake->id] = _turn;
         }
     }
 }
 
-void Simulation::updateFoodsEaten(GameState *newState)
+void Simulation::updateFoodsEaten(GameState &newState, GameState &oldState)
 {
-    for (Point food : _currentState->food())
+    for (Point food : oldState.food())
     {
-        Snake *inThatCellNow = newState->map().getSnake(food);
+        Snake *inThatCellNow = newState.map().getSnake(food);
         if (inThatCellNow != nullptr)
         {
             auto iter = _result.foodsEaten.find(inThatCellNow->id);

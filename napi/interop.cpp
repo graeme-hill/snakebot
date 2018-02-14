@@ -114,6 +114,7 @@ Point makePoint(napi_env env, napi_value jsFood)
 Snake makeSnake(napi_env env, napi_value jsSnake)
 {
     Snake snake {};
+    snake.dead = false;
 
     napi_value jsId;
     napi_get_named_property(env, jsSnake, "id", &jsId);

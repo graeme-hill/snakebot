@@ -43,15 +43,16 @@ public:
     uint32_t simNumber() { return _simNumber; }
 
 private:
-    Direction getMyMove();
-    void updateObituaries(GameState *newState);
-    void updateFoodsEaten(GameState *newState);
+    Direction getMyMove(GameState &state);
+    void updateObituaries(GameState &newState, GameState &oldState);
+    void updateFoodsEaten(GameState &newState, GameState &oldState);
+    GameState &currentState();
 
     AlgorithmBranch _branch;
     uint32_t _maxTurns;
     GameState &_initialState;
     uint32_t _simNumber;
-    GameState *_currentState;
+    std::unique_ptr<GameState> _newestState;
     uint32_t _turn;
     Future _result;
 };
