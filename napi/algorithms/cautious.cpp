@@ -1,24 +1,24 @@
-#include "test.hpp"
+#include "cautious.hpp"
 #include "../movement.hpp"
 #include "../astar.hpp"
 
 #include <functional>
 #include <unordered_map>
 
-Metadata Test::meta()
+Metadata Cautious::meta()
 {
     return {
-        "#000000",
+        "#880000",
         "#FFFFFF",
-        "http://www.edm2.com/images/thumb/1/13/C%2B%2B.png/250px-C%2B%2B.png",
-        "C++ test",
+        "https://www.illustrationsof.com/royalty-free-cautious-clipart-illustration-1046454.jpg",
+        "Cautious",
         "Hi",
         "pixel",
         "pixel"
     };
 }
 
-Direction Test::move(GameState &state)
+Direction Cautious::move(GameState &state)
 {
     auto foodDir = bestFood(state);
     if (foodDir.hasValue)

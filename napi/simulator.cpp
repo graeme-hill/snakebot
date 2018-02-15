@@ -67,8 +67,6 @@ Direction Simulation::getMyMove(GameState &state)
 
 void Simulation::updateObituaries(GameState &newState, GameState &oldState)
 {
-    std::cout << "old: " << oldState.snakes().size() << " new: " << newState.snakes().size() << std::endl;
-
     for (auto pair : oldState.snakes())
     {
         Snake *snake = pair.second;
@@ -144,8 +142,6 @@ std::vector<Future> runSimulations(
     while (completedSimulations.size() < simulations.size())
     {
         turn++;
-        std::cout << "let's sim turn " << turn << std::endl;
-
         for (Simulation &sim : simulations)
         {
             // Don't do anything if this sim is already done
@@ -196,12 +192,8 @@ std::vector<Future> simulateFutures(
         }
     }    
 
-    std::cout << algorithmPairs.size() << " algorithm pairs\n";
-
     std::vector<Direction> possibleFirstMoves = notImmediatelySuicidalMoves(
         initialState);
-
-    std::cout << possibleFirstMoves.size() << " possible 1st moves\n";
 
     if (possibleFirstMoves.empty())
     {

@@ -5,7 +5,10 @@
             "sources": [
             	"napi/index.cpp",
             	"napi/snakelib.cpp",
-            	"napi/algorithms/test.cpp",
+            	"napi/algorithms/cautious.cpp",
+                "napi/algorithms/hungry.cpp",
+                "napi/algorithms/dog.cpp",
+                "napi/algorithms/sim.cpp",
                 "napi/test/testsuite.cpp",
                 "napi/interop.cpp",
                 "napi/astar.cpp",

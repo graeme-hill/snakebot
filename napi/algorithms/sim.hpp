@@ -2,7 +2,7 @@
 
 #include "../snakelib.hpp"
 
-class Test : public Algorithm
+class Sim : public Algorithm
 {
 public:
     Metadata meta() override;

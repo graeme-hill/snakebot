@@ -1,6 +1,9 @@
 #include "interop.hpp"
 #include "snakelib.hpp"
-#include "algorithms/test.hpp"
+#include "algorithms/cautious.hpp"
+#include "algorithms/hungry.hpp"
+#include "algorithms/dog.hpp"
+#include "algorithms/sim.hpp"
 #include "test/testsuite.hpp"
 #include <memory>
 
@@ -101,7 +104,10 @@ napi_value test(napi_env env, napi_callback_info info)
 napi_value init(napi_env env, napi_value exports)
 {
     // INITIALIZE AVAILABLE ALGORITHMS HERE!
-    algorithms["test"] = std::unique_ptr<Algorithm>(new Test());
+    algorithms["cautious"] = std::unique_ptr<Algorithm>(new Cautious());
+    algorithms["hungry"] = std::unique_ptr<Algorithm>(new Hungry());
+    algorithms["dog"] = std::unique_ptr<Algorithm>(new Dog());
+    algorithms["sim"] = std::unique_ptr<Algorithm>(new Sim());
 
     // Make the move() function above available to be called by JS code.
     // Instead of exporting every algorithm's move function, just export this
