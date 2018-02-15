@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser')
 const app = express();
 
-const DEFAULT_ALGORITHM = "cpp_test";
+const DEFAULT_ALGORITHM = "cpp_sim";
 const DEFAULT_PORT = 5000;
 const DISPLAY_TIMINGS = true;
 
