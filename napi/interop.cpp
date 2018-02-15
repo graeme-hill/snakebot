@@ -116,7 +116,45 @@ void assertEqual(Snake &s1, Snake &s2, std::string messagePart)
 void assertEqual(Future &f1, Future &f2, std::string msgPart)
 {
     assertEqual(f2.obituaries.size(), f1.obituaries.size(), msgPart + " - obit size");
+
+    if (f2.obituaries.size() == f1.obituaries.size())
+    {
+        for (auto pair : f2.obituaries)
+        {
+            auto it = f1.obituaries.find(pair.first);
+            assertTrue(it != f2.obituaries.end(), msgPart + " - key '" + pair.first + "' is present");
+            if (it != f2.obituaries.end())
+            {
+                assertEqual(pair.second, it->second, msgPart + " - same values");
+            }
+        }
+    }
+
     assertEqual(f2.foodsEaten.size(), f1.foodsEaten.size(), msgPart + " - foods eaten size");
+
+    if (f2.foodsEaten.size() == f1.foodsEaten.size())
+    {
+        for (auto pair : f2.foodsEaten)
+        {
+            auto it = f1.foodsEaten.find(pair.first);
+            assertTrue(it != f2.foodsEaten.end(), msgPart + " - key '" + pair.first + "' is present");
+            if (it != f2.foodsEaten.end())
+            {
+                std::vector<uint32_t> turns1 = it->second;
+                std::vector<uint32_t> turns2 = pair.second;
+                assertEqual(turns2.size(), turns1.size(), msgPart + " - same food count");
+                if (turns2.size() == turns1.size())
+                {
+                    for (size_t i = 0; i < turns2.size(); i++)
+                    {
+                        std::stringstream ss;
+                        assertEqual(turns2[i], turns1[i], msgPart + " - same turn");
+                    }
+                }
+            }
+        }
+    }
+
     assertEqual(f2.algorithm->meta().name, f1.algorithm->meta().name, msgPart + " - algorithm");
     assertTrue(f2.terminationReason == f1.terminationReason, msgPart + " - termination reason");
     assertEqual(f2.moves.size(), f1.moves.size(), msgPart + " - moves count");

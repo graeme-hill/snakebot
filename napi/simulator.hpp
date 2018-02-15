@@ -28,6 +28,12 @@ struct Future
     std::vector<Direction> moves;
 };
 
+struct DirectionScore
+{
+    Direction direction;
+    int score;
+};
+
 class Simulation
 {
 public:
@@ -65,3 +71,5 @@ std::vector<Future> simulateFutures(
     GameState &initialState,
     uint32_t maxTurns,
     std::vector<Algorithm *> algorithms);
+
+Direction bestMove(std::vector<Future> &futures, GameState &state);

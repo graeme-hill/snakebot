@@ -209,19 +209,71 @@ std::vector<Future> simulateFutures(
         return runSimulations(algorithmPairs, initialState, maxTurns, {});
     }
 
-    // std::vector<Future> futures;
-    // for (Direction firstMove : possibleFirstMoves)
-    // {
-    //     std::vector<Future> futuresInThisDirection = runSimulations(
-    //         algorithmPairs, initialState, maxTurns, { firstMove });
-    //     for (Future future : futuresInThisDirection)
-    //     {
-    //         futures.push_back(future);
-    //     }
-    // }
-
     std::vector<Future> futures = runSimulations(
         algorithmPairs, initialState, maxTurns, possibleFirstMoves);
 
     return futures;
+}
+
+int scoreFuture(Future &future, GameState &state)
+{
+    auto obitIt = future.obituaries.find(state.mySnake()->id);
+    uint32_t survivedTurns = obitIt == future.obituaries.end()
+        ? future.moves.size()
+        : obitIt->second;
+    int score = survivedTurns * 100;
+    return score;
+}
+
+Direction bestMove(std::vector<Future> &futures, GameState &state)
+{
+    int worstLeftScore = -1;
+    int worstRightScore = -1;
+    int worstUpScore = -1;
+    int worstDownScore = -1;
+
+    for (Future &future : futures)
+    {
+        // Should never have a zero move future, but if there is don't crash
+        if (future.moves.empty())
+            continue; 
+
+        Direction move = future.moves.at(0);
+        int score = scoreFuture(future, state);
+        if (move == Direction::Left)
+        {
+            if (worstLeftScore < 0 || score < worstLeftScore)
+                worstLeftScore = score;
+        }
+        else if (move == Direction::Right)
+        {
+            if (worstRightScore < 0 || score < worstRightScore)
+                worstRightScore = score;
+        }
+        else if (move == Direction::Up)
+        {
+            if (worstUpScore < 0 || score < worstUpScore)
+                worstUpScore = score;
+        }
+        else
+        {
+            if (worstDownScore < 0 || score < worstDownScore)
+                worstDownScore = score;
+        }
+    }
+
+    std::array<DirectionScore, 4> moveScores {
+        DirectionScore{ Direction::Left, worstLeftScore },
+        DirectionScore{ Direction::Right, worstRightScore },
+        DirectionScore{ Direction::Up, worstUpScore },
+        DirectionScore{ Direction::Down, worstDownScore }
+    };
+
+    std::sort(moveScores.begin(), moveScores.end(),
+        [](DirectionScore a, DirectionScore b)
+        {
+            return a.score < b.score;
+        });
+
+    return moveScores.back().direction;
 }

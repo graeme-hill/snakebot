@@ -597,8 +597,8 @@ void newStateAfterMovesTest7()
 void simulateFuturesTest1()
 {
     GameState state(parseWorld({
-        "_ _ _ _",
-        "_ _ _ _",
+        "* _ _ _",
+        "* _ _ _",
         "_ 0 1 _",
         "_ ^ ^ _"
     }));
@@ -609,7 +609,7 @@ void simulateFuturesTest1()
 
     Future f1 {};
     f1.obituaries = { { "1", 3 }, { "0", 4 } };
-    f1.foodsEaten = {};
+    f1.foodsEaten = { { "0", { 2, 3 } } };
     f1.algorithm = &algo;
     f1.terminationReason = TerminationReason::Loss;
     f1.moves = { Direction::Left, Direction::Up, Direction::Up, Direction::Up };
@@ -626,32 +626,65 @@ void simulateFuturesTest1()
     assertEqual(actualFutures, expectedFutures, "simulateFuturesTest1()");
 }
 
+void bestMoveTest1()
+{
+    GameState state(parseWorld({
+        "_ _ _ _",
+        "_ _ _ _",
+        "_ 0 1 _",
+        "_ ^ ^ _"
+    }));
+
+    OneDirAlgorithm algo(Direction::Up);
+
+    Future f1 {};
+    f1.obituaries = { { "1", 3 }, { "0", 4 } };
+    f1.foodsEaten = {};
+    f1.algorithm = &algo;
+    f1.terminationReason = TerminationReason::Loss;
+    f1.moves = { Direction::Left, Direction::Up, Direction::Up, Direction::Up };
+
+    Future f2 {};
+    f2.obituaries = { { "1", 3 }, { "0", 3 } };
+    f2.foodsEaten = {};
+    f2.algorithm = &algo;
+    f2.terminationReason = TerminationReason::Loss;
+    f2.moves = { Direction::Up, Direction::Up, Direction::Up };
+
+    std::vector<Future> futures = { f1, f2 };
+
+    Direction move = bestMove(futures, state);
+
+    assertEqual(move, Direction::Left, "bestMoveTest1() - left first");
+}
+
 void TestSuite::run()
 {
-    // outOfBoundsTests();
-    // basicGameStateTests();
-    // mapTests();
-    // astarTests1();
-    // astarTests2();
-    // astarTests3();
-    // astarTests4();
-    // astarTests5();
-    // astarTests6();
-    // closestFoodTest1();
-    // closestFoodTest2();
-    // closestFoodTest3();
-    // bestFoodTest1();
-    // bestFoodTest2();
-    // bestFoodTest3();
-    // notImmediatelySuicidalTest1();
-    // notImmediatelySuicidalTest2();
-    // worldComparisonTest1();
-    // newStateAfterMovesTest1();
-    // newStateAfterMovesTest2();
-    // newStateAfterMovesTest3();
-    // newStateAfterMovesTest4();
-    // newStateAfterMovesTest5();
-    // newStateAfterMovesTest6();
-    // newStateAfterMovesTest7();
+    outOfBoundsTests();
+    basicGameStateTests();
+    mapTests();
+    astarTests1();
+    astarTests2();
+    astarTests3();
+    astarTests4();
+    astarTests5();
+    astarTests6();
+    closestFoodTest1();
+    closestFoodTest2();
+    closestFoodTest3();
+    bestFoodTest1();
+    bestFoodTest2();
+    bestFoodTest3();
+    notImmediatelySuicidalTest1();
+    notImmediatelySuicidalTest2();
+    worldComparisonTest1();
+    newStateAfterMovesTest1();
+    newStateAfterMovesTest2();
+    newStateAfterMovesTest3();
+    newStateAfterMovesTest4();
+    newStateAfterMovesTest5();
+    newStateAfterMovesTest6();
+    newStateAfterMovesTest7();
     simulateFuturesTest1();
+    bestMoveTest1();
 }
