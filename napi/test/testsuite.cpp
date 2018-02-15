@@ -346,6 +346,226 @@ void notImmediatelySuicidalTest2()
     assertTrue(!direction.hasValue, "notImmediatelySuicidalTest2() - !hasValue");
 }
 
+void worldComparisonTest1()
+{
+    // This is basically a meta test to make sure test helper function for
+    // comparing world objects is at least somewhat reliable.
+
+    World w1 = parseWorld({
+        "> > > 1",
+        "> 0 v <",
+        "> v v _",
+        "_ 3 2 _"
+    });
+
+    World w2 = parseWorld({
+        "> > > 1",
+        "> 0 v <",
+        "> v v _",
+        "_ 3 2 _"
+    }); 
+
+    assertEqual(w1, w2, "world compare");
+}
+
+void newStateAfterMovesTest1()
+{
+    GameState state(parseWorld({
+        "> > 0 _",
+        "_ _ _ _",
+        "_ 1 _ _",
+        "_ ^ < *"
+    }));
+
+    Snake *s0 = state.snakes()["0"];
+    Snake *s1 = state.snakes()["1"];
+
+    std::vector<SnakeMove> moves {
+        { s0, Direction::Down },
+        { s1, Direction::Left }
+    };
+    auto newState = state.newStateAfterMoves(moves);
+
+    World expected = parseWorld({
+        "_ > v _",
+        "_ _ 0 _",
+        "1 < _ _",
+        "_ ^ _ *"
+    });
+
+    assertEqual(newState->world(), expected, "newStateAfterMovesTest1()");
+}
+
+void newStateAfterMovesTest2()
+{
+    GameState state(parseWorld({
+        "> > 0 *",
+        "_ _ _ _",
+        "_ _ _ _",
+        "_ _ _ _"
+    }));
+
+    Snake *s0 = state.snakes()["0"];
+
+    std::vector<SnakeMove> moves {
+        { s0, Direction::Right },
+    };
+    auto newState = state.newStateAfterMoves(moves);
+
+    World expected = parseWorld({
+        "_ > > 0",
+        "_ _ _ _",
+        "_ _ _ _",
+        "_ _ _ _"
+    });
+
+    assertEqual(newState->world(), expected, "newStateAfterMovesTest2()");
+}
+
+void newStateAfterMovesTest3()
+{
+    GameState state(parseWorld({
+        "> > 0 v",
+        "_ _ _ v",
+        "_ _ _ 1",
+        "_ _ _ _"
+    }));
+
+    Snake *s0 = state.snakes()["0"];
+    Snake *s1 = state.snakes()["1"];
+
+    std::vector<SnakeMove> moves {
+        { s0, Direction::Right },
+        { s1, Direction::Left },
+    };
+    auto newState = state.newStateAfterMoves(moves);
+
+    World expected = parseWorld({
+        "_ > > 0",
+        "_ _ _ v",
+        "_ _ 1 <",
+        "_ _ _ _"
+    });
+
+    assertEqual(newState->world(), expected, "newStateAfterMovesTest3()");
+}
+
+void newStateAfterMovesTest4()
+{
+    GameState state(parseWorld({
+        "_ > > 0",
+        "_ _ 1 _",
+        "_ _ ^ <",
+        "_ _ _ _"
+    }));
+
+    Snake *s0 = state.snakes()["0"];
+    Snake *s1 = state.snakes()["1"];
+
+    std::vector<SnakeMove> moves {
+        { s0, Direction::Down },
+        { s1, Direction::Right },
+    };
+    auto newState = state.newStateAfterMoves(moves);
+
+    World expected = parseWorld({
+        "_ _ _ _",
+        "_ _ _ _",
+        "_ _ _ _",
+        "_ _ _ _"
+    });
+
+    assertEqual(newState->world(), expected, "newStateAfterMovesTest4()");
+}
+
+void newStateAfterMovesTest5()
+{
+    GameState state(parseWorld({
+        "> > > 0",
+        "_ _ 1 _",
+        "_ _ ^ <",
+        "_ _ _ _"
+    }));
+
+    Snake *s0 = state.snakes()["0"];
+    Snake *s1 = state.snakes()["1"];
+
+    std::vector<SnakeMove> moves {
+        { s0, Direction::Down },
+        { s1, Direction::Right },
+    };
+    auto newState = state.newStateAfterMoves(moves);
+
+    World expected = parseWorld({
+        "_ > > v",
+        "_ _ _ 0",
+        "_ _ _ _",
+        "_ _ _ _"
+    });
+
+    assertEqual(newState->world(), expected, "newStateAfterMovesTest5()");
+}
+
+void newStateAfterMovesTest6()
+{
+    GameState state(parseWorld({
+        "_ v < _",
+        "_ 0 _ _",
+        "1 _ 2 <",
+        "^ 3 < _"
+    }));
+
+    Snake *s0 = state.snakes()["0"];
+    Snake *s1 = state.snakes()["1"];
+    Snake *s2 = state.snakes()["2"];
+    Snake *s3 = state.snakes()["3"];
+
+    std::vector<SnakeMove> moves {
+        { s0, Direction::Down },
+        { s1, Direction::Right },
+        { s2, Direction::Left },
+        { s3, Direction::Up }
+    };
+    auto newState = state.newStateAfterMoves(moves);
+
+    World expected = parseWorld({
+        "_ v _ _",
+        "_ v _ _",
+        "_ 0 _ _",
+        "_ _ _ _"
+    });
+
+    assertEqual(newState->world(), expected, "newStateAfterMovesTest6()");
+}
+
+void newStateAfterMovesTest7()
+{
+    GameState state(parseWorld({
+        "> > > 0",
+        "_ _ 1 _",
+        "_ _ ^ <",
+        "_ _ _ _"
+    }));
+
+    Snake *s0 = state.snakes()["0"];
+    Snake *s1 = state.snakes()["1"];
+
+    std::vector<SnakeMove> moves {
+        { s0, Direction::Down },
+        { s1, Direction::Up },
+    };
+    auto newState = state.newStateAfterMoves(moves);
+
+    World expected = parseWorld({
+        "_ > > v",
+        "_ _ _ 0",
+        "_ _ _ _",
+        "_ _ _ _"
+    });
+
+    assertEqual(newState->world(), expected, "newStateAfterMovesTest7()");
+}
+
 void TestSuite::run()
 {
     outOfBoundsTests();
@@ -365,4 +585,12 @@ void TestSuite::run()
     bestFoodTest3();
     notImmediatelySuicidalTest1();
     notImmediatelySuicidalTest2();
+    worldComparisonTest1();
+    newStateAfterMovesTest1();
+    newStateAfterMovesTest2();
+    newStateAfterMovesTest3();
+    newStateAfterMovesTest4();
+    newStateAfterMovesTest5();
+    newStateAfterMovesTest6();
+    newStateAfterMovesTest7();
 }

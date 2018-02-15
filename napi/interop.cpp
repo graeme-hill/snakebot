@@ -54,6 +54,65 @@ void assertEqual(Direction actual, Direction expected, std::string message)
     assertEqual(actualStr, expectedStr, message);
 }
 
+void assertEqual(Point p1, Point p2, std::string message)
+{
+    std::stringstream p1ss;
+    std::stringstream p2ss;
+    p1ss << "(" << p1.x << "," << p1.y << ")";
+    p2ss << "(" << p2.x << "," << p2.y << ")";
+    assertEqual(p1ss.str(), p2ss.str(), message);
+}
+
+void assertEqual(World &w1, World &w2, std::string messagePart)
+{
+    assertEqual(w2.width, w1.width, messagePart + " - width");
+    assertEqual(w2.height, w1.height, messagePart + " - height");
+    assertEqual(w2.food.size(), w1.food.size(), messagePart + " - food count");
+
+    if (w2.food.size() == w1.food.size())
+    {
+        for (size_t i = 0; i < w2.food.size(); i++)
+        {
+            std::stringstream msg;
+            msg << messagePart << " - food " << i;
+            assertEqual(w2.food[i], w1.food[i], msg.str());
+        }
+    }
+
+    assertEqual(w2.snakes.size(), w1.snakes.size(), messagePart + " - snake count");
+
+    if (w2.snakes.size() == w1.snakes.size())
+    {
+        for (size_t i = 0; i < w2.snakes.size(); i++)
+        {
+            std::stringstream msg;
+            msg << messagePart << " - snake " << i;
+            assertEqual(w2.snakes[i], w1.snakes[i], msg.str());
+        }
+
+        if (w2.snakes.size() > 0)
+        {
+            assertEqual(w2.you, w1.you, messagePart + " - you");
+        }
+    }
+}
+
+void assertEqual(Snake &s1, Snake &s2, std::string messagePart)
+{
+    assertEqual(s2.id, s1.id, messagePart + " - id");
+    assertEqual(s2.length(), s1.length(), messagePart + " - length");
+
+    if (s2.length() == s1.length())
+    {
+        for (size_t i = 0; i < s2.parts.size(); i++)
+        {
+            std::stringstream msg;
+            msg << messagePart << " - part " << i;
+            assertEqual(s2.parts[i], s1.parts[i], msg.str());
+        }
+    }
+}
+
 void assertTrue(bool actual, std::string message)
 {
 	napi_env env = Interop::env();
@@ -189,8 +248,19 @@ World makeWorld(napi_env env, napi_value jsWorld)
         world.snakes.push_back(snake);
     }
 
-    Snake youSnake = makeSnake(env, jsYou);
-    world.you = youSnake.id;
+    napi_value jsYouIsTruthy;
+    bool youIsTruthy;
+    napi_coerce_to_bool(env, jsYou, &jsYouIsTruthy);
+    napi_get_value_bool(env, jsYouIsTruthy, &youIsTruthy);
+    if (youIsTruthy)
+    {
+        Snake youSnake = makeSnake(env, jsYou);
+        world.you = youSnake.id;
+    }
+    else
+    {
+        world.you = "";
+    }
 
     return world;
 }

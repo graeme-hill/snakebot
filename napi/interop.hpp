@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <sstream>
 #include <cstdint>
 #include <node_api.h>
 #include <vector>
@@ -30,6 +31,12 @@ void assertEqual(std::string actual, std::string expected, std::string message);
 void assertEqual(uint32_t actual, uint32_t expected, std::string message);
 
 void assertEqual(Direction actual, Direction expected, std::string message);
+
+void assertEqual(World &w1, World &w2, std::string messagePart);
+
+void assertEqual(Snake &s1, Snake &s2, std::string messagePart);
+
+void assertEqual(Point p1, Point p2, std::string message);
 
 void assertTrue(bool actual, std::string message);
 

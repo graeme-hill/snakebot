@@ -264,11 +264,16 @@ void eatFoodOrDie(World &world)
             }
         }
 
-        if (!bestEater->dead)
+        if (bestEater != nullptr && !bestEater->dead)
         {
             justAte.push_back(bestEater);
         }
     }
+
+    // TO DO: The definition of "just ate" actually needs to be based on last
+    // turn because the tail actually moves forward as the snakes eats the food
+    // and then stays in place on the following turn... will need to maintain
+    // state across turns :(
 
     // Shorten tail for any snake that didn't just eat
     for (Snake &snake : world.snakes)
@@ -281,6 +286,7 @@ void eatFoodOrDie(World &world)
         }
         else
         {
+            snake.parts.pop_back();
             // It did eat so remove the food it ate.
             world.food.erase(
                 std::remove(
@@ -294,73 +300,73 @@ void eatFoodOrDie(World &world)
 
 void markCrashersDead(World &world)
 {
-    // std::map<Point, Snake *> tailCells;
-    // std::map<Point, Snake *> headCells;
+    std::unordered_map<Point, Snake *> tailCells;
+    std::unordered_map<Point, Snake *> headCells;
 
-    // // Populate tailCells and headCells and handle head on collisions.
-    // for (Snake &snake : world.snakes)
-    // {
-    //     // Head
-    //     auto it = headCells.find(snake.head());
-    //     if (it != headCells.end())
-    //     {
-    //         Snake *other = it->second;
-    //         if (snake.length() < other->length())
-    //         {
-    //             // Get eaten by other snake.
-    //             snake.dead = true;
-    //         }
-    //         else if (snake.length() == other->length())
-    //         {
-    //             // Neither can eat the other so both die.
-    //             snake.dead = true;
-    //             other->dead = true;
-    //         }
-    //         else
-    //         {
-    //             // Eat the other snake.
-    //             other->dead = true;
-    //             headCells[snake.head()] = &snake;
-    //         }
-    //     }
-    //     else
-    //     {
-    //         // Only one in this cell so far.
-    //         headCells[snake.head()] = &snake;
-    //     }
+    // Populate tailCells and headCells and handle head on collisions.
+    for (Snake &snake : world.snakes)
+    {
+        // Head
+        auto it = headCells.find(snake.head());
+        if (it != headCells.end())
+        {
+            Snake *other = it->second;
+            if (snake.length() < other->length())
+            {
+                // Get eaten by other snake.
+                snake.dead = true;
+            }
+            else if (snake.length() == other->length())
+            {
+                // Neither can eat the other so both die.
+                snake.dead = true;
+                other->dead = true;
+            }
+            else
+            {
+                // Eat the other snake.
+                other->dead = true;
+                headCells[snake.head()] = &snake;
+            }
+        }
+        else
+        {
+            // Only one in this cell so far.
+            headCells[snake.head()] = &snake;
+        }
 
-    //     // Tail
-    //     for (uint32_t i = 1; i < snake.length(); i++)
-    //     {
-    //         tailCells[snake.parts[i]] = &snake;
-    //     }
-    // }
+        // Tail
+        for (uint32_t i = 1; i < snake.length(); i++)
+        {
+            tailCells[snake.parts[i]] = &snake;
+        }
+    }
 
-    // // Find heads that ran into tails or went oob.
-    // for (Snake &snake : world.snakes)
-    // {
-    //     if (outOfBounds(snake.head(), world.width))
-    //     {
-    //         snake.dead = true;
-    //     }
-    //     else
-    //     {
-    //         auto it = tailCells.find(snake.head());
-    //         if (it != tailCells.end())
-    //         {
-    //             // Crashed into someone's tail (possible its own).
-    //             snake.dead = true;
-    //         }
-    //     }
-    // }
+    // Find heads that ran into tails or went oob.
+    for (Snake &snake : world.snakes)
+    {
+        if (outOfBounds(snake.head(), world.width))
+        {
+            snake.dead = true;
+        }
+        else
+        {
+            auto it = tailCells.find(snake.head());
+            if (it != tailCells.end())
+            {
+                // Crashed into someone's tail (possible its own).
+                snake.dead = true;
+            }
+        }
+    }
 }
 
 void removeDeadGuys(World &world)
 {
-    // world.snakes.erase(
-    //     std::remove_if(world.snakes.begin(), world.snakes.end(),
-    //         [](const Snake &s) { return s.dead; }),
-    //     world.snakes.end());
+    world.snakes.erase(
+        std::remove_if(world.snakes.begin(), world.snakes.end(),
+            [](const Snake &s) { return s.dead; }),
+        world.snakes.end());
 }
 
 void applyMoves(World &world, std::vector<SnakeMove> &moves)
@@ -377,16 +383,3 @@ void applyMoves(World &world, std::vector<SnakeMove> &moves)
     // Removes dead snakes from the board.
     removeDeadGuys(world);
 }
-
-namespace std
-{
-    template <>
-    class hash<Point>
-    {
-    public :
-        size_t operator()(const Point &p) const
-        {
-            return hash<uint32_t>()(p.x) ^ hash<uint32_t>()(p.y);
-        }
-    };
-};

@@ -28,6 +28,19 @@ inline bool operator==(const Point &a, const Point &b)
     return a.x == b.x && a.y == b.y;
 }
 
+namespace std
+{
+    template <>
+    class hash<Point>
+    {
+    public :
+        size_t operator()(const Point &p) const
+        {
+            return hash<uint32_t>()(p.x) ^ hash<uint32_t>()(p.y);
+        }
+    };
+};
+
 struct Snake
 {
     std::string id;
