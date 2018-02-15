@@ -15,7 +15,7 @@ Simulation::Simulation(
     _simNumber(simNumber),
     _turn(0),
     _result(
-        {0, {}, {}, branch.pair.myAlgorithm, TerminationReason::Unknown, {}})
+        {{}, {}, branch.pair.myAlgorithm, TerminationReason::Unknown, {}})
 { }
 
 bool Simulation::next()
@@ -36,10 +36,13 @@ bool Simulation::next()
         moves.push_back({ enemy, direction });
     }
 
-    _newestState = currentState.newStateAfterMoves(moves);
+    std::unique_ptr<GameState> newState = 
+        currentState.newStateAfterMoves(moves);
 
-    updateObituaries(*_newestState, currentState);
-    updateFoodsEaten(*_newestState, currentState);
+    updateObituaries(*newState, currentState);
+    updateFoodsEaten(*newState, currentState);
+
+    _newestState = std::move(newState);
 
     if (_newestState->isLoss())
     {
@@ -64,6 +67,8 @@ Direction Simulation::getMyMove(GameState &state)
 
 void Simulation::updateObituaries(GameState &newState, GameState &oldState)
 {
+    std::cout << "old: " << oldState.snakes().size() << " new: " << newState.snakes().size() << std::endl;
+
     for (auto pair : oldState.snakes())
     {
         Snake *snake = pair.second;
@@ -124,7 +129,6 @@ std::vector<Future> runSimulations(
             simulations.push_back(
                 { branch, initialState, maxTurns, simIndex++ });
             results.push_back({
-                0,
                 {},
                 {},
                 algorithmPairs[simIndex].myAlgorithm,
@@ -140,6 +144,7 @@ std::vector<Future> runSimulations(
     while (completedSimulations.size() < simulations.size())
     {
         turn++;
+        std::cout << "let's sim turn " << turn << std::endl;
 
         for (Simulation &sim : simulations)
         {
@@ -158,11 +163,18 @@ std::vector<Future> runSimulations(
         }
     }
 
-    for (Future &future : results)
+    for (size_t i = 0; i < results.size(); i++)
     {
-        future.terminationReason = coerceTerminationReason(
-            future.terminationReason, turn, maxTurns);
+        results[i] = simulations[i].result();
+        results[i].terminationReason = coerceTerminationReason(
+            results[i].terminationReason, turn, maxTurns);
     }
+
+    // for (Future &future : results)
+    // {
+    //     future.terminationReason = coerceTerminationReason(
+    //         future.terminationReason, turn, maxTurns);
+    // }
 
     std::cout << "simulated " << turn << " turns" << std::endl;
 
@@ -184,8 +196,12 @@ std::vector<Future> simulateFutures(
         }
     }    
 
+    std::cout << algorithmPairs.size() << " algorithm pairs\n";
+
     std::vector<Direction> possibleFirstMoves = notImmediatelySuicidalMoves(
         initialState);
+
+    std::cout << possibleFirstMoves.size() << " possible 1st moves\n";
 
     if (possibleFirstMoves.empty())
     {
@@ -193,16 +209,19 @@ std::vector<Future> simulateFutures(
         return runSimulations(algorithmPairs, initialState, maxTurns, {});
     }
 
-    std::vector<Future> futures;
-    for (Direction firstMove : possibleFirstMoves)
-    {
-        std::vector<Future> futuresInThisDirection = runSimulations(
-            algorithmPairs, initialState, maxTurns, { firstMove });
-        for (Future future : futuresInThisDirection)
-        {
-            futures.push_back(future);
-        }
-    }
+    // std::vector<Future> futures;
+    // for (Direction firstMove : possibleFirstMoves)
+    // {
+    //     std::vector<Future> futuresInThisDirection = runSimulations(
+    //         algorithmPairs, initialState, maxTurns, { firstMove });
+    //     for (Future future : futuresInThisDirection)
+    //     {
+    //         futures.push_back(future);
+    //     }
+    // }
+
+    std::vector<Future> futures = runSimulations(
+        algorithmPairs, initialState, maxTurns, possibleFirstMoves);
 
     return futures;
 }

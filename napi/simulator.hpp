@@ -21,7 +21,6 @@ struct AlgorithmBranch
 
 struct Future
 {
-    uint32_t turnsSimulated;
     std::map<std::string, uint32_t> obituaries;
     std::map<std::string, std::vector<uint32_t>> foodsEaten;
     Algorithm *algorithm;

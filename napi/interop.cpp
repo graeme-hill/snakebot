@@ -115,7 +115,6 @@ void assertEqual(Snake &s1, Snake &s2, std::string messagePart)
 
 void assertEqual(Future &f1, Future &f2, std::string msgPart)
 {
-    assertEqual(f2.turnsSimulated, f1.turnsSimulated, msgPart + " - turns sim'd");
     assertEqual(f2.obituaries.size(), f1.obituaries.size(), msgPart + " - obit size");
     assertEqual(f2.foodsEaten.size(), f1.foodsEaten.size(), msgPart + " - foods eaten size");
     assertEqual(f2.algorithm->meta().name, f1.algorithm->meta().name, msgPart + " - algorithm");
