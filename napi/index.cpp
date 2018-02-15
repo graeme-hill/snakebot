@@ -109,6 +109,11 @@ napi_value init(napi_env env, napi_value exports)
     algorithms["dog"] = std::unique_ptr<Algorithm>(new Dog());
     algorithms["sim"] = std::unique_ptr<Algorithm>(new Sim());
 
+    std::cout << "cautious " << algorithms["cautious"]->id() << std::endl;
+    std::cout << "hungry " << algorithms["hungry"]->id() << std::endl;
+    std::cout << "dog " << algorithms["dog"]->id() << std::endl;
+    std::cout << "sim " << algorithms["sim"]->id() << std::endl;
+
     // Make the move() function above available to be called by JS code.
     // Instead of exporting every algorithm's move function, just export this
     // one function and let it act as a dispatcher using second parameter as

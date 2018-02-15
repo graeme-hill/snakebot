@@ -17,17 +17,17 @@ describe("move()", () => {
     ]);
 
     it("should return a direction", () =>
-        assert.include(["left","right","up","down"], cpp.move(world, "test")));
+        assert.include(["left","right","up","down"], cpp.move(world, "dog")));
 });
 
 describe("meta()", () => {
     it("should have metadata", () => {
-        assert.deepEqual(cpp.meta("test"), {
-            color: "#000000",
+        assert.deepEqual(cpp.meta("dog"), {
+            color: "#000088",
             secondary_color: "#FFFFFF",
-            head_url: "http://www.edm2.com/images/thumb/1/13/C%2B%2B.png/250px-C%2B%2B.png",
-            name: "C++ test",
-            taunt: "Hi",
+            head_url: "http://residentevents.com/media/reviews/photos/original/84/ad/76/hungry20hungry20hippos-78-1440787989.jpg",
+            name: "Dog",
+            taunt: "Woof",
             head_type: "pixel",
             tail_type: "pixel"
         });

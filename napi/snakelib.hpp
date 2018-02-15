@@ -88,8 +88,15 @@ class GameState;
 class Algorithm
 {
 public:
+    Algorithm();
     virtual Metadata meta() = 0;
     virtual Direction move(GameState &) = 0;
+    uint32_t id() { return _id; }
+
+private:
+    uint32_t _id;
+    static uint32_t nextId();
+    static uint32_t _nextId;
 };
 
 class Cell

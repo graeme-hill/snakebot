@@ -55,6 +55,16 @@ void World::prettyPrint()
     }
 }
 
+uint32_t Algorithm::_nextId = 0;
+
+Algorithm::Algorithm() : _id(nextId())
+{ }
+
+uint32_t Algorithm::nextId()
+{
+    return _nextId++;
+}
+
 GameState::GameState(World w) :
     _width(w.width),
     _height(w.height),
@@ -291,7 +301,7 @@ void eatFoodOrDie(World &world)
         }
         else
         {
-            snake.parts.pop_back();
+            //snake.parts.pop_back();
             // It did eat so remove the food it ate.
             world.food.erase(
                 std::remove(

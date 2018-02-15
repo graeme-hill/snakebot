@@ -210,62 +210,74 @@ std::vector<Future> simulateFutures(
 int scoreFuture(Future &future, GameState &state)
 {
     auto obitIt = future.obituaries.find(state.mySnake()->id);
+    auto foodIt = future.foodsEaten.find(state.mySnake()->id);
     uint32_t survivedTurns = obitIt == future.obituaries.end()
         ? future.moves.size()
         : obitIt->second;
-    int score = survivedTurns * 100;
+    uint32_t survivalScore = survivedTurns * 1000;
+
+    uint32_t foodScore = 0;
+    if (foodIt != future.foodsEaten.end())
+    {
+        std::vector<uint32_t> foodTurns = foodIt->second;
+        if (!foodTurns.empty())
+        {
+            foodScore += 100 - foodTurns.at(0);
+        }
+    }
+
+    int score = survivalScore + foodScore;
     return score;
 }
 
 Direction bestMove(std::vector<Future> &futures, GameState &state)
 {
-    int worstLeftScore = -1;
-    int worstRightScore = -1;
-    int worstUpScore = -1;
-    int worstDownScore = -1;
+    // 1. Get worst score per first-algorithm, direction pair and store as
+    //    score, direction pair (where direction is NOT unique).
+    // 2. Take the pair with the best score and return its direction.
+
+    // TODO: this key should be a struct with its own hash function, not string
+    std::unordered_map<std::string, DirectionScore> worstScores;
 
     for (Future &future : futures)
     {
-        // Should never have a zero move future, but if there is don't crash
+        // Should never have a zero move future, but if there is don't crash.
         if (future.moves.empty())
-            continue; 
+            continue;
 
-        Direction move = future.moves.at(0);
+        Direction direction = future.moves.at(0);
         int score = scoreFuture(future, state);
-        if (move == Direction::Left)
+
+        std::string algoName = future.algorithm->meta().name;
+        std::string key = algoName + "_" + directionToString(direction);
+        auto it = worstScores.find(key);
+        if (it == worstScores.end())
         {
-            if (worstLeftScore < 0 || score < worstLeftScore)
-                worstLeftScore = score;
-        }
-        else if (move == Direction::Right)
-        {
-            if (worstRightScore < 0 || score < worstRightScore)
-                worstRightScore = score;
-        }
-        else if (move == Direction::Up)
-        {
-            if (worstUpScore < 0 || score < worstUpScore)
-                worstUpScore = score;
+            worstScores[key] = DirectionScore{ direction, score };
         }
         else
         {
-            if (worstDownScore < 0 || score < worstDownScore)
-                worstDownScore = score;
+            DirectionScore existing = it->second;
+            if (score > existing.score)
+            {
+                worstScores[key] = DirectionScore{ direction, score };
+            }
         }
     }
 
-    std::array<DirectionScore, 4> moveScores {
-        DirectionScore{ Direction::Left, worstLeftScore },
-        DirectionScore{ Direction::Right, worstRightScore },
-        DirectionScore{ Direction::Up, worstUpScore },
-        DirectionScore{ Direction::Down, worstDownScore }
-    };
+    DirectionScore best{ Direction::Up, -1 };
 
-    std::sort(moveScores.begin(), moveScores.end(),
-        [](DirectionScore a, DirectionScore b)
+    for (auto it : worstScores)
+    {
+        if (best.score < 0)
         {
-            return a.score < b.score;
-        });
+            best = it.second;
+        }
+        else if (it.second.score > best.score)
+        {
+            best = it.second;
+        }
+    }
 
-    return moveScores.back().direction;
+    return best.direction;
 }
