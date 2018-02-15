@@ -7,6 +7,7 @@
 #include <functional>
 #include <array>
 #include <unordered_map>
+#include <unordered_set>
 #include <memory>
 #include <algorithm>
 #include <map>
@@ -82,14 +83,14 @@ struct Metadata
     std::string tailType;
 };
 
+class GameState;
+
 class Algorithm
 {
 public:
     virtual Metadata meta() = 0;
-    virtual Direction move(World) = 0;
+    virtual Direction move(GameState &) = 0;
 };
-
-class GameState;
 
 class Cell
 {
@@ -149,6 +150,8 @@ public:
     GameState &perspective(Snake *enemy);
     std::unique_ptr<GameState> newStateAfterMoves(
         std::vector<SnakeMove> &moves);
+
+    bool isLoss();
 
 private:
     void removeSnake(Snake *snake);

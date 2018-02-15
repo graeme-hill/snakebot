@@ -59,7 +59,8 @@ napi_value move(napi_env env, napi_callback_info info)
     }
 
     World world = makeWorld(env, jsWorld);
-    Direction direction = (*algoIter).second->move(world);
+    GameState state(world);
+    Direction direction = (*algoIter).second->move(state);
     std::string directionStr = directionToString(direction);
 
     napi_value jsDirection;

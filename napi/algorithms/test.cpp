@@ -18,9 +18,8 @@ Metadata Test::meta()
     };
 }
 
-Direction Test::move(World world)
+Direction Test::move(GameState &state)
 {
-    GameState state(world);
     auto foodDir = bestFood(state);
     if (foodDir.hasValue)
     {

@@ -113,6 +113,41 @@ void assertEqual(Snake &s1, Snake &s2, std::string messagePart)
     }
 }
 
+void assertEqual(Future &f1, Future &f2, std::string msgPart)
+{
+    assertEqual(f2.turnsSimulated, f1.turnsSimulated, msgPart + " - turns sim'd");
+    assertEqual(f2.obituaries.size(), f1.obituaries.size(), msgPart + " - obit size");
+    assertEqual(f2.foodsEaten.size(), f1.foodsEaten.size(), msgPart + " - foods eaten size");
+    assertEqual(f2.algorithm->meta().name, f1.algorithm->meta().name, msgPart + " - algorithm");
+    assertTrue(f2.terminationReason == f1.terminationReason, msgPart + " - termination reason");
+    assertEqual(f2.moves.size(), f1.moves.size(), msgPart + " - moves count");
+
+    if (f2.moves.size() == f1.moves.size())
+    {
+        for (size_t i = 0; i < f2.moves.size(); i++)
+        {
+            std::stringstream msg;
+            msg << msgPart << " - move " << i; 
+            assertEqual(f2.moves[i], f1.moves[i], msg.str());
+        }
+    }
+}
+
+void assertEqual(std::vector<Future> &f1, std::vector<Future> &f2, std::string m)
+{
+    assertEqual(f2.size(), f1.size(), m + " - future count");
+
+    if (f2.size() == f1.size())
+    {
+        for (size_t i = 0; i < f2.size(); i++)
+        {
+            std::stringstream msg;
+            msg << m << " - future " << i;
+            assertEqual(f2[i], f1[i], msg.str());
+        }
+    }
+}
+
 void assertTrue(bool actual, std::string message)
 {
 	napi_env env = Interop::env();

@@ -108,6 +108,11 @@ Snake *GameState::mySnake()
     return _mySnake;
 }
 
+bool GameState::isLoss()
+{
+    return _mySnake == nullptr;
+}
+
 void Cell::vacate(Snake *snake, uint32_t turn)
 {
     if (turn > 0)

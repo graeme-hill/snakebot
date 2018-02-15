@@ -22,8 +22,8 @@ struct AlgorithmBranch
 struct Future
 {
     uint32_t turnsSimulated;
-    std::map<uint32_t, uint32_t> obituaries;
-    std::map<uint32_t, std::vector<uint32_t>> foodsEaten;
+    std::map<std::string, uint32_t> obituaries;
+    std::map<std::string, std::vector<uint32_t>> foodsEaten;
     Algorithm *algorithm;
     TerminationReason terminationReason;
     std::vector<Direction> moves;
@@ -34,7 +34,7 @@ class Simulation
 public:
     Simulation(
         AlgorithmBranch branch,
-        GameState &initialState
+        GameState &initialState,
         uint32_t maxTurns,
         uint32_t simNumber);
 
@@ -46,15 +46,14 @@ private:
     Direction getMyMove(GameState &state);
     void updateObituaries(GameState &newState, GameState &oldState);
     void updateFoodsEaten(GameState &newState, GameState &oldState);
-    GameState &currentState();
 
     AlgorithmBranch _branch;
-    uint32_t _maxTurns;
     GameState &_initialState;
+    uint32_t _maxTurns;
     uint32_t _simNumber;
-    std::unique_ptr<GameState> _newestState;
     uint32_t _turn;
     Future _result;
+    std::unique_ptr<GameState> _newestState;
 };
 
 std::vector<Future> runSimulations(

@@ -2,7 +2,35 @@
 #include "../interop.hpp"
 #include "../astar.hpp"
 #include "../movement.hpp"
+#include "../simulator.hpp"
 #include <iostream>
+
+class OneDirAlgorithm : public Algorithm
+{
+public:
+    OneDirAlgorithm(Direction dir) : _dir(dir) { }
+
+    Metadata meta() override
+    {
+        return {
+            "#000000",
+            "#FFFFFF",
+            "http://www.edm2.com/images/thumb/1/13/C%2B%2B.png/250px-C%2B%2B.png",
+            "C++ test",
+            "Hi",
+            "pixel",
+            "pixel"
+        };
+    }
+
+    Direction move(GameState &) override
+    {
+        return _dir;
+    }
+
+private:
+    Direction _dir;
+};
 
 void basicGameStateTests()
 {
@@ -566,6 +594,24 @@ void newStateAfterMovesTest7()
     assertEqual(newState->world(), expected, "newStateAfterMovesTest7()");
 }
 
+void simulateFuturesTest1()
+{
+    GameState state(parseWorld({
+        "_ _ _ _",
+        "_ _ _ _",
+        "_ 0 1 _",
+        "_ ^ ^ _"
+    }));
+
+    OneDirAlgorithm algo(Direction::Up);
+
+    // std::vector<Future> futures = simulateFutures(&state, 5, { &algo });
+
+    // Future f1 {};
+    // f1.turnsSimulated = 4;
+    // f1.obituaries = { { }}
+}
+
 void TestSuite::run()
 {
     outOfBoundsTests();
@@ -593,4 +639,5 @@ void TestSuite::run()
     newStateAfterMovesTest5();
     newStateAfterMovesTest6();
     newStateAfterMovesTest7();
+    simulateFuturesTest1();
 }

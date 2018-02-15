@@ -9,7 +9,8 @@
                 "napi/test/testsuite.cpp",
                 "napi/interop.cpp",
                 "napi/astar.cpp",
-                "napi/movement.cpp"
+                "napi/movement.cpp",
+                "napi/simulator.cpp"
             ],
             "cflags": [
                 "-std=c++17"

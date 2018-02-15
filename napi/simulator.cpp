@@ -1,10 +1,11 @@
 #include "simulator.hpp"
+#include "movement.hpp"
 
 #include <numeric>
 
 Simulation::Simulation(
-    std::vectorAlgorithmBranch branch,
-    GameState &initialState
+    AlgorithmBranch branch,
+    GameState &initialState,
     uint32_t maxTurns,
     uint32_t simNumber)
     :
@@ -12,43 +13,30 @@ Simulation::Simulation(
     _initialState(initialState),
     _maxTurns(maxTurns),
     _simNumber(simNumber),
-    _currentState(&_initialState),
     _turn(0),
     _result(
         {0, {}, {}, branch.pair.myAlgorithm, TerminationReason::Unknown, {}})
 { }
 
-GameState &Simulation::currentState()
-{
-    if (_newestState)
-    {
-        return *_newestState;
-    }
-    else
-    {
-        return *_currentState;
-    }
-}
-
 bool Simulation::next()
 {
     _turn++;
-    GameState &currentState = currentState();
+    GameState &currentState = _newestState ? *_newestState : _initialState;
 
     // My move.
-    SnakeMove myMove = { currentState->mySnake(), getMyMove(currentState) };
-    std::vector<Direction> moves { myMove };
+    SnakeMove myMove = { currentState.mySnake(), getMyMove(currentState) };
+    std::vector<SnakeMove> moves { myMove };
     _result.moves.push_back(myMove.direction);
 
     // Enemy moves.
-    for (Snake *enemy : currentState->enemies())
+    for (Snake *enemy : currentState.enemies())
     {
-        GameState &enemyState = currentState->perspective(enemy);
+        GameState &enemyState = currentState.perspective(enemy);
         Direction direction = _branch.pair.enemyAlgorithm->move(enemyState);
         moves.push_back({ enemy, direction });
     }
 
-    _newestState = currentState->newStateAfterMoves(moves);
+    _newestState = currentState.newStateAfterMoves(moves);
 
     updateObituaries(*_newestState, currentState);
     updateFoodsEaten(*_newestState, currentState);
@@ -58,24 +46,27 @@ bool Simulation::next()
         _result.terminationReason = TerminationReason::Loss;
         return true;
     }
+
+    return false;
 }
 
 Direction Simulation::getMyMove(GameState &state)
 {
-    if (turn <= _branch.firstMoves.size())
+    if (_turn <= _branch.firstMoves.size())
     {
-        return _branch.firstMoves.at(turn - 1);
+        return _branch.firstMoves.at(_turn - 1);
     }
     else
     {
-        return _branch.pair.myAlgorithm.move(state);
+        return _branch.pair.myAlgorithm->move(state);
     }
 }
 
 void Simulation::updateObituaries(GameState &newState, GameState &oldState)
 {
-    for (Snake *snake : oldState.snakes())
+    for (auto pair : oldState.snakes())
     {
+        Snake *snake = pair.second;
         auto newIter = newState.snakes().find(snake->id);
         if (newIter == newState.snakes().end())
         {
@@ -96,7 +87,7 @@ void Simulation::updateFoodsEaten(GameState &newState, GameState &oldState)
             {
                 _result.foodsEaten[inThatCellNow->id] = {};
             }
-            foodsEaten[inThatCellNow->id].push_back(_turn);
+            _result.foodsEaten[inThatCellNow->id].push_back(_turn);
         }
     }
 }
@@ -161,15 +152,15 @@ std::vector<Future> runSimulations(
 
             if (sim.next() || turn >= maxTurns)
             {
-                results[sim.sumNumber()] = sim.result();
-                completedSimulations.push_back(sim.simNumber());
+                results[sim.simNumber()] = sim.result();
+                completedSimulations.insert(sim.simNumber());
             }
         }
     }
 
     for (Future &future : results)
     {
-        future.TerminationReason = coerceTerminationReason(
+        future.terminationReason = coerceTerminationReason(
             future.terminationReason, turn, maxTurns);
     }
 

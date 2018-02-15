@@ -6,5 +6,5 @@ class Test : public Algorithm
 {
 public:
     Metadata meta() override;
-    Direction move(World world) override;
+    Direction move(GameState &state) override;
 };
