@@ -590,7 +590,7 @@ void simulateFuturesTest1()
 
     OneDirAlgorithm algo(Direction::Up);
 
-    std::vector<Future> actualFutures = simulateFutures(state, 5, { &algo });
+    std::vector<Future> actualFutures = simulateFutures(state, 5, { &algo }, { &algo });
 
     Future f1 {};
     f1.obituaries = { { "1", 3 }, { "0", 4 } };

@@ -138,13 +138,14 @@ std::vector<Future> runSimulations(
 std::vector<Future> simulateFutures(
     GameState &initialState,
     uint32_t maxTurns,
-    std::vector<Algorithm *> algorithms)
+    std::vector<Algorithm *> myAlgorithms,
+    std::vector<Algorithm *> enemyAlgorithms)
 {
     // Make algorithm pairs
     std::vector<AlgorithmPair> algorithmPairs;
-    for (Algorithm *a1 : algorithms)
+    for (Algorithm *a1 : myAlgorithms)
     {
-        for (Algorithm *a2 : algorithms)
+        for (Algorithm *a2 : enemyAlgorithms)
         {
             algorithmPairs.push_back({ a1, a2 });
         }

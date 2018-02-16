@@ -109,6 +109,7 @@ std::vector<Future> runSimulations(
 std::vector<Future> simulateFutures(
     GameState &initialState,
     uint32_t maxTurns,
-    std::vector<Algorithm *> algorithms);
+    std::vector<Algorithm *> myAlgorithms,
+    std::vector<Algorithm *> enemyAlgorithms);
 
 Direction bestMove(std::vector<Future> &futures, GameState &state);
