@@ -120,82 +120,82 @@ bool isCellRisky(Point p, GameState &state)
     return isCellOk(p, state) && isCloseToEqualOrBiggerSnakeHead(p, state); 
 }
 
-std::vector<Direction> notImmediatelySuicidalMoves(GameState &state)
+DirectionSet notImmediatelySuicidalMoves(GameState &state)
 {
     Point myHead = state.mySnake()->head();
     uint32_t x = myHead.x;
     uint32_t y = myHead.y;
-    std::vector<Direction> moves;
+    DirectionSet moves;
 
     if (isCellOk({x - 1, y}, state))
     {
-        moves.push_back(Direction::Left);
+        moves.push(Direction::Left);
     }
     if (isCellOk({x + 1, y}, state))
     {
-        moves.push_back(Direction::Right);
+        moves.push(Direction::Right);
     }
     if (isCellOk({x, y - 1}, state))
     {
-        moves.push_back(Direction::Up);
+        moves.push(Direction::Up);
     }
     if (isCellOk({x, y + 1}, state))
     {
-        moves.push_back(Direction::Down);
+        moves.push(Direction::Down);
     }
 
     return moves;
 }
 
-std::vector<Direction> safeMoves(GameState &state)
+DirectionSet safeMoves(GameState &state)
 {
     Point myHead = state.mySnake()->head();
     uint32_t x = myHead.x;
     uint32_t y = myHead.y;
-    std::vector<Direction> moves;
+    DirectionSet moves;
 
     if (isCellSafe({x - 1, y}, state))
     {
-        moves.push_back(Direction::Left);
+        moves.push(Direction::Left);
     }
     if (isCellSafe({x + 1, y}, state))
     {
-        moves.push_back(Direction::Right);
+        moves.push(Direction::Right);
     }
     if (isCellSafe({x, y - 1}, state))
     {
-        moves.push_back(Direction::Up);
+        moves.push(Direction::Up);
     }
     if (isCellSafe({x, y + 1}, state))
     {
-        moves.push_back(Direction::Down);
+        moves.push(Direction::Down);
     }
 
     return moves;
 }
 
-std::vector<Direction> riskyMoves(GameState &state)
+DirectionSet riskyMoves(GameState &state)
 {
     Point myHead = state.mySnake()->head();
     uint32_t x = myHead.x;
     uint32_t y = myHead.y;
-    std::vector<Direction> moves;
+    DirectionSet moves;
 
     if (isCellRisky({x - 1, y}, state))
     {
-        moves.push_back(Direction::Left);
+        moves.push(Direction::Left);
     }
     if (isCellRisky({x + 1, y}, state))
     {
-        moves.push_back(Direction::Right);
+        moves.push(Direction::Right);
     }
     if (isCellRisky({x, y - 1}, state))
     {
-        moves.push_back(Direction::Up);
+        moves.push(Direction::Up);
     }
     if (isCellRisky({x, y + 1}, state))
     {
-        moves.push_back(Direction::Down);
+        moves.push(Direction::Down);
     }
 
     return moves;
@@ -203,14 +203,14 @@ std::vector<Direction> riskyMoves(GameState &state)
 
 MaybeDirection notImmediatelySuicidal(GameState &state)
 {
-    std::vector<Direction> moves = notImmediatelySuicidalMoves(state);
+    DirectionSet moves = notImmediatelySuicidalMoves(state);
     if (moves.empty())
     {
         return MaybeDirection{ false, Direction::Left };
     }
     else
     {
-        return MaybeDirection{ true, moves.at(0) };
+        return MaybeDirection{ true, *moves.begin() };
     }
 }
 

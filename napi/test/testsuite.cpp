@@ -447,6 +447,9 @@ void newStateAfterMovesTest2()
         "_ _ _ _"
     });
 
+    // Make sure the snake has double tail end piece
+    expected.snakes[0].parts.push_back(expected.snakes[0].parts.at(2));
+
     assertEqual(newState->world(), expected, "newStateAfterMovesTest2()");
 }
 
@@ -658,6 +661,60 @@ void bestMoveTest1()
     assertEqual(move, Direction::Left, "bestMoveTest1() - left first");
 }
 
+void directionSetTests()
+{
+    {
+        DirectionSet set;
+        set.push(Direction::Right);
+
+        std::vector<Direction> vec;
+        for (Direction d : set)
+        {
+            vec.push_back(d);
+        }
+
+        assertEqual(vec.size(), 1, "DirectionSetTests() - size");
+        assertEqual(vec.at(0), Direction::Right, "DirectionSetTests() - direction");
+    }
+
+    {
+        DirectionSet set;
+        set.push(Direction::Up);
+        set.push(Direction::Down);
+        set.push(Direction::Up);
+
+        std::vector<Direction> vec;
+        for (Direction d : set)
+        {
+            vec.push_back(d);
+        }
+
+        assertEqual(vec.size(), 2, "DirectionSetTests() - size");
+        assertEqual(vec.at(0), Direction::Up, "DirectionSetTests() - direction");
+        assertEqual(vec.at(1), Direction::Down, "DirectionSetTests() - direction");
+    }
+
+    {
+        DirectionSet set;
+        set.push(Direction::Up);
+        set.push(Direction::Right);
+        set.push(Direction::Down);
+        set.push(Direction::Left);
+
+        std::vector<Direction> vec;
+        for (Direction d : set)
+        {
+            vec.push_back(d);
+        }
+
+        assertEqual(vec.size(), 4, "DirectionSetTests() - size");
+        assertEqual(vec.at(0), Direction::Left, "DirectionSetTests() - direction");
+        assertEqual(vec.at(1), Direction::Right, "DirectionSetTests() - direction");
+        assertEqual(vec.at(2), Direction::Up, "DirectionSetTests() - direction");
+        assertEqual(vec.at(3), Direction::Down, "DirectionSetTests() - direction");
+    }
+}
+
 void TestSuite::run()
 {
     outOfBoundsTests();
@@ -687,4 +744,5 @@ void TestSuite::run()
     newStateAfterMovesTest7();
     simulateFuturesTest1();
     bestMoveTest1();
+    directionSetTests();
 }

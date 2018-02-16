@@ -55,9 +55,9 @@ bool Simulation::next()
 
 Direction Simulation::getMyMove(GameState &state)
 {
-    if (_turn <= _branch.firstMoves.size())
+    if (_turn == 0 && _branch.firstMove.hasValue)
     {
-        return _branch.firstMoves.at(_turn - 1);
+        return _branch.firstMove.value;
     }
     else
     {
@@ -111,7 +111,7 @@ std::vector<Future> runSimulations(
     std::vector<AlgorithmPair> algorithmPairs,
     GameState &initialState,
     uint32_t maxTurns,
-    std::vector<Direction> firstMoves)
+    DirectionSet firstMoves)
 {
     uint32_t turn = 0;
 
@@ -123,7 +123,8 @@ std::vector<Future> runSimulations(
     {
         for (Direction firstDir : firstMoves)
         {
-            AlgorithmBranch branch{ pair, { firstDir } };
+            MaybeDirection maybeDir { true, firstDir };
+            AlgorithmBranch branch{ pair, maybeDir };
             simulations.push_back(
                 { branch, initialState, maxTurns, simIndex++ });
             results.push_back({
@@ -186,7 +187,7 @@ std::vector<Future> simulateFutures(
         }
     }    
 
-    std::vector<Direction> firstMoves = safeMoves(initialState);
+    DirectionSet firstMoves = safeMoves(initialState);
 
     if (firstMoves.empty())
     {

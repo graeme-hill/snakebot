@@ -150,12 +150,12 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
     uint32_t goalIndex = cellIndex(goal, state);
 
     bool isFirstMove = true;
-    std::unordered_set<uint32_t> closedSet;
-    std::unordered_set<uint32_t> openSet;
-    std::unordered_map<uint32_t, uint32_t> cameFrom;
-    std::unordered_map<uint32_t, uint32_t> gScore;
-    std::unordered_map<uint32_t, uint32_t> fScore;
-    std::unordered_map<uint32_t, uint32_t> turns;
+    std::unordered_set<uint32_t> closedSet(20);
+    std::unordered_set<uint32_t> openSet(20);
+    std::unordered_map<uint32_t, uint32_t> cameFrom(20);
+    std::unordered_map<uint32_t, uint32_t> gScore(20);
+    std::unordered_map<uint32_t, uint32_t> fScore(20);
+    std::unordered_map<uint32_t, uint32_t> turns(20);
 
     openSet.insert(startIndex);
     gScore.emplace(startIndex, 0);

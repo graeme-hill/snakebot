@@ -41,6 +41,106 @@ namespace std
     };
 };
 
+struct MaybeDirection
+{
+    bool hasValue;
+    Direction value;
+};
+
+class DirectionIterator
+{
+public:
+    DirectionIterator(std::array<MaybeDirection, 4> &values, size_t index) :
+        _values(values), _index(index)
+    { }
+
+    bool operator==(const DirectionIterator &other)
+    {
+        return other._index == _index && &other._values == &_values;
+    }
+
+    bool operator!=(const DirectionIterator &other)
+    {
+        return other._index != _index || &other._values != &_values;
+    }
+
+    DirectionIterator &operator++()
+    {
+        // Find the next direction where hasValue==true
+        for (size_t i = _index + 1; i < _values.size(); i++)
+        {
+            if (_values[i].hasValue)
+            {
+                _index = i;
+                return *this;
+            }
+        }
+
+        // Couldn't find a direction so put it at the end()
+        _index = _values.size();
+        return *this;
+    }
+
+    Direction &operator*()
+    {
+        return _values[_index].value;
+    }
+
+private:
+    std::array<MaybeDirection, 4> &_values;
+    size_t _index;
+};
+
+class DirectionSet
+{
+public:
+    DirectionSet() :
+        _values({
+            MaybeDirection{ false, Direction::Left },
+            MaybeDirection{ false, Direction::Right },
+            MaybeDirection{ false, Direction::Up },
+            MaybeDirection{ false, Direction::Down }
+        }),
+        _beginIndex(_values.size())
+    { }
+
+    void push(Direction dir)
+    {
+        size_t thisIndex = dirIndex(dir);
+        _values[thisIndex].hasValue = true;
+        _beginIndex = std::min(_beginIndex, thisIndex);
+    }
+
+    DirectionIterator begin()
+    {
+        return DirectionIterator(_values, _beginIndex);
+    }
+
+    DirectionIterator end()
+    {
+        return DirectionIterator(_values, _values.size());
+    }
+
+    bool empty()
+    {
+        return _beginIndex >= _values.size();
+    }
+
+private:
+    size_t dirIndex(Direction dir)
+    {
+        switch (dir)
+        {
+            case (Direction::Left): return 0;
+            case (Direction::Right): return 1;
+            case (Direction::Up): return 2;
+            default: return 3;
+        }
+    }
+    std::array<MaybeDirection, 4> _values;
+    size_t _beginIndex;
+};
+
 struct Snake
 {
     std::string id;

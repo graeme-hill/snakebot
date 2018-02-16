@@ -16,7 +16,7 @@ struct AlgorithmPair
 struct AlgorithmBranch
 {
     AlgorithmPair pair;
-    std::vector<Direction> firstMoves;
+    MaybeDirection firstMove;
 };
 
 struct Future
