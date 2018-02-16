@@ -66,17 +66,6 @@ bool indexIsSafe(uint32_t index, uint32_t turn, GameState &state)
     return turnsUntilCouldBeVacant < turn;
 }
 
-bool isAdjacent(uint32_t aIndex, uint32_t bIndex, GameState &state)
-{
-    Point a = deconstructCellIndex(aIndex, state);
-    Point b = deconstructCellIndex(bIndex, state);
-
-    bool horizontallyAdjacent = absDiff(a.x, b.x) == 1 && a.y == b.y;
-    bool verticallyAdjacent = absDiff(a.y, b.y) == 1 && a.x == b.x;
-
-    return horizontallyAdjacent || verticallyAdjacent;
-}
-
 bool is180(uint32_t index, uint32_t neighborIndex, GameState &state)
 {
     // If length of snake is 1 then nothing to worry about (... I think... might wanna test that)
@@ -92,26 +81,6 @@ bool is180(uint32_t index, uint32_t neighborIndex, GameState &state)
     uint32_t neckIndex = cellIndex(neck, state);
 
     return index == headIndex && neighborIndex == neckIndex;
-}
-
-bool isCloseToHead(uint32_t index, Snake *snake, GameState &state)
-{
-    uint32_t headIndex = cellIndex(snake->head(), state);
-    return isAdjacent(index, headIndex, state);
-}
-
-bool isCloseToEqualOrBiggerSnakeHead(uint32_t index, GameState &state)
-{
-    auto enemies = state.enemies();
-    for (Snake *otherSnake : enemies)
-    {
-        bool otherSnakeIsTooBigToEat = state.mySnake()->length() <= otherSnake->length();
-        if (otherSnakeIsTooBigToEat && isCloseToHead(index, otherSnake, state))
-        {
-            return true;
-        }
-    }
-    return false;
 }
 
 bool isOkNeighbor(uint32_t index, uint32_t other, uint32_t turn, GameState &state)

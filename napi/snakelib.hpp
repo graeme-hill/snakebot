@@ -235,3 +235,11 @@ inline uint32_t absDiff(uint32_t a, uint32_t b)
 std::string directionToString(Direction direction);
 
 void applyMoves(World &world, std::vector<SnakeMove> &moves);
+
+bool isAdjacent(uint32_t aIndex, uint32_t bIndex, GameState &state);
+
+bool isCloseToHead(uint32_t index, Snake *snake, GameState &state);
+
+bool isCloseToEqualOrBiggerSnakeHead(Point p, GameState &state);
+
+bool isCloseToEqualOrBiggerSnakeHead(uint32_t index, GameState &state);

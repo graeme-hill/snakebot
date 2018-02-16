@@ -192,17 +192,15 @@ std::vector<Future> simulateFutures(
         }
     }    
 
-    std::vector<Direction> possibleFirstMoves = notImmediatelySuicidalMoves(
-        initialState);
+    std::vector<Direction> firstMoves = safeMoves(initialState);
 
-    if (possibleFirstMoves.empty())
+    if (firstMoves.empty())
     {
-        // gonna die
-        return runSimulations(algorithmPairs, initialState, maxTurns, {});
+        firstMoves = riskyMoves(initialState);
     }
 
     std::vector<Future> futures = runSimulations(
-        algorithmPairs, initialState, maxTurns, possibleFirstMoves);
+        algorithmPairs, initialState, maxTurns, firstMoves);
 
     return futures;
 }

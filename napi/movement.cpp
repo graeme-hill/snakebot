@@ -110,6 +110,16 @@ bool isCellOk(Point p, GameState &state)
         && !is180(p, state);
 }
 
+bool isCellSafe(Point p, GameState &state)
+{
+    return isCellOk(p, state) && !isCloseToEqualOrBiggerSnakeHead(p, state); 
+}
+
+bool isCellRisky(Point p, GameState &state)
+{
+    return isCellOk(p, state) && isCloseToEqualOrBiggerSnakeHead(p, state); 
+}
+
 std::vector<Direction> notImmediatelySuicidalMoves(GameState &state)
 {
     Point myHead = state.mySnake()->head();
@@ -130,6 +140,60 @@ std::vector<Direction> notImmediatelySuicidalMoves(GameState &state)
         moves.push_back(Direction::Up);
     }
     if (isCellOk({x, y + 1}, state))
+    {
+        moves.push_back(Direction::Down);
+    }
+
+    return moves;
+}
+
+std::vector<Direction> safeMoves(GameState &state)
+{
+    Point myHead = state.mySnake()->head();
+    uint32_t x = myHead.x;
+    uint32_t y = myHead.y;
+    std::vector<Direction> moves;
+
+    if (isCellSafe({x - 1, y}, state))
+    {
+        moves.push_back(Direction::Left);
+    }
+    if (isCellSafe({x + 1, y}, state))
+    {
+        moves.push_back(Direction::Right);
+    }
+    if (isCellSafe({x, y - 1}, state))
+    {
+        moves.push_back(Direction::Up);
+    }
+    if (isCellSafe({x, y + 1}, state))
+    {
+        moves.push_back(Direction::Down);
+    }
+
+    return moves;
+}
+
+std::vector<Direction> riskyMoves(GameState &state)
+{
+    Point myHead = state.mySnake()->head();
+    uint32_t x = myHead.x;
+    uint32_t y = myHead.y;
+    std::vector<Direction> moves;
+
+    if (isCellRisky({x - 1, y}, state))
+    {
+        moves.push_back(Direction::Left);
+    }
+    if (isCellRisky({x + 1, y}, state))
+    {
+        moves.push_back(Direction::Right);
+    }
+    if (isCellRisky({x, y - 1}, state))
+    {
+        moves.push_back(Direction::Up);
+    }
+    if (isCellRisky({x, y + 1}, state))
     {
         moves.push_back(Direction::Down);
     }
@@ -164,3 +228,4 @@ MaybeDirection chaseTail(GameState &state)
         return MaybeDirection { false, Direction::Left };
     }
 }
+
