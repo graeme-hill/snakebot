@@ -57,48 +57,6 @@ bool Simulation::next()
     return false;
 }
 
-Direction Simulation::getMyMove(GameState &state)
-{
-    if (_turn == 1 && _branch.firstMove.hasValue)
-    {
-        return _branch.firstMove.value;
-    }
-    else
-    {
-        return _branch.pair.myAlgorithm->move(state);
-    }
-}
-
-void Simulation::updateObituaries(GameState &newState, GameState &oldState)
-{
-    for (auto pair : oldState.snakes())
-    {
-        Snake *snake = pair.second;
-        auto newIter = newState.snakes().find(snake->id);
-        if (newIter == newState.snakes().end())
-        {
-            _result.obituaries[snake->id] = _turn;
-        }
-    }
-}
-
-void Simulation::updateFoodsEaten(GameState &newState, GameState &oldState)
-{
-    for (Point food : oldState.food())
-    {
-        Snake *inThatCellNow = newState.map().getSnake(food);
-        if (inThatCellNow != nullptr)
-        {
-            auto iter = _result.foodsEaten.find(inThatCellNow->id);
-            if (iter == _result.foodsEaten.end())
-            {
-                _result.foodsEaten[inThatCellNow->id] = {};
-            }
-            _result.foodsEaten[inThatCellNow->id].push_back(_turn);
-        }
-    }
-}
-
 TerminationReason coerceTerminationReason(
     TerminationReason current, uint32_t turn, uint32_t maxTurns)
 {

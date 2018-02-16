@@ -11,6 +11,8 @@
 #include <memory>
 #include <algorithm>
 
+#define MAX_SNAKES 10
+
 // Container for an instance of T that adds a flag to track whether the
 // value "exists". In reality the value always exists so there needs to
 // be a default state (ie: parameter-less ctor).
@@ -86,6 +88,11 @@ public:
 private:
     std::array<Maybe<T>, N> _data;
 };
+
+// struct Proximities
+// {
+//     std::array<
+// };
 
 enum class Direction
 {
@@ -432,10 +439,38 @@ std::string directionToString(Direction direction);
 
 void applyMoves(World &world, std::vector<SnakeMove> &moves);
 
-bool isAdjacent(uint32_t aIndex, uint32_t bIndex, GameState &state);
+inline bool isAdjacent(uint32_t aIndex, uint32_t bIndex, GameState &state)
+{
+    Point a = deconstructCellIndex(aIndex, state);
+    Point b = deconstructCellIndex(bIndex, state);
 
-bool isCloseToHead(uint32_t index, Snake *snake, GameState &state);
+    bool horizontallyAdjacent = absDiff(a.x, b.x) == 1 && a.y == b.y;
+    bool verticallyAdjacent = absDiff(a.y, b.y) == 1 && a.x == b.x;
 
-bool isCloseToEqualOrBiggerSnakeHead(Point p, GameState &state);
+    return horizontallyAdjacent || verticallyAdjacent;
+}
 
-bool isCloseToEqualOrBiggerSnakeHead(uint32_t index, GameState &state);
+inline bool isCloseToHead(uint32_t index, Snake *snake, GameState &state)
+{
+    uint32_t headIndex = cellIndex(snake->head(), state);
+    return isAdjacent(index, headIndex, state);
+}
+
+inline bool isCloseToEqualOrBiggerSnakeHead(uint32_t index, GameState &state)
+{
+    auto enemies = state.enemies();
+    for (Snake *otherSnake : enemies)
+    {
+        bool otherSnakeIsTooBigToEat = state.mySnake()->length() <= otherSnake->length();
+        if (otherSnakeIsTooBigToEat && isCloseToHead(index, otherSnake, state))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+inline bool isCloseToEqualOrBiggerSnakeHead(Point p, GameState &state)
+{
+    return isCloseToEqualOrBiggerSnakeHead(cellIndex(p, state), state);
+}
