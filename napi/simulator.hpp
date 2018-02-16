@@ -25,7 +25,8 @@ struct Future
     std::unordered_map<std::string, std::vector<uint32_t>> foodsEaten;
     Algorithm *algorithm;
     TerminationReason terminationReason;
-    std::vector<Direction> moves;
+    Direction move;
+    uint32_t turns;
 };
 
 struct DirectionScore

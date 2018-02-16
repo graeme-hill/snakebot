@@ -597,14 +597,16 @@ void simulateFuturesTest1()
     f1.foodsEaten = { { "0", { 2, 3 } } };
     f1.algorithm = &algo;
     f1.terminationReason = TerminationReason::Loss;
-    f1.moves = { Direction::Left, Direction::Up, Direction::Up, Direction::Up };
+    f1.move = Direction::Left;
+    f1.turns = 4;
 
     Future f2 {};
     f2.obituaries = { { "1", 3 }, { "0", 3 } };
     f2.foodsEaten = {};
     f2.algorithm = &algo;
     f2.terminationReason = TerminationReason::Loss;
-    f2.moves = { Direction::Up, Direction::Up, Direction::Up };
+    f2.move = Direction::Up;
+    f2.turns = 3;
 
     std::vector<Future> expectedFutures = { f1, f2 };
 
@@ -627,14 +629,16 @@ void bestMoveTest1()
     f1.foodsEaten = {};
     f1.algorithm = &algo;
     f1.terminationReason = TerminationReason::Loss;
-    f1.moves = { Direction::Left, Direction::Up, Direction::Up, Direction::Up };
+    f1.move = Direction::Left;
+    f1.turns = 4;
 
     Future f2 {};
     f2.obituaries = { { "1", 3 }, { "0", 3 } };
     f2.foodsEaten = {};
     f2.algorithm = &algo;
     f2.terminationReason = TerminationReason::Loss;
-    f2.moves = { Direction::Up, Direction::Up, Direction::Up };
+    f2.move = Direction::Up;
+    f2.turns = 3;
 
     std::vector<Future> futures = { f1, f2 };
 
@@ -697,6 +701,26 @@ void directionSetTests()
     }
 }
 
+void arrayDictTest1()
+{
+    ArrayDict<std::string, 10> test;
+    test.set(3, "three");
+    test.set(7, "seven");
+    assertEqual(test.get(3).value(), "three", "snakeDictTest1 - 3");
+    assertEqual(test.get(7).value(), "seven", "snakeDictTest1 - 7");
+    assertTrue(!test.get(0).hasValue(), "snakeDictTest1 - 0 !exists");
+    assertTrue(!test.get(10).hasValue(), "snakeDictTest1 - 10 !exists");
+    assertTrue(test.get(3).hasValue(), "snakeDictTest1 - 3 exists");
+    assertTrue(test.get(7).hasValue(), "snakeDictTest1 - 7 exists");
+
+    test.remove(3);
+    test.remove(9);
+
+    assertTrue(!test.get(10).hasValue(), "snakeDictTest1 - 10 !exists");
+    assertTrue(!test.get(3).hasValue(), "snakeDictTest1 - 3 !exists");
+    assertTrue(test.get(7).hasValue(), "snakeDictTest1 - 7 exists");
+}
+
 void TestSuite::run()
 {
     outOfBoundsTests();
@@ -727,4 +751,5 @@ void TestSuite::run()
     simulateFuturesTest1();
     bestMoveTest1();
     directionSetTests();
+    arrayDictTest1();
 }

@@ -15,7 +15,7 @@ Simulation::Simulation(
     _simNumber(simNumber),
     _turn(0),
     _result(
-        {{}, {}, branch.pair.myAlgorithm, TerminationReason::Unknown, {}})
+        {{}, {}, branch.pair.myAlgorithm, TerminationReason::Unknown, Direction::Left, 0})
 { }
 
 bool Simulation::next()
@@ -26,7 +26,11 @@ bool Simulation::next()
     // My move.
     SnakeMove myMove = { currentState.mySnake(), getMyMove(currentState) };
     std::vector<SnakeMove> moves { myMove };
-    _result.moves.push_back(myMove.direction);
+    if (_result.turns == 0)
+    {
+        _result.move = myMove.direction;
+    }
+    _result.turns++;
 
     // Enemy moves.
     for (Snake *enemy : currentState.enemies())
@@ -55,7 +59,7 @@ bool Simulation::next()
 
 Direction Simulation::getMyMove(GameState &state)
 {
-    if (_turn == 0 && _branch.firstMove.hasValue)
+    if (_turn == 1 && _branch.firstMove.hasValue)
     {
         return _branch.firstMove.value;
     }
@@ -132,7 +136,8 @@ std::vector<Future> runSimulations(
                 {},
                 algorithmPairs[simIndex].myAlgorithm,
                 TerminationReason::Unknown,
-                {}
+                Direction::Left,
+                0
             });
         }
     }
@@ -205,7 +210,7 @@ int scoreFuture(Future &future, GameState &state)
     auto obitIt = future.obituaries.find(state.mySnake()->id);
     auto foodIt = future.foodsEaten.find(state.mySnake()->id);
     uint32_t survivedTurns = obitIt == future.obituaries.end()
-        ? future.moves.size()
+        ? future.turns
         : obitIt->second;
     uint32_t survivalScore = survivedTurns * 1000;
 
@@ -235,10 +240,10 @@ Direction bestMove(std::vector<Future> &futures, GameState &state)
     for (Future &future : futures)
     {
         // Should never have a zero move future, but if there is don't crash.
-        if (future.moves.empty())
+        if (future.turns == 0)
             continue;
 
-        Direction direction = future.moves.at(0);
+        Direction direction = future.move;
         int score = scoreFuture(future, state);
 
         std::string algoName = future.algorithm->meta().name;

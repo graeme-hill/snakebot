@@ -11,6 +11,82 @@
 #include <memory>
 #include <algorithm>
 
+// Container for an instance of T that adds a flag to track whether the
+// value "exists". In reality the value always exists so there needs to
+// be a default state (ie: parameter-less ctor).
+template <typename T>
+class Maybe
+{
+public:
+    Maybe() : _hasValue(false)
+    { }
+    Maybe(T value) : _hasValue(true), _value(value)
+    { }
+
+    bool hasValue() { return _hasValue; }
+    T &value() { return _value; }
+
+    static Maybe<T> none()
+    {
+        return Maybe<T>();
+    }
+
+    static Maybe<T> just(T value)
+    {
+        return Maybe<T>(value);
+    }
+private:
+
+    bool _hasValue;
+    T _value;
+};
+
+// T = type of values in dictionary (which will be wrapped in Maybe<T>)
+// N = maximum number of keys in dictionary
+// Keys are always integers b/w 0 and N-1.
+// Keys must be unique.
+// Values are intended to be small and copy-friendly.
+template <typename T, size_t N>
+class ArrayDict
+{
+public:
+    ArrayDict()
+    {
+        // Initialize everything as empty
+        _data.fill(Maybe<T>());
+    }
+
+    void set(size_t i, T val)
+    {
+        if (i < N)
+        {
+            _data[i] = Maybe<T>::just(val);
+        }
+    }
+
+    Maybe<T> get(size_t i)
+    {
+        if (i < N)
+        {
+            return _data[i];
+        }
+        else
+        {
+            return Maybe<T>::none();
+        }
+    }
+
+    void remove(size_t i)
+    {
+        if (i < N)
+        {
+            _data[i] = Maybe<T>::none();
+        }
+    }
+private:
+    std::array<Maybe<T>, N> _data;
+};
+
 enum class Direction
 {
     Up, Down, Left, Right
