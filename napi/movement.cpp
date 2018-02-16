@@ -43,12 +43,8 @@ MaybeDirection bestFood(GameState &state)
     uint32_t bestLength;
     bool foundOne = false;
 
-    uint32_t c = 0;
     for (Point food : state.food())
     {
-        c++;
-        if (c > 1)
-            break;
         auto myPath = shortestPath(me->head(), food, state);
 
         if (myPath.empty())
