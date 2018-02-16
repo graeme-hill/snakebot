@@ -38,21 +38,23 @@ uint32_t lowestFScoreInSet(
     return lowestIndex;
 }
 
-std::vector<Direction> reconstructPath(
+Path reconstructPath(
     std::unordered_map<uint32_t, uint32_t> &cameFrom, uint32_t currentIndex, uint32_t width)
 {
-    std::vector<Direction> moves;
+    MaybeDirection result = MaybeDirection::none();
     auto iter = cameFrom.find(currentIndex);
+    size_t size = 0;
     while (iter != cameFrom.end())
     {
         uint32_t nextIndex = iter->second;
         Direction direction = directionBetweenNodes(nextIndex, currentIndex, width);
-        moves.insert(moves.begin(), direction);
+        result = MaybeDirection::just(direction);
+        size++;
         currentIndex = nextIndex;
         iter = cameFrom.find(currentIndex);
     }
 
-    return moves;
+    return Path{ size, result };
 }
 
 bool indexIsSafe(uint32_t index, uint32_t turn, GameState &state)
@@ -142,7 +144,7 @@ void printMap(std::string name, std::unordered_map<uint32_t, uint32_t> map)
     std::cout << std::endl;
 }
 
-std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
+Path shortestPath(Point start, Point goal, GameState &state)
 {
     uint32_t safety = 0;
 
@@ -175,7 +177,7 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
         uint32_t currentIndex = lowestFScoreInSet(openSet, fScore);
         if (currentIndex == goalIndex)
         {
-            std::vector<Direction> path = reconstructPath(cameFrom, currentIndex, state.width());
+            Path path = reconstructPath(cameFrom, currentIndex, state.width());
             return path;
         }
 
@@ -223,5 +225,5 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
     }
 
     // Found no path
-    return std::vector<Direction>();
+    return Path::none();
 }

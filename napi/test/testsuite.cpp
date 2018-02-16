@@ -147,18 +147,16 @@ void astarTests1()
     }));
 
     auto path = shortestPath({2,0}, {3,1}, state);
-    assertEqual(path.size(), 2, "astarTests1() - simple case path length");
+    assertEqual(path.size, 2, "astarTests1() - simple case path length");
 
     // Doesn't matter whether it goes down,right or right,down.
-    if (path.at(0) == Direction::Down)
+    if (path.direction.value == Direction::Down)
     {
-        assertTrue(path.at(0) == Direction::Down, "astarTests1() - down first");
-        assertTrue(path.at(1) == Direction::Right, "astarTests1() - right second");
+        assertEqual(path.direction.value, Direction::Down, "astarTests1() - down first");
     }
     else
     {
-        assertTrue(path.at(0) == Direction::Right, "astarTests1() - right first");
-        assertTrue(path.at(1) == Direction::Down, "astarTests1() - down second");
+        assertEqual(path.direction.value, Direction::Right, "astarTests1() - right first");
     }
 }
 
@@ -173,14 +171,9 @@ void astarTests2()
 
     // Expected path will be right,down,down,left,left,left
     auto path = shortestPath({2,0}, {0,2}, state);
-    assertEqual(path.size(), 6, "astarTests2() - path length");
+    assertEqual(path.size, 6, "astarTests2() - path length");
 
-    assertEqual(path.at(0), Direction::Right, "astarTests2() - right");
-    assertEqual(path.at(1), Direction::Down, "astarTests2() - down");
-    assertEqual(path.at(2), Direction::Down, "astarTests2() - down");
-    assertEqual(path.at(3), Direction::Left, "astarTests2() - left");
-    assertEqual(path.at(4), Direction::Left, "astarTests2() - left");
-    assertEqual(path.at(5), Direction::Left, "astarTests2() - left");
+    assertEqual(path.direction.value, Direction::Right, "astarTests2() - right");
 }
 
 void astarTests3()
@@ -195,12 +188,10 @@ void astarTests3()
     }));
 
     // Expected path will be right,right,right
-    std::vector<Direction> path = shortestPath({1,3}, {4,3}, state);
-    assertEqual(path.size(), 3, "astarTests3() - path length");
+    Path path = shortestPath({1,3}, {4,3}, state);
+    assertEqual(path.size, 3, "astarTests3() - path length");
 
-    assertEqual(path.at(0), Direction::Right, "astarTests3() - right");
-    assertEqual(path.at(1), Direction::Right, "astarTests3() - right");
-    assertEqual(path.at(2), Direction::Right, "astarTests3() - right");
+    assertEqual(path.direction.value, Direction::Right, "astarTests3() - right");
 }
 
 void astarTests4()
@@ -215,13 +206,10 @@ void astarTests4()
     }));
 
     // Expected path will be down,right,right,right
-    std::vector<Direction> path = shortestPath({1,2}, {4,3}, state);
-    assertEqual(path.size(), 4, "astarTests4() - path length");
+    Path path = shortestPath({1,2}, {4,3}, state);
+    assertEqual(path.size, 4, "astarTests4() - path length");
 
-    assertEqual(path.at(0), Direction::Down, "astarTests4() - down");
-    assertEqual(path.at(1), Direction::Right, "astarTests4() - right");
-    assertEqual(path.at(2), Direction::Right, "astarTests4() - right");
-    assertEqual(path.at(3), Direction::Right, "astarTests4() - right");
+    assertEqual(path.direction.value, Direction::Down, "astarTests4() - down");
 }
 
 void astarTests5()
@@ -235,16 +223,10 @@ void astarTests5()
         "_ _ _ _ _ _",
     }));
 
-    std::vector<Direction> path = shortestPath({1,2}, {3,2}, state);
-    assertEqual(path.size(), 4, "astarTests5() - path length");
+    Path path = shortestPath({1,2}, {3,2}, state);
+    assertEqual(path.size, 4, "astarTests5() - path length");
 
-    assertEqual(path.at(0), Direction::Down, "astarTests5() - down to avoid getting eaten");
-    assertEqual(path.at(1), Direction::Right, "astarTests5() - right");
-    if (path.size() > 2)
-    {
-        assertEqual(path.at(2), Direction::Right, "astarTests5() - right");
-        assertEqual(path.at(3), Direction::Up, "astarTests5() - up");
-    }
+    assertEqual(path.direction.value, Direction::Down, "astarTests5() - down to avoid getting eaten");
 }
 
 void astarTests6()
@@ -263,8 +245,8 @@ void astarTests6()
         "_ _ _ _ _ _ _ _"
     }));
 
-    std::vector<Direction> path = shortestPath({2,3}, {7,3}, state);
-    assertEqual(path.size(), 5, "astarTests6() - path length");
+    Path path = shortestPath({2,3}, {7,3}, state);
+    assertEqual(path.size, 5, "astarTests6() - path length");
 }
 
 void closestFoodTest1()

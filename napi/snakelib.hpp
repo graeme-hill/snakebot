@@ -45,6 +45,27 @@ struct MaybeDirection
 {
     bool hasValue;
     Direction value;
+
+    static MaybeDirection none()
+    {
+        return MaybeDirection{ false, Direction::Left };
+    }
+
+    static MaybeDirection just(Direction d)
+    {
+        return MaybeDirection{ true, d };
+    }
+};
+
+struct Path
+{
+    size_t size;
+    MaybeDirection direction;
+
+    static Path none()
+    {
+        return Path{ 0, MaybeDirection::none() };
+    }
 };
 
 class DirectionIterator

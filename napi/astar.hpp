@@ -2,4 +2,4 @@
 
 #include "snakelib.hpp"
 
-std::vector<Direction> shortestPath(Point start, Point goal, GameState &state);
+Path shortestPath(Point start, Point goal, GameState &state);

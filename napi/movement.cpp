@@ -5,19 +5,19 @@
 MaybeDirection closestFood(GameState &state)
 {
     Snake *me = state.mySnake();
-    std::vector<Direction> best;
+    Path best = Path::none();
     bool foundAnything = false;
 
     for (auto food : state.food())
     {
-        std::vector<Direction> myPath = shortestPath(me->head(), food, state);
+        Path myPath = shortestPath(me->head(), food, state);
 
-        if (myPath.empty())
+        if (!myPath.direction.hasValue)
         {
             continue;
         }
 
-        if (myPath.size() >= best.size() && foundAnything)
+        if (myPath.size >= best.size && foundAnything)
         {
             continue;
         }
@@ -26,31 +26,22 @@ MaybeDirection closestFood(GameState &state)
         best = myPath;
     }
 
-    if (!best.empty())
-    {
-        return  MaybeDirection{ true, best.at(0) };
-    }
-    else
-    {
-        return MaybeDirection{ false, Direction::Left };
-    }
+    return best.direction;
 }
 
 MaybeDirection bestFood(GameState &state)
 {
     Snake *me = state.mySnake();
-    Direction bestDirection = Direction::Left;
-    uint32_t bestLength;
-    bool foundOne = false;
+    Path best = Path::none();
 
     for (Point food : state.food())
     {
         auto myPath = shortestPath(me->head(), food, state);
 
-        if (myPath.empty())
+        if (!myPath.direction.hasValue)
             continue;
 
-        if (foundOne && myPath.size() >= bestLength)
+        if (best.direction.hasValue && myPath.size >= best.size)
             continue;
 
         bool enemyWillWin = false;
@@ -59,18 +50,18 @@ MaybeDirection bestFood(GameState &state)
             GameState &enemyState = state.perspective(enemy);
             auto enemyPath = shortestPath(enemy->head(), food, enemyState);
 
-            if (enemyPath.empty())
+            if (!enemyPath.direction.hasValue)
             {
                 continue;
             }
 
-            if (enemyPath.size() == myPath.size())
+            if (enemyPath.size == myPath.size)
             {
                 enemyWillWin = me->length() < enemy->length();
             }
             else
             {
-                enemyWillWin = enemyPath.size() < myPath.size();
+                enemyWillWin = enemyPath.size < myPath.size;
             }
 
             if (enemyWillWin)
@@ -81,13 +72,11 @@ MaybeDirection bestFood(GameState &state)
 
         if (!enemyWillWin)
         {
-            foundOne = true;
-            bestLength = myPath.size();
-            bestDirection = myPath.at(0);
+            best = myPath;
         }
     }
 
-    return MaybeDirection{ foundOne, bestDirection };
+    return best.direction;
 }
 
 bool is180(Point p, GameState &state)
@@ -218,14 +207,7 @@ MaybeDirection chaseTail(GameState &state)
 {
     Point myHead = state.mySnake()->head();
     Point myTail = state.mySnake()->tail();
-    std::vector<Direction> path = shortestPath(myHead, myTail, state);
-    if (!path.empty())
-    {
-        return MaybeDirection { true, path.at(0) };
-    }
-    else
-    {
-        return MaybeDirection { false, Direction::Left };
-    }
+    Path path = shortestPath(myHead, myTail, state);
+    return path.direction;
 }
 
