@@ -13,11 +13,14 @@
                 "napi/interop.cpp",
                 "napi/astar.cpp",
                 "napi/movement.cpp",
-                "napi/simulator.cpp"
+                "napi/simulator.cpp",
+                "napi/timing.cpp",
+                "napi/benchmark/benchsuite.cpp"
             ],
             "cflags": [
                 "-std=c++17"
             ],
+            "lflags": [],
             "cflags_cc!": [ "-fno-rtti" ],
             "conditions": [
                 [

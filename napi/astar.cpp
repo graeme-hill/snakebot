@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <unordered_set>
-#include <map>
+#include <unordered_map>
 
 #define VERY_HIGH_COST 1000
 #define INFINITY_COST 1000000
@@ -14,7 +14,7 @@ uint32_t heuristicCostEstimate(Point start, Point goal)
 }
 
 uint32_t lowestFScoreInSet(
-    std::unordered_set<uint32_t> &set, std::map<uint32_t, uint32_t> &fScore)
+    std::unordered_set<uint32_t> &set, std::unordered_map<uint32_t, uint32_t> &fScore)
 {
     uint32_t lowest = 0;
     uint32_t lowestIndex = 0;
@@ -39,7 +39,7 @@ uint32_t lowestFScoreInSet(
 }
 
 std::vector<Direction> reconstructPath(
-    std::map<uint32_t, uint32_t> &cameFrom, uint32_t currentIndex, uint32_t width)
+    std::unordered_map<uint32_t, uint32_t> &cameFrom, uint32_t currentIndex, uint32_t width)
 {
     std::vector<Direction> moves;
     auto iter = cameFrom.find(currentIndex);
@@ -109,7 +109,7 @@ std::vector<uint32_t> getNeighbors(uint32_t index, uint32_t turn, GameState &sta
     return result;
 }
 
-uint32_t getGScore(std::map<uint32_t, uint32_t> &gScore, uint32_t index)
+uint32_t getGScore(std::unordered_map<uint32_t, uint32_t> &gScore, uint32_t index)
 {
     auto iter = gScore.find(index);
     if (iter == gScore.end())
@@ -132,7 +132,7 @@ void printSet(std::string name, std::unordered_set<uint32_t> set)
     std::cout << std::endl;
 }
 
-void printMap(std::string name, std::map<uint32_t, uint32_t> map)
+void printMap(std::string name, std::unordered_map<uint32_t, uint32_t> map)
 {
     std::cout << name << ": ";
     for (auto p : map)
@@ -152,10 +152,10 @@ std::vector<Direction> shortestPath(Point start, Point goal, GameState &state)
     bool isFirstMove = true;
     std::unordered_set<uint32_t> closedSet;
     std::unordered_set<uint32_t> openSet;
-    std::map<uint32_t, uint32_t> cameFrom;
-    std::map<uint32_t, uint32_t> gScore;
-    std::map<uint32_t, uint32_t> fScore;
-    std::map<uint32_t, uint32_t> turns;
+    std::unordered_map<uint32_t, uint32_t> cameFrom;
+    std::unordered_map<uint32_t, uint32_t> gScore;
+    std::unordered_map<uint32_t, uint32_t> fScore;
+    std::unordered_map<uint32_t, uint32_t> turns;
 
     openSet.insert(startIndex);
     gScore.emplace(startIndex, 0);

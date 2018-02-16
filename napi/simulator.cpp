@@ -166,13 +166,7 @@ std::vector<Future> runSimulations(
             results[i].terminationReason, turn, maxTurns);
     }
 
-    // for (Future &future : results)
-    // {
-    //     future.terminationReason = coerceTerminationReason(
-    //         future.terminationReason, turn, maxTurns);
-    // }
-
-    std::cout << "simulated " << turn << " turns" << std::endl;
+    //std::cout << "simulated " << turn << " turns" << std::endl;
 
     return results;
 }

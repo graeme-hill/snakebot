@@ -21,8 +21,8 @@ struct AlgorithmBranch
 
 struct Future
 {
-    std::map<std::string, uint32_t> obituaries;
-    std::map<std::string, std::vector<uint32_t>> foodsEaten;
+    std::unordered_map<std::string, uint32_t> obituaries;
+    std::unordered_map<std::string, std::vector<uint32_t>> foodsEaten;
     Algorithm *algorithm;
     TerminationReason terminationReason;
     std::vector<Direction> moves;
