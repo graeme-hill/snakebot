@@ -14,11 +14,11 @@ Metadata Sim::meta()
     return {
         "#008800",
         "#FFFFFF",
-        "https://news.filehippo.com/wp-content/uploads/2014/12/www.moma_.org_.jpg",
-        "C++ sim",
+        "https://www.popoptiq.com/wp-content/uploads/2015/04/Timecop-1994-Movie-Picture-01.jpg",
+        "Time Cop",
         "Hi",
-        "pixel",
-        "pixel"
+        "shades",
+        "fat-rattle"
     };
 }
 
