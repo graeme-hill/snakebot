@@ -1,6 +1,9 @@
 #pragma once
 
 #include "snakelib.hpp"
+#include <thread>
+
+#define THREAD_COUNT 4
 
 enum class TerminationReason
 {
@@ -118,3 +121,68 @@ std::vector<Future> simulateFutures(
     std::vector<Algorithm *> enemyAlgorithms);
 
 Direction bestMove(std::vector<Future> &futures, GameState &state);
+
+struct SimParams
+{
+    std::vector<AlgorithmBranch> branches;
+    std::unique_ptr<GameState> state;
+    uint32_t maxTurns;
+};
+
+class SimThread
+{
+public:
+    SimThread() : _hasWork(false), _quit(false), _thread(&SimThread::spin, this)
+    {
+    }
+
+    void startWork(SimParams params)
+    {
+        _params = std::move(params);
+        _hasWork = true;
+    }
+
+    void spin()
+    {
+        while (!_quit)
+        {
+            if (_hasWork)
+            {
+                _result = runSimulationBranches(_params.branches, *_params.state, _params.maxTurns);
+                _hasWork = false;
+            }
+            std::this_thread::yield();
+        }
+    }
+
+    std::vector<Future> &result()
+    {
+        return _result;
+    }
+
+    bool done()
+    {
+        return !_hasWork;
+    }
+
+    void kill()
+    {
+        _quit = true;
+    }
+
+    void join()
+    {
+        _thread.join();
+    }
+
+    static std::array<SimThread, THREAD_COUNT> instances;
+
+    static void stopAll();
+
+private:
+    std::vector<Future> _result;
+    SimParams _params;
+    volatile bool _hasWork;
+    volatile bool _quit;
+    std::thread _thread;
+};

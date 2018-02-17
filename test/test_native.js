@@ -34,7 +34,11 @@ describe("meta()", () => {
     });
 });
 
-describe("C++ tests", () => {
+describe("C++ tests", function() {
+    after(function() {
+        cpp.terminate();
+    });
+
     cpp.test({
         assertEqual: (actual, expected, message) => {
             it(message, () => assert.equal(actual, expected));

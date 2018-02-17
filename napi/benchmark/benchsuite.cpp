@@ -110,4 +110,20 @@ void BenchSuite::run()
     simulatorOnBusyGrid1();
     simulatorOnBusyGrid2();
     astar1();
+
+        simulatorOnBusyGrid1();
+    simulatorOnBusyGrid2();
+    astar1();
+
+        simulatorOnBusyGrid1();
+    simulatorOnBusyGrid2();
+    astar1();
+
+        simulatorOnBusyGrid1();
+    simulatorOnBusyGrid2();
+    astar1();
+
+        simulatorOnBusyGrid1();
+    simulatorOnBusyGrid2();
+    astar1();
 }

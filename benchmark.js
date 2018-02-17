@@ -9,3 +9,5 @@ cpp.benchmark({
         return helpers.parseWorld(rows);
     }
 });
+
+cpp.terminate();

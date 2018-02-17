@@ -131,6 +131,17 @@ napi_value benchmark(napi_env env, napi_callback_info info)
     return result;
 }
 
+napi_value terminate(napi_env env, napi_callback_info info)
+{
+    std::cout << "Waiting for simulation threads to stop...\n";
+    SimThread::stopAll();
+
+    // Return undefined (ie: no return value)
+    napi_value result;
+    napi_get_undefined(env, &result);
+    return result;
+}
+
 napi_value init(napi_env env, napi_value exports)
 {
     // INITIALIZE AVAILABLE ALGORITHMS HERE!
@@ -145,11 +156,12 @@ napi_value init(napi_env env, napi_value exports)
     // the algorithm name (which needs to match the name used as the key in
     // algorithms unordered map.
     napi_status status;
-    std::array<napi_property_descriptor, 4> descriptors;
+    std::array<napi_property_descriptor, 5> descriptors;
     descriptors[0] = DECLARE_NAPI_METHOD("move", move);
     descriptors[1] = DECLARE_NAPI_METHOD("meta", meta);
     descriptors[2] = DECLARE_NAPI_METHOD("test", test);
     descriptors[3] = DECLARE_NAPI_METHOD("benchmark", benchmark);
+    descriptors[4] = DECLARE_NAPI_METHOD("terminate", terminate);
     status = napi_define_properties(
         env, exports, descriptors.size(), descriptors.data());
     HANDLE_ERROR("Failed to export functions from C++ to JS");

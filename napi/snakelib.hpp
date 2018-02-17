@@ -360,6 +360,7 @@ public:
     GameState &perspective(Snake *enemy);
     std::unique_ptr<GameState> newStateAfterMoves(
         std::vector<SnakeMove> &moves);
+    std::unique_ptr<GameState> clone();
 
     bool isLoss();
 

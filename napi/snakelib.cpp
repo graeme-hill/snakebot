@@ -112,6 +112,12 @@ std::unique_ptr<GameState> GameState::newStateAfterMoves(
     return std::unique_ptr<GameState>(new GameState(newWorld));
 }
 
+std::unique_ptr<GameState> GameState::clone()
+{
+    World newWorld = _world;
+    return std::unique_ptr<GameState>(new GameState(newWorld));
+}
+
 Snake *GameState::mySnake()
 {
     return _mySnake;

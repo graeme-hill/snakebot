@@ -29,10 +29,10 @@ struct MemoryPool
     std::unordered_map<uint32_t, uint32_t> fScore;
     std::unordered_map<uint32_t, uint32_t> turns;
 
-    static MemoryPool instance;
+    static thread_local MemoryPool instance;
 };
 
-MemoryPool MemoryPool::instance;
+thread_local MemoryPool MemoryPool::instance;
 
 void clean(MemoryPool &pool)
 {
