@@ -100,8 +100,7 @@ GameState &GameState::perspective(Snake *enemy)
 
     World newWorld = _world;
     newWorld.you = enemy->id;
-    std::unique_ptr<GameState> newState(new GameState(newWorld));
-    _perspectiveCopies.insert({ enemy->id, std::move(newState) });
+    _perspectiveCopies.insert(std::make_pair(enemy->id, std::unique_ptr<GameState>(new GameState(newWorld))));
     return *_perspectiveCopies[enemy->id];
 }
 

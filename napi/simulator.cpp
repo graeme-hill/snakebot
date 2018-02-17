@@ -3,6 +3,60 @@
 
 #include <numeric>
 
+// struct SimParams
+// {
+//     std::vector<AlgorithmBranch> branches;
+//     GameState *state;
+//     uint32_t maxTurns;
+// };
+
+// class SimThread
+// {
+// public:
+//     SimThread() : _hasWork(false), _thread(&SimThread::spin, this)
+//     {
+//     }
+
+//     void startWork(SimParams params)
+//     {
+//         _params = params;
+//         _hasWork = true;
+//     }
+
+//     void spin()
+//     {
+//         while (true)
+//         {
+//             if (_hasWork)
+//             {
+//                 std::cout << _params.algorithmPairs.size() << " futures to sim\n";
+//                 _result = runSimulationBranches(_params.branches, *_params.state, _params.maxTurns);
+//                 _hasWork = false;
+//             }
+//         }
+//     }
+
+//     std::vector<Future> &result()
+//     {
+//         return _result;
+//     }
+
+//     bool done()
+//     {
+//         return !_hasWork;
+//     }
+
+//     static std::array<SimThread, THREAD_COUNT> instances;
+
+// private:
+//     std::vector<Future> _result;
+//     SimParams _params;
+//     volatile bool _hasWork;
+//     std::thread _thread;
+// };
+
+// std::array<SimThread, THREAD_COUNT> SimThread::instances;
+
 Simulation::Simulation(
     AlgorithmBranch branch,
     GameState &initialState,
@@ -69,35 +123,28 @@ TerminationReason coerceTerminationReason(
     return current;
 }
 
-std::vector<Future> runSimulations(
-    std::vector<AlgorithmPair> algorithmPairs,
+std::vector<Future> runSimulationBranches(
+    std::vector<AlgorithmBranch> &branches,
     GameState &initialState,
-    uint32_t maxTurns,
-    DirectionSet firstMoves)
+    uint32_t maxTurns)
 {
     uint32_t turn = 0;
-
-    // Create a simulation for every algorithm pair + firstMove branch
     std::vector<Simulation> simulations;
-    std::vector<Future> results;
     uint32_t simIndex = 0;
-    for (AlgorithmPair pair : algorithmPairs)
+    std::vector<Future> results;
+
+    for (AlgorithmBranch &branch : branches)
     {
-        for (Direction firstDir : firstMoves)
-        {
-            MaybeDirection maybeDir { true, firstDir };
-            AlgorithmBranch branch{ pair, maybeDir };
-            simulations.push_back(
+        simulations.push_back(
                 { branch, initialState, maxTurns, simIndex++ });
-            results.push_back({
-                {},
-                {},
-                algorithmPairs[simIndex].myAlgorithm,
-                TerminationReason::Unknown,
-                Direction::Left,
-                0
-            });
-        }
+        results.push_back({
+            {},
+            {},
+            branch.pair.myAlgorithm,
+            TerminationReason::Unknown,
+            Direction::Left,
+            0
+        });
     }
 
     // Keep track of simulations that are finished so we know when to stop
@@ -133,6 +180,77 @@ std::vector<Future> runSimulations(
     //std::cout << "simulated " << turn << " turns" << std::endl;
 
     return results;
+}
+
+std::vector<Future> runSimulations(
+    std::vector<AlgorithmPair> algorithmPairs,
+    GameState &initialState,
+    uint32_t maxTurns,
+    DirectionSet firstMoves)
+{
+    // uint32_t turn = 0;
+
+    // Create a simulation for every algorithm pair + firstMove branch
+    // std::vector<Simulation> simulations;
+    // std::vector<Future> results;
+    // uint32_t simIndex = 0;
+    std::vector<AlgorithmBranch> branches;
+    for (AlgorithmPair pair : algorithmPairs)
+    {
+        for (Direction firstDir : firstMoves)
+        {
+            MaybeDirection maybeDir { true, firstDir };
+            AlgorithmBranch branch{ pair, maybeDir };
+            branches.push_back(branch);
+            // simulations.push_back(
+            //     { branch, initialState, maxTurns, simIndex++ });
+            // results.push_back({
+            //     {},
+            //     {},
+            //     algorithmPairs[simIndex].myAlgorithm,
+            //     TerminationReason::Unknown,
+            //     Direction::Left,
+            //     0
+            // });
+        }
+    }
+
+    std::vector<Future> result = runSimulationBranches(branches, initialState, maxTurns);
+    return result;
+
+    // // Keep track of simulations that are finished so we know when to stop
+    // std::unordered_set<uint32_t> completedSimulations;
+
+    // while (completedSimulations.size() < simulations.size())
+    // {
+    //     turn++;
+    //     for (Simulation &sim : simulations)
+    //     {
+    //         // Don't do anything if this sim is already done
+    //         auto completedIter = completedSimulations.find(sim.simNumber());
+    //         if (completedIter != completedSimulations.end())
+    //         {
+    //             continue;
+    //         }
+
+    //         if (sim.next() || turn >= maxTurns)
+    //         {
+    //             results[sim.simNumber()] = sim.result();
+    //             completedSimulations.insert(sim.simNumber());
+    //         }
+    //     }
+    // }
+
+    // for (size_t i = 0; i < results.size(); i++)
+    // {
+    //     results[i] = simulations[i].result();
+    //     results[i].terminationReason = coerceTerminationReason(
+    //         results[i].terminationReason, turn, maxTurns);
+    // }
+
+    // //std::cout << "simulated " << turn << " turns" << std::endl;
+
+    // return results;
 }
 
 std::vector<Future> simulateFutures(

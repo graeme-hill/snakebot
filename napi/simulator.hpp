@@ -100,11 +100,16 @@ private:
     std::unique_ptr<GameState> _newestState;
 };
 
+std::vector<Future> runSimulationBranches(
+    std::vector<AlgorithmBranch> &branches,
+    GameState &initialState,
+    uint32_t maxTurns);
+
 std::vector<Future> runSimulations(
     std::vector<AlgorithmPair> algorithmPairs,
     GameState &initialState,
     uint32_t maxTurns,
-    std::vector<Direction> firstMoves);
+    DirectionSet firstMoves);
 
 std::vector<Future> simulateFutures(
     GameState &initialState,
