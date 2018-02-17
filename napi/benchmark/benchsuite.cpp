@@ -3,6 +3,7 @@
 #include "../snakelib.hpp"
 #include "../algorithms/sim.hpp"
 #include "../timing.hpp"
+#include "../astar.hpp"
 
 void simulatorOnBusyGrid1()
 {
@@ -70,46 +71,43 @@ void simulatorOnBusyGrid2()
     });
 }
 
+void astar1()
+{
+    GameState state(parseWorld({
+        "_ _ _ v _ _ _ _ _ _ _ _ _ _ _ _ _ > > v",
+        "_ _ 8 v _ 7 < < < < _ _ _ _ _ _ _ _ 9 v",
+        "_ _ ^ < _ _ _ _ _ _ * _ _ _ _ _ _ _ ^ <",
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ v _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ v _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ 2 _ _ _ _ _",
+        "_ _ _ _ > > 0 _ _ _ _ _ _ _ _ _ _ _ _ _",
+        "_ _ * _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ > v _ _ _ _ _ _ _",
+        "_ _ _ _ _ _ _ * _ _ _ _ > 4 _ _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _ > > 5 _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 3 < < _",
+        "_ _ _ > > 1 _ _ _ _ _ _ _ _ _ _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ *",
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ v _ _ _ _ _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ v _ _ _ _ _ _ _ _ _",
+        "_ _ * _ _ _ _ _ _ _ > 6 _ _ _ _ _ _ _ _"
+    }));
+
+    benchmark("A* - one path", [&state]()
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            shortestPath({ 2, 1 }, { 19, 15 }, state);
+        }
+    });
+}
+
 void BenchSuite::run()
 {
     simulatorOnBusyGrid1();
     simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
+    astar1();
 }

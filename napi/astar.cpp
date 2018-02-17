@@ -8,6 +8,42 @@
 #define INFINITY_COST 1000000
 #define MAX_ITERATIONS 10000
 
+struct MemoryPool
+{
+    MemoryPool() :
+        closedSet(20),
+        openSet(20),
+        cameFrom(20),
+        gScore(20),
+        fScore(20),
+        turns(20)
+    { }
+
+    MemoryPool(const MemoryPool &) = delete;
+    MemoryPool(MemoryPool &&) = delete;
+
+    std::unordered_set<uint32_t> closedSet;
+    std::unordered_set<uint32_t> openSet;
+    std::unordered_map<uint32_t, uint32_t> cameFrom;
+    std::unordered_map<uint32_t, uint32_t> gScore;
+    std::unordered_map<uint32_t, uint32_t> fScore;
+    std::unordered_map<uint32_t, uint32_t> turns;
+
+    static MemoryPool instance;
+};
+
+MemoryPool MemoryPool::instance;
+
+void clean(MemoryPool &pool)
+{
+    pool.closedSet.clear();
+    pool.openSet.clear();
+    pool.cameFrom.clear();
+    pool.gScore.clear();
+    pool.fScore.clear();
+    pool.turns.clear();
+}
+
 uint32_t heuristicCostEstimate(Point start, Point goal)
 {
     return absDiff(start.x, goal.x) + absDiff(start.y, goal.y);
@@ -152,12 +188,14 @@ Path shortestPath(Point start, Point goal, GameState &state)
     uint32_t goalIndex = cellIndex(goal, state);
 
     bool isFirstMove = true;
-    std::unordered_set<uint32_t> closedSet(20);
-    std::unordered_set<uint32_t> openSet(20);
-    std::unordered_map<uint32_t, uint32_t> cameFrom(20);
-    std::unordered_map<uint32_t, uint32_t> gScore(20);
-    std::unordered_map<uint32_t, uint32_t> fScore(20);
-    std::unordered_map<uint32_t, uint32_t> turns(20);
+    MemoryPool &pool = MemoryPool::instance; // reuse same pool of heap memory to avoid extra (de)allocations
+    clean(pool);
+    std::unordered_set<uint32_t> &closedSet = pool.closedSet;
+    std::unordered_set<uint32_t> &openSet = pool.openSet;
+    std::unordered_map<uint32_t, uint32_t> &cameFrom = pool.cameFrom;
+    std::unordered_map<uint32_t, uint32_t> &gScore = pool.gScore;
+    std::unordered_map<uint32_t, uint32_t> &fScore = pool.fScore;
+    std::unordered_map<uint32_t, uint32_t> &turns = pool.turns;
 
     openSet.insert(startIndex);
     gScore.emplace(startIndex, 0);
