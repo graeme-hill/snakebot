@@ -3,6 +3,8 @@
 
 #include <numeric>
 
+#define IDEAL_HEALTH_AT_FOOD_TIME 100
+
 std::array<SimThread, THREAD_COUNT> SimThread::instances;
 
 void SimThread::stopAll()
@@ -220,6 +222,20 @@ std::vector<Future> simulateFutures(
     return futures;
 }
 
+int foodScore(uint32_t foodTurn, GameState &state)
+{
+    int health = state.mySnake()->health;
+    int healthAtFoodTime = health - foodTurn;
+    int diff = healthAtFoodTime - IDEAL_HEALTH_AT_FOOD_TIME;
+    int multiplier = 2;
+    if (diff < 0)
+    {
+        multiplier = 1;
+    }
+    int inverseDiff = IDEAL_HEALTH_AT_FOOD_TIME - std::abs(diff);
+    return inverseDiff * multiplier;
+}
+
 int scoreFuture(Future &future, GameState &state)
 {
     auto obitIt = future.obituaries.find(state.mySnake()->id);
@@ -229,17 +245,17 @@ int scoreFuture(Future &future, GameState &state)
         : obitIt->second;
     uint32_t survivalScore = survivedTurns * 1000;
 
-    uint32_t foodScore = 0;
+    uint32_t foodPoints = 0;
     if (foodIt != future.foodsEaten.end())
     {
-        std::vector<uint32_t> foodTurns = foodIt->second;
+        std::vector<uint32_t> &foodTurns = foodIt->second;
         if (!foodTurns.empty())
         {
-            foodScore += 100 - foodTurns.at(0);
+            foodPoints += foodScore(foodTurns.at(0), state);// 100 - foodTurns.at(0);
         }
     }
 
-    int score = survivalScore + foodScore;
+    int score = survivalScore + foodPoints;
     return score;
 }
 
