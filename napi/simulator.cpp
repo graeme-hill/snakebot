@@ -20,6 +20,14 @@ void SimThread::stopAll()
     }
 }
 
+void SimThread::wakeAll()
+{
+    for (SimThread &simThread : SimThread::instances)
+    {
+        simThread.wakeUp();
+    }
+}
+
 Simulation::Simulation(
     AlgorithmBranch branch,
     GameState &initialState,

@@ -22,6 +22,13 @@ Metadata Sim::meta()
     };
 }
 
+void Sim::start()
+{
+    // Make sure the simulation threads are all awake so that it's not slow on
+    // the first move.
+    SimThread::wakeAll();
+}
+
 Direction Sim::move(GameState &state)
 {
     Dog dog;

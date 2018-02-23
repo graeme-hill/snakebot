@@ -18,6 +18,10 @@ Metadata Hungry::meta()
     };
 }
 
+void Hungry::start()
+{
+}
+
 Direction Hungry::move(GameState &state)
 {
     auto foodDir = closestFood(state);

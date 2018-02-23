@@ -18,6 +18,10 @@ Metadata Cautious::meta()
     };
 }
 
+void Cautious::start()
+{
+}
+
 Direction Cautious::move(GameState &state)
 {
     auto foodDir = bestFood(state);

@@ -22,7 +22,8 @@ function getAlgorithm(key) {
         const snakeBotNative = require("bindings")("snakebot_native");
         return {
             meta: snakeBotNative.meta(cppKey),
-            move: (world) => snakeBotNative.move(world, cppKey)
+            move: (world) => snakeBotNative.move(world, cppKey),
+            start: () => snakeBotNative.start(cppKey)
         };
     } else {
         // It's a normal JS algorithm implementation so just require() it.

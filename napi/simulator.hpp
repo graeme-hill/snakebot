@@ -1,9 +1,17 @@
 #pragma once
 
 #include "snakelib.hpp"
+#include "timing.hpp"
 #include <thread>
+#include <chrono>
 
 #define THREAD_COUNT 4
+
+// Sleep this amount of time each iteration of worker thread when in sleep mode.
+#define SLEEP_MODE_DELAY_MILLIS 10
+
+// Amount of time with no work before worker thread enters sleep mode.
+#define SECONDS_OF_NO_WORK_UNTIL_SLEEP 10.0
 
 enum class TerminationReason
 {
@@ -50,6 +58,7 @@ public:
     bool next();
     Future result() { return _result; }
     uint32_t simNumber() { return _simNumber; }
+
 
 private:
     Direction getMyMove(GameState &state)
@@ -132,9 +141,13 @@ struct SimParams
 class SimThread
 {
 public:
-    SimThread() : _hasWork(false), _quit(false), _thread(&SimThread::spin, this)
-    {
-    }
+    SimThread() :
+        _hasWork(false),
+        _quit(false),
+        _thread(&SimThread::spin, this),
+        _timeOfLastWork(Clock::now()),
+        _sleeping(true)
+    { }
 
     void startWork(SimParams params)
     {
@@ -148,10 +161,36 @@ public:
         {
             if (_hasWork)
             {
+                if (_sleeping)
+                {
+                    wakeUp();
+                }
+
                 _result = runSimulationBranches(_params.branches, *_params.state, _params.maxTurns);
                 _hasWork = false;
+                _timeOfLastWork = Clock::now();
             }
-            std::this_thread::yield();
+            else if (!_sleeping)
+            {
+                auto now = Clock::now();
+                Seconds diff = now - _timeOfLastWork;
+                if (diff > Seconds(SECONDS_OF_NO_WORK_UNTIL_SLEEP))
+                {
+                    sleep();
+                }
+            }
+
+            if (_sleeping)
+            {
+                // Play very nice with other threads and take very little CPU
+                std::this_thread::sleep_for(
+                    std::chrono::milliseconds(SLEEP_MODE_DELAY_MILLIS));
+            }
+            else
+            {
+                // Play nice with other threads but take a lot of CPU
+                std::this_thread::yield();
+            }
         }
     }
 
@@ -175,9 +214,23 @@ public:
         _thread.join();
     }
 
+    void wakeUp()
+    {
+        std::cout << "I'M AWAKE\n";
+        _sleeping = false;
+    }
+
+    void sleep()
+    {
+        std::cout << "zzzzzzzzzzzzz\n";
+        _sleeping = true;
+    }
+
     static std::array<SimThread, THREAD_COUNT> instances;
 
     static void stopAll();
+
+    static void wakeAll();
 
 private:
     std::vector<Future> _result;
@@ -185,4 +238,6 @@ private:
     volatile bool _hasWork;
     volatile bool _quit;
     std::thread _thread;
+    Clock::time_point _timeOfLastWork;
+    volatile bool _sleeping;
 };

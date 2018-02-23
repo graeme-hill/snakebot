@@ -24,6 +24,9 @@ public:
         };
     }
 
+    void start() override
+    { }
+
     Direction move(GameState &) override
     {
         return _dir;
