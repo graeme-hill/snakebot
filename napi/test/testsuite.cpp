@@ -3,6 +3,7 @@
 #include "../astar.hpp"
 #include "../movement.hpp"
 #include "../simulator.hpp"
+#include "../algorithms/sim.hpp"
 #include <iostream>
 
 class OneDirAlgorithm : public Algorithm
@@ -373,7 +374,7 @@ void worldComparisonTest1()
         "> 0 v <",
         "> v v _",
         "_ 3 2 _"
-    }); 
+    });
 
     assertEqual(w1, w2, "world compare");
 }
@@ -721,6 +722,49 @@ void arrayDictTest1()
     assertTrue(test.get(7).hasValue(), "snakeDictTest1 - 7 exists");
 }
 
+void wideRectangleTest1()
+{
+    std::cout << "wideRectangleTest1\n";
+    GameState state(parseWorld({
+        "_ _ _ _ _ _ _ _ _ v _ _",
+        "_ _ * _ _ _ 1 < < < _ _",
+        "_ _ > v _ _ _ * _ _ _ _",
+        "_ _ _ > 0 _ * _ _ _ _ _"
+    }));
+
+    assertEqual(state.width(), 12, "wideRectangleTest1() - width");
+    assertEqual(state.height(), 4, "wideRectangleTest1() - height");
+
+    Sim sim;
+    sim.move(state);
+    assertTrue(true, "wideRectangleTest1() - don't segfault");
+}
+
+void tallRectangleTest1()
+{
+    GameState state(parseWorld({
+        "_ _ _ _",
+        "_ _ _ _",
+        "_ < < <",
+        "_ v _ _",
+        "1 < _ _",
+        "_ * _ *",
+        "_ _ _ _",
+        "_ _ _ _",
+        "* _ 0 <",
+        "_ _ > ^",
+        "_ _ ^ _",
+        "_ _ _ _"
+    }));
+
+    assertEqual(state.width(), 4, "wideRectangleTest1() - width");
+    assertEqual(state.height(), 12, "wideRectangleTest1() - height");
+
+    Sim sim;
+    sim.move(state);
+    assertTrue(true, "tallRectangleTest1() - don't segfault");
+}
+
 void TestSuite::run()
 {
     outOfBoundsTests();
@@ -752,4 +796,6 @@ void TestSuite::run()
     bestMoveTest1();
     directionSetTests();
     arrayDictTest1();
+    wideRectangleTest1();
+    tallRectangleTest1();
 }

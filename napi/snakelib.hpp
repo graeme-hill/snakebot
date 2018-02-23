@@ -409,15 +409,15 @@ inline Point deconstructCellIndex(uint32_t index, GameState &state)
     return deconstructCellIndex(index, state.width());
 }
 
-inline bool outOfBounds(Point p, uint32_t width)
+inline bool outOfBounds(Point p, uint32_t width, uint32_t height)
 {
     // Since x and y are unsigned so they wrap and become very large numbers.
-    return p.x >= width || p.y >= width;
+    return p.x >= width || p.y >= height;
 }
 
 inline bool outOfBounds(Point p, GameState &gameState)
 {
-    return outOfBounds(p, gameState.width());
+    return outOfBounds(p, gameState.width(), gameState.height());
 }
 
 inline Direction directionBetweenNodes(uint32_t fromIndex, uint32_t toIndex, uint32_t width)

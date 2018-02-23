@@ -95,7 +95,7 @@ GameState &GameState::perspective(Snake *enemy)
     auto iter = _perspectiveCopies.find(enemy->id);
     if (iter != _perspectiveCopies.end())
     {
-        return *iter->second; 
+        return *iter->second;
     }
 
     World newWorld = _world;
@@ -310,7 +310,7 @@ void eatFoodOrDie(World &world)
             // It did eat so remove the food it ate.
             world.food.erase(
                 std::remove(
-                    world.food.begin(), 
+                    world.food.begin(),
                     world.food.end(),
                     snake.head()),
                 world.food.end());
@@ -365,7 +365,7 @@ void markCrashersDead(World &world)
     // Find heads that ran into tails or went oob.
     for (Snake &snake : world.snakes)
     {
-        if (outOfBounds(snake.head(), world.width))
+        if (outOfBounds(snake.head(), world.width, world.height))
         {
             snake.dead = true;
         }
@@ -392,7 +392,7 @@ void removeDeadGuys(World &world)
 void applyMoves(World &world, std::vector<SnakeMove> &moves)
 {
     // Adds new part in direction of move. Does not handle collions, oob, etc.
-    moveHeadsForward(world, moves);    
+    moveHeadsForward(world, moves);
 
     // Removes tail part if didn't eat. Marks dead if got eaten.
     eatFoodOrDie(world);

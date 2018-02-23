@@ -101,12 +101,12 @@ bool isCellOk(Point p, GameState &state)
 
 bool isCellSafe(Point p, GameState &state)
 {
-    return isCellOk(p, state) && !isCloseToEqualOrBiggerSnakeHead(p, state); 
+    return isCellOk(p, state) && !isCloseToEqualOrBiggerSnakeHead(p, state);
 }
 
 bool isCellRisky(Point p, GameState &state)
 {
-    return isCellOk(p, state) && isCloseToEqualOrBiggerSnakeHead(p, state); 
+    return isCellOk(p, state) && isCloseToEqualOrBiggerSnakeHead(p, state);
 }
 
 DirectionSet notImmediatelySuicidalMoves(GameState &state)
@@ -210,4 +210,3 @@ MaybeDirection chaseTail(GameState &state)
     Path path = shortestPath(myHead, myTail, state);
     return path.direction;
 }
-

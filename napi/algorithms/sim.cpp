@@ -30,8 +30,10 @@ Direction Sim::move(GameState &state)
 
     std::vector<Algorithm *> myAlgorithms { &cautious };
     std::vector<Algorithm *> enemyAlgorithms { &hungry };
+
     std::vector<Future> futures = simulateFutures(
     	state, 100, myAlgorithms, enemyAlgorithms);
+
     Direction best = bestMove(futures, state);
 
     return best;

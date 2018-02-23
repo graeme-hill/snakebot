@@ -3,7 +3,7 @@
 
 #include <numeric>
 
-#define IDEAL_HEALTH_AT_FOOD_TIME 100
+#define IDEAL_HEALTH_AT_FOOD_TIME 50
 
 std::array<SimThread, THREAD_COUNT> SimThread::instances;
 
@@ -57,7 +57,7 @@ bool Simulation::next()
         moves.push_back({ enemy, direction });
     }
 
-    std::unique_ptr<GameState> newState = 
+    std::unique_ptr<GameState> newState =
         currentState.newStateAfterMoves(moves);
 
     updateObituaries(*newState, currentState);
@@ -207,7 +207,7 @@ std::vector<Future> simulateFutures(
         {
             algorithmPairs.push_back({ a1, a2 });
         }
-    }    
+    }
 
     DirectionSet firstMoves = safeMoves(initialState);
 
