@@ -411,7 +411,7 @@ inline Point deconstructCellIndex(uint32_t index, GameState &state)
 
 inline bool outOfBounds(Point p, uint32_t width, uint32_t height)
 {
-    // Since x and y are unsigned so they wrap and become very large numbers.
+    // Since x and y are unsigned they wrap and become very large numbers.
     return p.x >= width || p.y >= height;
 }
 
