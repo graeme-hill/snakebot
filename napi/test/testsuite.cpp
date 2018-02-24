@@ -773,10 +773,10 @@ void tallRectangleTest1()
 void inYourFaceTest1()
 {
     GameState state(parseWorld({
-        "_ _ _ _",
-        "_ _ 0 <",
-        "_ 1 < <",
-        "_ _ _ _"
+        "_ _ _ _ _",
+        "_ _ _ 0 <",
+        "_ 1 < < _",
+        "_ _ _ _ _"
     }));
 
     InYourFace inYourFace;
@@ -788,6 +788,7 @@ void inYourFaceTest2()
 {
     GameState state(parseWorld({
         "_ 0 < <",
+        "_ _ _ _",
         "_ _ _ _",
         "_ 1 < <",
         "_ _ _ _"
@@ -802,6 +803,7 @@ void inYourFaceTest3()
 {
     GameState state(parseWorld({
         "_ 1 < <",
+        "_ _ _ _",
         "_ _ _ _",
         "_ 0 < <",
         "_ _ _ _"
