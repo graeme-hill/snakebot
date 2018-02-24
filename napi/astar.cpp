@@ -46,7 +46,7 @@ void clean(MemoryPool &pool)
 
 uint32_t heuristicCostEstimate(Point start, Point goal)
 {
-    return absDiff(start.x, goal.x) + absDiff(start.y, goal.y);
+    return distance(start, goal);
 }
 
 uint32_t lowestFScoreInSet(

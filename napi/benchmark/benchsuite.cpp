@@ -4,6 +4,7 @@
 #include "../algorithms/sim.hpp"
 #include "../timing.hpp"
 #include "../astar.hpp"
+#include "../movement.hpp"
 
 void simulatorOnBusyGrid1()
 {
@@ -35,6 +36,11 @@ void simulatorOnBusyGrid1()
     benchmark("sim - one turn on a big grid w/ a lot of food", [&sim, &state]()
     {
         sim.move(state);
+    });
+
+    benchmark("sim - bestFood()", [&state]()
+    {
+        bestFood(state);
     });
 }
 
@@ -104,7 +110,7 @@ void astar1()
 
 void BenchSuite::run()
 {
-    for (auto i = 0; i < 3; i++)
+    for (auto i = 0; i < 10; i++)
     {
         std::cout << "--- pass " << (i + 1) << " ---" << std::endl;
         simulatorOnBusyGrid1();

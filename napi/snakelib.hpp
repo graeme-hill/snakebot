@@ -476,3 +476,8 @@ inline bool isCloseToEqualOrBiggerSnakeHead(Point p, GameState &state)
 {
     return isCloseToEqualOrBiggerSnakeHead(cellIndex(p, state), state);
 }
+
+inline uint32_t distance(Point a, Point b)
+{
+    return absDiff(a.x, b.x) + absDiff(a.y, b.y);
+}
