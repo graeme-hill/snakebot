@@ -141,93 +141,18 @@ struct SimParams
 class SimThread
 {
 public:
-    SimThread() :
-        _hasWork(false),
-        _quit(false),
-        _thread(&SimThread::spin, this),
-        _timeOfLastWork(Clock::now()),
-        _sleeping(true)
-    { }
-
+    SimThread();
     void startWork(SimParams params)
-    {
-        _params = std::move(params);
-        _hasWork = true;
-    }
-
-    void spin()
-    {
-        while (!_quit)
-        {
-            if (_hasWork)
-            {
-                if (_sleeping)
-                {
-                    wakeUp();
-                }
-
-                _result = runSimulationBranches(_params.branches, *_params.state, _params.maxTurns);
-                _hasWork = false;
-                _timeOfLastWork = Clock::now();
-            }
-            else if (!_sleeping)
-            {
-                auto now = Clock::now();
-                Seconds diff = now - _timeOfLastWork;
-                if (diff > Seconds(SECONDS_OF_NO_WORK_UNTIL_SLEEP))
-                {
-                    sleep();
-                }
-            }
-
-            if (_sleeping)
-            {
-                // Play very nice with other threads and take very little CPU
-                std::this_thread::sleep_for(
-                    std::chrono::milliseconds(SLEEP_MODE_DELAY_MILLIS));
-            }
-            else
-            {
-                // Play nice with other threads but take a lot of CPU
-                std::this_thread::yield();
-            }
-        }
-    }
-
-    std::vector<Future> &result()
-    {
-        return _result;
-    }
-
-    bool done()
-    {
-        return !_hasWork;
-    }
-
-    void kill()
-    {
-        _quit = true;
-    }
-
-    void join()
-    {
-        _thread.join();
-    }
-
-    void wakeUp()
-    {
-        _sleeping = false;
-    }
-
-    void sleep()
-    {
-        _sleeping = true;
-    }
+    void spin();
+    std::vector<Future> &result();
+    bool done();
+    void kill();
+    void join();
+    void wakeUp();
+    void sleep();
 
     static std::array<SimThread, THREAD_COUNT> instances;
-
     static void stopAll();
-
     static void wakeAll();
 
 private:

@@ -7,6 +7,14 @@
 
 std::array<SimThread, THREAD_COUNT> SimThread::instances;
 
+SimThread::SimThread() :
+    _hasWork(false),
+    _quit(false),
+    _thread(&SimThread::spin, this),
+    _timeOfLastWork(Clock::now()),
+    _sleeping(true)
+{ }
+
 void SimThread::stopAll()
 {
     for (SimThread &simThread : SimThread::instances)
@@ -25,6 +33,81 @@ void SimThread::wakeAll()
     for (SimThread &simThread : SimThread::instances)
     {
         simThread.wakeUp();
+    }
+}
+
+std::vector<Future> &SimThread::result()
+{
+    return _result;
+}
+
+bool SimThread::done()
+{
+    return !_hasWork;
+}
+
+void SimThread::kill()
+{
+    _quit = true;
+}
+
+void SimThread::join()
+{
+    _thread.join();
+}
+
+void SimThread::wakeUp()
+{
+    _sleeping = false;
+}
+
+void SimThread::sleep()
+{
+    _sleeping = true;
+}
+
+void SimThread::startWork(SimParams params)
+{
+    _params = std::move(params);
+    _hasWork = true;
+}
+
+void SimThread::spin()
+{
+    while (!_quit)
+    {
+        if (_hasWork)
+        {
+            if (_sleeping)
+            {
+                wakeUp();
+            }
+
+            _result = runSimulationBranches(_params.branches, *_params.state, _params.maxTurns);
+            _hasWork = false;
+            _timeOfLastWork = Clock::now();
+        }
+        else if (!_sleeping)
+        {
+            auto now = Clock::now();
+            Seconds diff = now - _timeOfLastWork;
+            if (diff > Seconds(SECONDS_OF_NO_WORK_UNTIL_SLEEP))
+            {
+                sleep();
+            }
+        }
+
+        if (_sleeping)
+        {
+            // Play very nice with other threads and take very little CPU
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds(SLEEP_MODE_DELAY_MILLIS));
+        }
+        else
+        {
+            // Play nice with other threads but take a lot of CPU
+            std::this_thread::yield();
+        }
     }
 }
 
