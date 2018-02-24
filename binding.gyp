@@ -9,6 +9,7 @@
                 "napi/algorithms/hungry.cpp",
                 "napi/algorithms/dog.cpp",
                 "napi/algorithms/sim.cpp",
+                "napi/algorithms/inyourface.cpp",
                 "napi/test/testsuite.cpp",
                 "napi/interop.cpp",
                 "napi/astar.cpp",

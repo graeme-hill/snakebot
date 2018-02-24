@@ -121,7 +121,8 @@ bool is180(uint32_t index, uint32_t neighborIndex, GameState &state)
     return index == headIndex && neighborIndex == neckIndex;
 }
 
-bool isOkNeighbor(uint32_t index, uint32_t other, uint32_t turn, GameState &state)
+bool isOkNeighbor(
+    uint32_t index, uint32_t other, uint32_t turn, GameState &state)
 {
     bool result = indexIsSafe(other, turn, state)
         && !is180(index, other, state)
@@ -130,7 +131,8 @@ bool isOkNeighbor(uint32_t index, uint32_t other, uint32_t turn, GameState &stat
     return result;
 }
 
-std::vector<uint32_t> getNeighbors(uint32_t index, uint32_t turn, GameState &state)
+std::vector<uint32_t> getNeighbors(
+    uint32_t index, uint32_t turn, GameState &state)
 {
     std::vector<uint32_t> result;
 
@@ -222,7 +224,8 @@ Path shortestPath(Point start, Point goal, GameState &state)
         openSet.erase(currentIndex);
         closedSet.insert(currentIndex);
 
-        std::vector<uint32_t> neighbors = getNeighbors(currentIndex, turns[currentIndex], state);
+        std::vector<uint32_t> neighbors = getNeighbors(
+            currentIndex, turns[currentIndex], state);
         for (uint32_t neighborIndex : neighbors)
         {
             if (closedSet.find(neighborIndex) != closedSet.end())

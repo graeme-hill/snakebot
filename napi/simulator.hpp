@@ -53,6 +53,7 @@ public:
         AlgorithmBranch branch,
         GameState &initialState,
         uint32_t maxTurns,
+        uint32_t maxMillis,
         uint32_t simNumber);
 
     bool next();
@@ -106,6 +107,7 @@ private:
     AlgorithmBranch _branch;
     GameState &_initialState;
     uint32_t _maxTurns;
+    uint32_t _maxMillis;
     uint32_t _simNumber;
     uint32_t _turn;
     Future _result;
@@ -115,17 +117,20 @@ private:
 std::vector<Future> runSimulationBranches(
     std::vector<AlgorithmBranch> &branches,
     GameState &initialState,
-    uint32_t maxTurns);
+    uint32_t maxTurns,
+    uint32_t maxMillis);
 
 std::vector<Future> runSimulations(
     std::vector<AlgorithmPair> algorithmPairs,
     GameState &initialState,
     uint32_t maxTurns,
+    uint32_t maxMillis,
     DirectionSet firstMoves);
 
 std::vector<Future> simulateFutures(
     GameState &initialState,
     uint32_t maxTurns,
+    uint32_t maxMillis,
     std::vector<Algorithm *> myAlgorithms,
     std::vector<Algorithm *> enemyAlgorithms);
 
@@ -136,6 +141,7 @@ struct SimParams
     std::vector<AlgorithmBranch> branches;
     std::unique_ptr<GameState> state;
     uint32_t maxTurns;
+    uint32_t maxMillis;
 };
 
 class SimThread

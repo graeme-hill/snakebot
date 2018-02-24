@@ -4,6 +4,7 @@
 #include "../movement.hpp"
 #include "../simulator.hpp"
 #include "../algorithms/sim.hpp"
+#include "../algorithms/inyourface.hpp"
 #include <iostream>
 
 class OneDirAlgorithm : public Algorithm
@@ -594,7 +595,8 @@ void simulateFuturesTest1()
 
     OneDirAlgorithm algo(Direction::Up);
 
-    std::vector<Future> actualFutures = simulateFutures(state, 5, { &algo }, { &algo });
+    std::vector<Future> actualFutures = simulateFutures(
+        state, 5, 100, { &algo }, { &algo });
 
     Future f1 {};
     f1.obituaries = { { "1", 3 }, { "0", 4 } };
@@ -768,6 +770,48 @@ void tallRectangleTest1()
     assertTrue(true, "tallRectangleTest1() - don't segfault");
 }
 
+void inYourFaceTest1()
+{
+    GameState state(parseWorld({
+        "_ _ _ _",
+        "_ _ 0 <",
+        "_ 1 < <",
+        "_ _ _ _"
+    }));
+
+    InYourFace inYourFace;
+    Direction dir = inYourFace.move(state);
+    assertEqual(dir, Direction::Left, "inYourFaceTest1() - go left");
+}
+
+void inYourFaceTest2()
+{
+    GameState state(parseWorld({
+        "_ 0 < <",
+        "_ _ _ _",
+        "_ 1 < <",
+        "_ _ _ _"
+    }));
+
+    InYourFace inYourFace;
+    Direction dir = inYourFace.move(state);
+    assertEqual(dir, Direction::Down, "inYourFaceTest1() - go down");
+}
+
+void inYourFaceTest3()
+{
+    GameState state(parseWorld({
+        "_ 1 < <",
+        "_ _ _ _",
+        "_ 0 < <",
+        "_ _ _ _"
+    }));
+
+    InYourFace inYourFace;
+    Direction dir = inYourFace.move(state);
+    assertEqual(dir, Direction::Up, "inYourFaceTest1() - go up");
+}
+
 void TestSuite::run()
 {
     outOfBoundsTests();
@@ -801,4 +845,7 @@ void TestSuite::run()
     arrayDictTest1();
     wideRectangleTest1();
     tallRectangleTest1();
+    inYourFaceTest1();
+    inYourFaceTest2();
+    inYourFaceTest3();
 }

@@ -1,9 +1,10 @@
 #include "simulator.hpp"
 #include "movement.hpp"
+#include <cmath>
 
 #include <numeric>
 
-#define IDEAL_HEALTH_AT_FOOD_TIME 50
+#define IDEAL_HEALTH_AT_FOOD_TIME 100
 
 std::array<SimThread, THREAD_COUNT> SimThread::instances;
 
@@ -83,7 +84,11 @@ void SimThread::spin()
                 wakeUp();
             }
 
-            _result = runSimulationBranches(_params.branches, *_params.state, _params.maxTurns);
+            _result = runSimulationBranches(
+                _params.branches,
+                *_params.state,
+                _params.maxTurns,
+                _params.maxMillis);
             _hasWork = false;
             _timeOfLastWork = Clock::now();
         }
@@ -115,11 +120,13 @@ Simulation::Simulation(
     AlgorithmBranch branch,
     GameState &initialState,
     uint32_t maxTurns,
+    uint32_t maxMillis,
     uint32_t simNumber)
     :
     _branch(branch),
     _initialState(initialState),
     _maxTurns(maxTurns),
+    _maxMillis(maxMillis),
     _simNumber(simNumber),
     _turn(0),
     _result(
@@ -180,8 +187,11 @@ TerminationReason coerceTerminationReason(
 std::vector<Future> runSimulationBranches(
     std::vector<AlgorithmBranch> &branches,
     GameState &initialState,
-    uint32_t maxTurns)
+    uint32_t maxTurns,
+    uint32_t maxMillis)
 {
+    auto start = Clock::now();
+    auto maxSeconds = Seconds(static_cast<double>(maxMillis) / 1000.0);
     uint32_t turn = 0;
     std::vector<Simulation> simulations;
     uint32_t simIndex = 0;
@@ -190,7 +200,8 @@ std::vector<Future> runSimulationBranches(
     for (AlgorithmBranch &branch : branches)
     {
         simulations.push_back(
-                { branch, initialState, maxTurns, simIndex++ });
+            { branch, initialState, maxTurns, maxMillis, simIndex++ });
+
         results.push_back({
             {},
             {},
@@ -204,6 +215,8 @@ std::vector<Future> runSimulationBranches(
     // Keep track of simulations that are finished so we know when to stop
     std::unordered_set<uint32_t> completedSimulations;
 
+    bool outOfTime = false;
+
     while (completedSimulations.size() < simulations.size())
     {
         turn++;
@@ -216,7 +229,11 @@ std::vector<Future> runSimulationBranches(
                 continue;
             }
 
-            if (sim.next() || turn >= maxTurns)
+            auto now = Clock::now();
+            Seconds diff = now - start;
+            outOfTime = diff >= maxSeconds;
+
+            if (sim.next() || turn >= maxTurns || outOfTime)
             {
                 results[sim.simNumber()] = sim.result();
                 completedSimulations.insert(sim.simNumber());
@@ -231,7 +248,8 @@ std::vector<Future> runSimulationBranches(
             results[i].terminationReason, turn, maxTurns);
     }
 
-    //std::cout << "simulated " << turn << " turns" << std::endl;
+    std::cout << "simulated " << turn << " turns | oot: "
+        << outOfTime << std::endl;
 
     return results;
 }
@@ -240,6 +258,7 @@ std::vector<Future> runSimulations(
     std::vector<AlgorithmPair> algorithmPairs,
     GameState &initialState,
     uint32_t maxTurns,
+    uint32_t maxMillis,
     DirectionSet firstMoves)
 {
     uint32_t branchIndex = 0;
@@ -257,7 +276,8 @@ std::vector<Future> runSimulations(
 
     for (uint32_t g = 0; g < THREAD_COUNT; g++)
     {
-        SimThread::instances[g].startWork({ branches[g], initialState.clone(), maxTurns });
+        SimThread::instances[g].startWork(
+            { branches[g], initialState.clone(), maxTurns, maxMillis });
     }
 
     bool anyIncomplete = true;
@@ -287,6 +307,7 @@ std::vector<Future> runSimulations(
 std::vector<Future> simulateFutures(
     GameState &initialState,
     uint32_t maxTurns,
+    uint32_t maxMillis,
     std::vector<Algorithm *> myAlgorithms,
     std::vector<Algorithm *> enemyAlgorithms)
 {
@@ -308,7 +329,7 @@ std::vector<Future> simulateFutures(
     }
 
     std::vector<Future> futures = runSimulations(
-        algorithmPairs, initialState, maxTurns, firstMoves);
+        algorithmPairs, initialState, maxTurns, maxMillis, firstMoves);
 
     return futures;
 }
@@ -334,7 +355,7 @@ int scoreFuture(Future &future, GameState &state)
     uint32_t survivedTurns = obitIt == future.obituaries.end()
         ? future.turns
         : obitIt->second;
-    uint32_t survivalScore = survivedTurns * 1000;
+    uint32_t survivalScore = log2(survivedTurns) * 1000;
 
     uint32_t foodPoints = 0;
     if (foodIt != future.foodsEaten.end())
