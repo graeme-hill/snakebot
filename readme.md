@@ -18,6 +18,13 @@ npm install --global --production windows-build-tools
 If you don't want to run an algorithm implemented in C++ then it should still work with just node; however
 if you run the whole set of tests you'll get errors if it can't load the C++ library.
 
+On Ubuntu you can get required tools with:
+
+```
+sudo apt-get install build-essential
+npm install -g node-gyp mocha
+```
+
 ## Building
 
 You only need to build if you use a C++ algorithm:

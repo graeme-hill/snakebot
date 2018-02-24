@@ -1,10 +1,12 @@
 #pragma once
- 
+
 #include "snakelib.hpp"
 
 MaybeDirection closestFood(GameState &state);
 
+MaybeDirection bestFoodBruteForce(GameState &state);
 MaybeDirection bestFood(GameState &state);
+MaybeDirection bestFoodSorted(GameState &state);
 
 DirectionSet notImmediatelySuicidalMoves(GameState &state);
 
