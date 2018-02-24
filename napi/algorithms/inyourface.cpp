@@ -5,6 +5,14 @@
 #include <functional>
 #include <unordered_map>
 
+// Create with no specific target in mind.
+InYourFace::InYourFace() : _target(nullptr)
+{ }
+
+// Create with a specific target.
+InYourFace::InYourFace(Snake *target) : _target(target)
+{ }
+
 Metadata InYourFace::meta()
 {
     return {
@@ -22,48 +30,93 @@ void InYourFace::start()
 {
 }
 
-bool cellIsOk(GameState &state, Point p)
-{
-
-}
-
 MaybeDirection bestCutoff(GameState &state, Snake *target)
 {
-    Point th = target->head();
-    Point mh state.mySnake()->head();
+    if (target == nullptr)
+        return MaybeDirection::none();
 
+    Point th = target->head();
+    Point mh = state.mySnake()->head();
+
+    // Cells adjacent to target's head
     Point l = { th.x - 1, th.y };
     Point r = { th.x + 1, th.y };
     Point u = { th.x, th.y + 1 };
     Point d = { th.x, th.y - 1 };
 
-    Path result = Path::none();
-    bool found = false;
-    uint32_t bestDistance;
+    Path res = Path::none();
 
+    // Calc path to each adjacent cell (some of them will be unavailable and
+    // give no path).
     auto lPath = shortestPath(mh, l, state);
     auto rPath = shortestPath(mh, r, state);
     auto uPath = shortestPath(mh, u, state);
     auto dPath = shortestPath(mh, d, state);
 
+    // Pick the best one.
+    if (lPath.size > 0 && (res.size == 0 || lPath.size < res.size))
+    {
+        res = lPath;
+    }
 
+    if (rPath.size > 0 && (res.size == 0 || rPath.size < res.size))
+    {
+        res = rPath;
+    }
+
+    if (uPath.size > 0 && (res.size == 0 || uPath.size < res.size))
+    {
+        res = uPath;
+    }
+
+    if (dPath.size > 0 && (res.size == 0 || dPath.size < res.size))
+    {
+        res = dPath;
+    }
+
+    return res.direction;
 }
 
-Snake *getSnakeToAnnoy(GameState &state)
+Snake *getSnakeToAnnoy(GameState &state, Snake *fixedTarget)
 {
-    Snake *target = state.enemies().at(0);
-    return target;
+    // If the creator of this class assigned a fixed target then just use that.
+    if (fixedTarget != nullptr)
+    {
+        return fixedTarget;
+    }
+
+    auto myLength = state.mySnake()->length();
+    Snake *closestSnake = nullptr;
+    Snake *closestSmallerSnake = nullptr;
+
+    for (Snake *enemy : state.enemies())
+    {
+        if (closestSnake == nullptr || closestSnake->length() > enemy->length())
+        {
+            closestSnake = enemy;
+        }
+
+        bool smaller = enemy->length() < myLength;
+        if (smaller && (closestSmallerSnake == nullptr || closestSmallerSnake->length() > enemy->length()))
+        {
+            closestSmallerSnake = enemy;
+        }
+    }
+
+    return closestSmallerSnake == nullptr ? closestSnake : closestSmallerSnake;
 }
 
 Direction InYourFace::move(GameState &state)
 {
-    Snake *target = getSnakeToAnnoy(state);
-    auto pathToTarget = shortestPath(
-        state.mySnake()->head(), target->head(), state);
-
-    if (pathToTarget.direction.hasValue)
+    if (state.mySnake()->health > 50)
     {
-        return pathToTarget.direction.value;
+        Snake *target = getSnakeToAnnoy(state, _target);
+        auto cutoffDir = bestCutoff(state, target);
+
+        if (cutoffDir.hasValue)
+        {
+            return cutoffDir.value;
+        }
     }
 
     auto foodDir = closestFood(state);

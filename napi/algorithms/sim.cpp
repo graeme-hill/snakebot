@@ -1,7 +1,7 @@
 #include "sim.hpp"
-#include "dog.hpp"
 #include "hungry.hpp"
 #include "cautious.hpp"
+#include "inyourface.hpp"
 #include "../movement.hpp"
 #include "../astar.hpp"
 #include "../simulator.hpp"
@@ -31,12 +31,13 @@ void Sim::start()
 
 Direction Sim::move(GameState &state)
 {
-    Dog dog;
+    InYourFace inYourFace;
+    InYourFace inMyFace(state.mySnake());
     Hungry hungry;
     Cautious cautious;
 
-    std::vector<Algorithm *> myAlgorithms { &cautious };
-    std::vector<Algorithm *> enemyAlgorithms { &hungry };
+    std::vector<Algorithm *> myAlgorithms { &cautious, &inYourFace };
+    std::vector<Algorithm *> enemyAlgorithms { &hungry, &inMyFace };
 
     std::vector<Future> futures = simulateFutures(
     	state, 100000, 100, myAlgorithms, enemyAlgorithms);

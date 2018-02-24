@@ -350,25 +350,65 @@ int foodScore(uint32_t foodTurn, GameState &state)
 
 int scoreFuture(Future &future, GameState &state)
 {
-    auto obitIt = future.obituaries.find(state.mySnake()->id);
-    auto foodIt = future.foodsEaten.find(state.mySnake()->id);
-    uint32_t survivedTurns = obitIt == future.obituaries.end()
-        ? future.turns
-        : obitIt->second;
-    uint32_t survivalScore = log2(survivedTurns) * 1000;
+    auto myId = state.mySnake()->id;
+    uint32_t survivalScore = 100000;
+    uint32_t murderScore = 0;
+    uint32_t foodScore = 0;
+    bool dies = false;
 
-    uint32_t foodPoints = 0;
+    for (auto pair : future.obituaries)
+    {
+        if (pair.first == myId)
+        {
+            survivalScore = pair.second;
+            dies = true;
+        }
+        else
+        {
+            murderScore += (100U - (std::min(100U, pair.second))) * 10;
+        }
+    }
+
+    auto foodIt = future.foodsEaten.find(state.mySnake()->id);
     if (foodIt != future.foodsEaten.end())
     {
         std::vector<uint32_t> &foodTurns = foodIt->second;
         if (!foodTurns.empty())
         {
-            foodPoints += foodScore(foodTurns.at(0), state);// 100 - foodTurns.at(0);
+            foodScore += 100U - (std::min(100U, foodTurns.at(0)));
         }
     }
 
-    int score = survivalScore + foodPoints;
-    return score;
+    uint32_t finalScore = dies
+        ? survivalScore
+        : survivalScore + foodScore + murderScore;
+
+    std::cout << "survive: " << survivalScore
+        << " murder: " << murderScore
+        << " food: " << foodScore
+        << " final: " << finalScore << std::endl;
+
+    return finalScore;
+
+    // auto obitIt = future.obituaries.find(state.mySnake()->id);
+    // auto foodIt = future.foodsEaten.find(state.mySnake()->id);
+    // uint32_t survivedTurns = obitIt == future.obituaries.end()
+    //     ? future.turns
+    //     : obitIt->second;
+    // uint32_t survivalScore = log2(survivedTurns) * 1000;
+    //
+    // uint32_t foodPoints = 0;
+    // if (foodIt != future.foodsEaten.end())
+    // {
+    //     std::vector<uint32_t> &foodTurns = foodIt->second;
+    //     if (!foodTurns.empty())
+    //     {
+    //         foodPoints += foodScore(foodTurns.at(0), state);// 100 - foodTurns.at(0);
+    //     }
+    // }
+    //
+    // int score = survivalScore + foodPoints;
+    // return score;
 }
 
 Direction bestMove(std::vector<Future> &futures, GameState &state)
