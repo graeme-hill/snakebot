@@ -814,6 +814,49 @@ void inYourFaceTest3()
     assertEqual(dir, Direction::Up, "inYourFaceTest1() - go up");
 }
 
+void simTest1()
+{
+    GameState state(parseWorld({
+        "_ _ _ _ _ _ > > _ > > > v _ _ _ _",
+        "_ _ _ _ _ _ _ v _ ^ v _ > > v _ _",
+        "* _ _ _ _ _ _ v * ^ < _ _ _ 0 _ _",
+        "* _ * _ * _ _ > > > > > > > > v _",
+        "v < _ _ _ _ _ _ _ _ _ _ _ _ _ v _",
+        "v ^ _ _ _ _ 2 _ _ _ * _ _ _ _ v _",
+        "v _ _ _ _ _ ^ _ _ _ _ _ _ _ _ > v",
+        "v _ _ _ _ * ^ _ _ _ _ _ _ _ _ _ v",
+        "v _ _ * * _ ^ _ * _ 1 < < _ _ _ v",
+        "v _ _ _ _ _ ^ _ _ _ _ _ ^ _ v < <",
+        "v _ _ _ * _ ^ _ _ _ * _ ^ < < _ _",
+        "> > > > > > ^ _ _ _ _ _ _ _ _ _ _"
+    }));
+
+    Sim sim;
+    Direction dir = sim.move(state);
+    assertEqual(dir, Direction::Left, "simTest1() - go left if you want to live");
+}
+
+void simTest2()
+{
+    GameState state(parseWorld({
+        "_ * * 0 * _ _ _ _",
+        "1 _ * ^ _ * * _ _",
+        "^ _ * ^ < _ _ _ _",
+        "^ < _ _ ^ v < _ _",
+        "> ^ _ _ ^ < ^ _ _",
+        "^ _ _ _ _ _ ^ _ _",
+        "^ _ _ _ _ _ ^ _ v",
+        "^ _ _ _ _ _ * _ v",
+        "^ * * * _ _ _ _ v",
+        "^ < < < < _ * _ v",
+        "* _ * _ ^ < < < <"
+    }));
+
+    Sim sim;
+    Direction dir = sim.move(state);
+    assertEqual(dir, Direction::Right, "simTest2() - go right if you want to live");
+}
+
 void TestSuite::run()
 {
     outOfBoundsTests();
@@ -850,4 +893,6 @@ void TestSuite::run()
     inYourFaceTest1();
     inYourFaceTest2();
     inYourFaceTest3();
+    simTest1();
+    simTest2();
 }

@@ -383,10 +383,10 @@ int scoreFuture(Future &future, GameState &state)
         ? survivalScore
         : survivalScore + foodScore + murderScore;
 
-    std::cout << "survive: " << survivalScore
-        << " murder: " << murderScore
-        << " food: " << foodScore
-        << " final: " << finalScore << std::endl;
+    // std::cout << "survive: " << survivalScore
+    //     << " murder: " << murderScore
+    //     << " food: " << foodScore
+    //     << " final: " << finalScore << std::endl;
 
     return finalScore;
 

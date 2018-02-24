@@ -306,6 +306,18 @@ void eatFoodOrDie(World &world)
         }
         else
         {
+            // This snake just ate which means it needs to grow on the NEXT
+            // turn. Implement by moving current tail piece forward once to
+            // overlap new tail position. In this case length should always be
+            // at least two because it just ate, but at least make sure not to
+            // crash if that does somehow happen.
+            if (snake.parts.size() >= 2)
+            {
+                size_t oldTailIndex = snake.parts.size() - 1;
+                size_t newTailIndex = snake.parts.size() - 2;
+                snake.parts[oldTailIndex] = snake.parts.at(newTailIndex);
+            }
+
             //snake.parts.pop_back();
             // It did eat so remove the food it ate.
             world.food.erase(
