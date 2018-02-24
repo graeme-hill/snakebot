@@ -216,13 +216,11 @@ public:
 
     void wakeUp()
     {
-        std::cout << "I'M AWAKE\n";
         _sleeping = false;
     }
 
     void sleep()
     {
-        std::cout << "zzzzzzzzzzzzz\n";
         _sleeping = true;
     }
 

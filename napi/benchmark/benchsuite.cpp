@@ -104,23 +104,11 @@ void astar1()
 
 void BenchSuite::run()
 {
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    astar1();
-
+    for (auto i = 0; i < 3; i++)
+    {
+        std::cout << "--- pass " << (i + 1) << " ---" << std::endl;
         simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    astar1();
-
-        simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    astar1();
-
-        simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    astar1();
-
-        simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    astar1();
+        simulatorOnBusyGrid2();
+        astar1();
+    }
 }
