@@ -33,6 +33,8 @@ void assertEqual(uint32_t actual, uint32_t expected, std::string message);
 
 void assertEqual(Direction actual, Direction expected, std::string message);
 
+void assertEqual(TerminationReason actual, TerminationReason expected, std::string message);
+
 void assertEqual(World &w1, World &w2, std::string messagePart);
 
 void assertEqual(Snake &s1, Snake &s2, std::string messagePart);

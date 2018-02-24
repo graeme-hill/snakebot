@@ -65,13 +65,14 @@ uint32_t Algorithm::nextId()
     return _nextId++;
 }
 
-GameState::GameState(World w) :
+GameState::GameState(World w, AxisBias bias) :
     _width(w.width),
     _height(w.height),
     _food(w.food),
     _mySnake(nullptr),
     _world(w),
-    _map(*this)
+    _map(*this),
+    _pathfindingBias(bias)
 {
     for (size_t i = 0; i < _world.snakes.size(); i++)
     {
@@ -90,7 +91,7 @@ GameState::GameState(World w) :
     _map.update();
 }
 
-GameState &GameState::perspective(Snake *enemy)
+GameState &GameState::perspective(Snake *enemy, AxisBias bias)
 {
     auto iter = _perspectiveCopies.find(enemy->id);
     if (iter != _perspectiveCopies.end())
@@ -100,7 +101,9 @@ GameState &GameState::perspective(Snake *enemy)
 
     World newWorld = _world;
     newWorld.you = enemy->id;
-    _perspectiveCopies.insert(std::make_pair(enemy->id, std::unique_ptr<GameState>(new GameState(newWorld))));
+    _perspectiveCopies.insert(
+        std::make_pair(enemy->id,
+            std::unique_ptr<GameState>(new GameState(newWorld, bias))));
     return *_perspectiveCopies[enemy->id];
 }
 
@@ -227,6 +230,18 @@ std::string directionToString(Direction direction)
         case Direction::Down: return "down";
         case Direction::Left: return "left";
         default: return "right";
+    }
+}
+
+std::string axisBiasToString(AxisBias bias)
+{
+    if (bias == AxisBias::Vertical)
+    {
+        return "Vertical";
+    }
+    else
+    {
+        return "Horizontal";
     }
 }
 

@@ -116,18 +116,71 @@ void SimThread::spin()
     }
 }
 
+std::string terminationReasonToString(TerminationReason reason)
+{
+    switch (reason)
+    {
+        case TerminationReason::Loss: return "Loss";
+        case TerminationReason::MaxTurns: return "MaxTurns";
+        case TerminationReason::OutOfTime: return "OutOfTime";
+        default: return "Unknown";
+    }
+}
+
+void Future::prettyPrint()
+{
+    std::cout << "Future: algo=" << algorithm->meta().name
+        << " turns=" << turns
+        << " move=" << directionToString(move)
+        << " termination=" << terminationReasonToString(terminationReason)
+        << std::endl;
+
+    if (!obituaries.empty())
+    {
+        std::cout << "  obituaries:";
+        for (auto it : obituaries)
+        {
+            std::cout << " " << it.first << "=" << it.second;
+        }
+        std::cout << std::endl;
+    }
+
+    if (!foodsEaten.empty())
+    {
+        std::cout << "  food:";
+        for (auto it : foodsEaten)
+        {
+            auto turns = it.second;
+            if (!turns.empty())
+            {
+                std::cout << " " << it.first << "=[";
+                std::string sep = "";
+                for (auto t : turns)
+                {
+                    std::cout << sep << t;
+                    sep = ",";
+                }
+                std::cout << "]";
+            }
+        }
+        std::cout << std::endl;
+    }
+}
+
 Simulation::Simulation(
     AlgorithmBranch branch,
     GameState &initialState,
     uint32_t maxTurns,
     uint32_t maxMillis,
-    uint32_t simNumber)
+    uint32_t simNumber,
+    AxisBias bias)
     :
     _branch(branch),
     _initialState(initialState),
     _maxTurns(maxTurns),
     _maxMillis(maxMillis),
     _simNumber(simNumber),
+    _enemyPathfindingBias(bias),
     _turn(0),
     _result(
         {{}, {}, branch.pair.myAlgorithm, TerminationReason::Unknown, Direction::Left, 0})
@@ -150,7 +203,8 @@ bool Simulation::next()
     // Enemy moves.
     for (Snake *enemy : currentState.enemies())
     {
-        GameState &enemyState = currentState.perspective(enemy);
+        GameState &enemyState = currentState.perspective(
+            enemy, _enemyPathfindingBias);
         Direction direction = _branch.pair.enemyAlgorithm->move(enemyState);
         moves.push_back({ enemy, direction });
     }
@@ -199,8 +253,9 @@ std::vector<Future> runSimulationBranches(
 
     for (AlgorithmBranch &branch : branches)
     {
+        AxisBias bias = branch.enemyPathBindingBias;
         simulations.push_back(
-            { branch, initialState, maxTurns, maxMillis, simIndex++ });
+            { branch, initialState, maxTurns, maxMillis, simIndex++, bias });
 
         results.push_back({
             {},
@@ -267,10 +322,15 @@ std::vector<Future> runSimulations(
     {
         for (Direction firstDir : firstMoves)
         {
-            uint32_t threadIndex = branchIndex++ % THREAD_COUNT;
             MaybeDirection maybeDir { true, firstDir };
-            AlgorithmBranch branch{ pair, maybeDir };
-            branches[threadIndex].push_back(branch);
+
+            uint32_t threadIndex1 = branchIndex++ % THREAD_COUNT;
+            AlgorithmBranch branch1{ pair, maybeDir, AxisBias::Horizontal };
+            branches[threadIndex1].push_back(branch1);
+
+            uint32_t threadIndex2 = branchIndex++ % THREAD_COUNT;
+            AlgorithmBranch branch2{ pair, maybeDir, AxisBias::Vertical };
+            branches[threadIndex2].push_back(branch2);
         }
     }
 
@@ -422,12 +482,16 @@ Direction bestMove(std::vector<Future> &futures, GameState &state)
 
     for (Future &future : futures)
     {
+        //future.prettyPrint();
+
         // Should never have a zero move future, but if there is don't crash.
         if (future.turns == 0)
             continue;
 
         Direction direction = future.move;
         int score = scoreFuture(future, state);
+
+        //std::cout << "  score: " << score << std::endl;
 
         std::string algoName = future.algorithm->meta().name;
         std::string key = algoName + "_" + directionToString(direction);
@@ -439,7 +503,7 @@ Direction bestMove(std::vector<Future> &futures, GameState &state)
         else
         {
             DirectionScore existing = it->second;
-            if (score > existing.score)
+            if (score < existing.score)
             {
                 worstScores[key] = DirectionScore{ direction, score };
             }

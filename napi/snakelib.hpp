@@ -13,6 +13,12 @@
 
 #define MAX_SNAKES 10
 
+enum class AxisBias
+{
+    Vertical,
+    Horizontal
+};
+
 // Container for an instance of T that adds a flag to track whether the
 // value "exists". In reality the value always exists so there needs to
 // be a default state (ie: parameter-less ctor).
@@ -343,7 +349,7 @@ private:
 class GameState
 {
 public:
-    GameState(World w);
+    GameState(World w, AxisBias bias = AxisBias::Vertical);
 
     // delete move and copy ctors for now to avoid accidental copies
     GameState(const GameState &) = delete;
@@ -357,8 +363,9 @@ public:
     std::vector<Point> &food() { return _food; }
     Snake *mySnake();
     Map &map() { return _map; }
+    AxisBias pathfindingBias() { return _pathfindingBias; }
 
-    GameState &perspective(Snake *enemy);
+    GameState &perspective(Snake *enemy, AxisBias bias);
     std::unique_ptr<GameState> newStateAfterMoves(
         std::vector<SnakeMove> &moves);
     std::unique_ptr<GameState> clone();
@@ -377,6 +384,7 @@ private:
     Snake *_mySnake;
     World _world;
     Map _map;
+    AxisBias _pathfindingBias;
 };
 
 inline Point coordAfterMove(Point p, Direction dir)
@@ -438,6 +446,8 @@ inline uint32_t absDiff(uint32_t a, uint32_t b)
 }
 
 std::string directionToString(Direction direction);
+
+std::string axisBiasToString(AxisBias bias);
 
 void applyMoves(World &world, std::vector<SnakeMove> &moves);
 
