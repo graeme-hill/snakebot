@@ -142,7 +142,7 @@ class SimThread
 {
 public:
     SimThread();
-    void startWork(SimParams params)
+    void startWork(SimParams params);
     void spin();
     std::vector<Future> &result();
     bool done();
