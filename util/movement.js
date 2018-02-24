@@ -144,7 +144,6 @@ function identifyEnemyTunnelTarget(enemies, gameState) {
 
         let currentCell = { x: head.x, y: head.y };
 
-       // console.log("thing: " + checkCell(currentCell.x, currentCell.y-1));
         const directionsOccupied = [0,0,0,0]; //north south west east
         directionsOccupied[0] = checkCell({}, currentCell.x, currentCell.y-1);
         directionsOccupied[1] = checkCell({},  currentCell.x, currentCell.y+1);
@@ -154,18 +153,19 @@ function identifyEnemyTunnelTarget(enemies, gameState) {
        // console.log("enemy: " + enemyIndex + " : " + directionsOccupied);
         const cellPath = [];
         let bailOutCounter = 0;
-        while (directionsOccupied.reduce(sumFxn, 0) === 3 && bailOutCounter < gameState.width) {
+        while (directionsOccupied.reduce(sumFxn, 0) === 3 && bailOutCounter < gameState.width) { //should check height too
             console.log("loop " + directionsOccupied);
             let indexOfCellWhoIsEmpty;
             directionsOccupied.some((occupied, index) => { 
-                if(!occupied) {
+                if(occupied === 0) {
                     indexOfCellWhoIsEmpty = index;
                     return true;
                 }
             });
-            cellPath.push(currentCell);
+            
             let previousCell = { x: currentCell.x, y: currentCell.y };
-            currentCell = cellDirectionMappings[indexOfCellWhoIsEmpty](currentCell);
+            currentCell = cellDirectionMappings[indexOfCellWhoIsEmpty](currentCell);            
+            cellPath.push({x: currentCell.x, y: currentCell.y });
             directionsOccupied[0] = checkCell(previousCell, currentCell.x, currentCell.y-1);
             directionsOccupied[1] = checkCell(previousCell, currentCell.x, currentCell.y+1);
             directionsOccupied[2] = checkCell(previousCell, currentCell.x-1, currentCell.y);
@@ -197,7 +197,7 @@ function identifyEnemyTunnelTarget(enemies, gameState) {
     });
     
     if (closestKillPath) {
-        console.log("KILL PATH FOUND");
+        console.log("KILL PATH FOUND: " + closestKillPath);
         return closestKillPath[0];
     } else {
         return null;
