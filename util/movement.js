@@ -102,6 +102,7 @@ function closestFood(gameState) {
 }
 
 function identifyEnemyTunnelTarget(enemies, gameState) {
+    const myHead = gameState.mySnake.head();
     function checkCell(previousCell, x, y) {
         if(previousCell.x === x && previousCell.y === y) {
             return 1;
@@ -173,12 +174,12 @@ function identifyEnemyTunnelTarget(enemies, gameState) {
             bailOutCounter++;
         }
 
-        const targetCell = cellPath.length > 1 ? currentCell : null;
+        const targetCell = cellPath.length > 1 ? cellPath[cellPath.length - 2] : null;
         if(targetCell) {
             console.log(cellPath);
             console.log("TargetCell found: ");
             console.log(targetCell);
-            var myPath = astar.shortestPath(head, targetCell, gameState);
+            var myPath = astar.shortestPath(myHead, targetCell, gameState);
             if (!myPath) {
                 return;
             }
