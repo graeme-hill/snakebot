@@ -481,3 +481,8 @@ inline uint32_t distance(Point a, Point b)
 {
     return absDiff(a.x, b.x) + absDiff(a.y, b.y);
 }
+
+inline bool cellIsEmpty(GameState &state, Point cell)
+{
+    return state.map().turnsUntilVacant(cell) == 0;
+}

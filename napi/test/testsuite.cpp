@@ -729,7 +729,6 @@ void arrayDictTest1()
 
 void wideRectangleTest1()
 {
-    std::cout << "wideRectangleTest1\n";
     GameState state(parseWorld({
         "_ _ _ _ _ _ _ _ _ v _ _",
         "_ _ * _ _ _ 1 < < < _ _",

@@ -80,7 +80,7 @@ function* simulate(myAlgo, enemyAlgo, initialState, firstMoves) {
     const simulatedMoves = []
 
     // This loop could go forever if the primary snake stays alive, but since
-    // it yields on each iteration the caller can choose how long to keep 
+    // it yields on each iteration the caller can choose how long to keep
     // going. If the caller is the one that decides to stop then it is also
     // responsible for setting a termination reason.
     while (true) {
@@ -144,7 +144,7 @@ function runSimulations(algorithmPairs, initialState, maxMillis, maxTurns, first
         index: i,
         sim: simulate(pair.myAlgorithm, pair.enemyAlgorithm, initialState, firstMoves)
     }));
-        
+
     // Initial results in case zero turns are simulated for some reason
     const results = numberedSimulations.map(s => ({
         turnsSimulated: 0,
@@ -179,9 +179,9 @@ function runSimulations(algorithmPairs, initialState, maxMillis, maxTurns, first
         result.terminationReason = coerceTerminationReason(result.terminationReason);
     }
 
-    console.log("simulated " + turn + " turns");
+    //console.log("simulated " + turn + " turns");
 
-    return results;    
+    return results;
 }
 
 function simulateFutures(initialState, maxMillis, maxTurns, algorithms) {
@@ -245,7 +245,7 @@ function bestMove(futures, state) {
         return bestScoredMove;
     }, null);
 
-    console.log(best);
+    //console.log(best);
 
     return best.move;
 }

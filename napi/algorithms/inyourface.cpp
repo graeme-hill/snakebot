@@ -44,14 +44,20 @@ MaybeDirection bestCutoff(GameState &state, Snake *target)
     Point u = { th.x, th.y + 1 };
     Point d = { th.x, th.y - 1 };
 
+    // Only target empty cells adjacent to enemy head
+    bool lEmpty = cellIsEmpty(state, l);
+    bool rEmpty = cellIsEmpty(state, r);
+    bool uEmpty = cellIsEmpty(state, u);
+    bool dEmpty = cellIsEmpty(state, d);
+
     Path res = Path::none();
 
     // Calc path to each adjacent cell (some of them will be unavailable and
     // give no path).
-    auto lPath = shortestPath(mh, l, state);
-    auto rPath = shortestPath(mh, r, state);
-    auto uPath = shortestPath(mh, u, state);
-    auto dPath = shortestPath(mh, d, state);
+    auto lPath = lEmpty ? shortestPath(mh, l, state) : Path::none();
+    auto rPath = rEmpty ? shortestPath(mh, r, state) : Path::none();
+    auto uPath = uEmpty ? shortestPath(mh, u, state) : Path::none();
+    auto dPath = dEmpty ? shortestPath(mh, d, state) : Path::none();
 
     // Pick the best one.
     if (lPath.size > 0 && (res.size == 0 || lPath.size < res.size))

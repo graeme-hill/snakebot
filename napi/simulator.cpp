@@ -248,8 +248,8 @@ std::vector<Future> runSimulationBranches(
             results[i].terminationReason, turn, maxTurns);
     }
 
-    std::cout << "simulated " << turn << " turns | oot: "
-        << outOfTime << std::endl;
+    // std::cout << "simulated " << turn << " turns | oot: "
+    //     << outOfTime << std::endl;
 
     return results;
 }
