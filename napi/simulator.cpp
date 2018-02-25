@@ -303,8 +303,8 @@ std::vector<Future> runSimulationBranches(
             results[i].terminationReason, turn, maxTurns);
     }
 
-    // std::cout << "simulated " << turn << " turns | oot: "
-    //     << outOfTime << std::endl;
+    std::cout << "simulated " << turn << " turns | oot: "
+        << outOfTime << std::endl;
 
     return results;
 }
@@ -420,12 +420,12 @@ int scoreFuture(Future &future, GameState &state)
     {
         if (pair.first == myId)
         {
-            survivalScore = pair.second;
+            survivalScore = pair.second * 100;
             dies = true;
         }
         else
         {
-            murderScore += (100U - (std::min(100U, pair.second))) * 10;
+            murderScore += (100U - (std::min(100U, pair.second))) * 100;
         }
     }
 
@@ -479,6 +479,7 @@ Direction bestMove(std::vector<Future> &futures, GameState &state)
 
     // TODO: this key should be a struct with its own hash function, not string
     std::unordered_map<std::string, DirectionScore> worstScores;
+    std::unordered_map<std::string, DirectionScore> bestScores;
 
     for (Future &future : futures)
     {
@@ -508,21 +509,56 @@ Direction bestMove(std::vector<Future> &futures, GameState &state)
                 worstScores[key] = DirectionScore{ direction, score };
             }
         }
+
+        it = bestScores.find(key);
+        if (it == bestScores.end())
+        {
+            bestScores[key] = DirectionScore{ direction, score };
+        }
+        else
+        {
+            DirectionScore existing = it->second;
+            if (score > existing.score)
+            {
+                bestScores[key] = DirectionScore{ direction, score };
+            }
+        }
     }
 
-    DirectionScore best{ Direction::Up, -1 };
+    DirectionScore bestOfTheWorst{ Direction::Up, -1 };
+    DirectionScore bestOfTheBest{ Direction::Up, -1 };
 
     for (auto it : worstScores)
     {
-        if (best.score < 0)
+        if (bestOfTheWorst.score < 0)
         {
-            best = it.second;
+            bestOfTheWorst = it.second;
         }
-        else if (it.second.score > best.score)
+        else if (it.second.score > bestOfTheWorst.score)
         {
-            best = it.second;
+            bestOfTheWorst = it.second;
         }
     }
 
-    return best.direction;
+    for (auto it : bestScores)
+    {
+        if (bestOfTheBest.score < 0)
+        {
+            bestOfTheBest = it.second;
+        }
+        else if (it.second.score > bestOfTheBest.score)
+        {
+            bestOfTheBest = it.second;
+        }
+    }
+
+    if (bestOfTheWorst.score < 1500)
+    {
+        std::cout << "TAKING MY CHANCES!!!\n";
+        return bestOfTheBest.direction;
+    }
+    else
+    {
+        return bestOfTheWorst.direction;
+    }
 }

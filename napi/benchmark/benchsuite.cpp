@@ -31,9 +31,9 @@ void simulatorOnBusyGrid1()
         "_ _ * _ _ _ _ _ _ _ > 6 _ _ _ _ _ _ _ _"
     }));
 
-    Sim sim;
+    Sim sim(100, 100000);
 
-    benchmark("sim - one turn on a big grid w/ a lot of food", [&sim, &state]()
+    benchmark("sim - 100 simulated turns on a big grid w/ a lot of food", [&sim, &state]()
     {
         sim.move(state);
     });
