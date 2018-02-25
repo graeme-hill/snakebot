@@ -387,14 +387,14 @@ private:
     AxisBias _pathfindingBias;
 };
 
-inline Point coordAfterMove(Point p, Direction dir)
+inline Point coordAfterMove(Point p, Direction dir, int range = 1)
 {
     switch (dir)
     {
-        case Direction::Up: return { p.x, p.y - 1 };
-        case Direction::Down: return { p.x, p.y + 1 };
-        case Direction::Left: return { p.x - 1, p.y };
-        default: return { p.x + 1, p.y };
+        case Direction::Up: return { p.x, p.y - range };
+        case Direction::Down: return { p.x, p.y + range };
+        case Direction::Left: return { p.x - range, p.y };
+        default: return { p.x + range, p.y };
     }
 }
 

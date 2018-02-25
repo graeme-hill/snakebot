@@ -33,7 +33,42 @@ bool isCellRisky(Point p, GameState &state)
     return isCellOk(p, state) && isCloseToEqualOrBiggerSnakeHead(p, state);
 }
 
-MaybeDirection closestKillTunnelTarget(GameState &state)
+bool checkForOkCellsInRange(int range, Direction dir, Point cell, GameState &state)
+{
+    bool isOk = true;
+    if (dir == Direction::Up) 
+    {
+        for(int i = 1 ; i <= range ; i++) {
+            isOk = isOk && isCellOk({cell.x, cell.y - i}, state);
+        }
+        return isOk;
+    } 
+    else if (dir == Direction::Down) 
+    {
+        for(int i = 1 ; i <= range ; i++) {
+            isOk = isOk && isCellOk({cell.x, cell.y + i}, state);
+        }        
+        return isOk;
+    }
+    else if (dir == Direction::Left) 
+    {
+        for(int i = 1 ; i <= range ; i++) {        
+            isOk = isOk && isCellOk({cell.x - i, cell.y}, state);
+        }
+        return isOk;
+    }    
+    else if (dir == Direction::Right) 
+    {
+        for(int i = 1 ; i <= range ; i++) {        
+            isOk = isOk && isCellOk({cell.x + i, cell.y}, state);
+        }
+        return isOk;
+    } else {
+        return false;
+    }
+}
+
+MaybeDirection closestKillTunnelTarget(GameState &state, int killTunnelRange = 1)
 {
     Snake *me = state.mySnake();
     Path best = Path::none();
@@ -48,31 +83,37 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
         Point nextCell;
 
         int count = 0;
+        Direction lastDirection = Direction::Up;
         //up
-        if(isCellOk({currentCell.x, currentCell.y-1}, state)) 
+        
+        if(checkForOkCellsInRange(killTunnelRange, Direction::Up, currentCell, state))
         {
-            nextCell = {currentCell.x, currentCell.y-1};
+            nextCell = coordAfterMove(currentCell, Direction::Up, 1);
+            lastDirection = Direction::Up;
             count++;
         }
 
         //down
-        if(isCellOk({currentCell.x, currentCell.y+1}, state)) 
+        if(checkForOkCellsInRange(killTunnelRange, Direction::Down, currentCell, state))
         {
-            nextCell = {currentCell.x, currentCell.y+1};
+            nextCell = coordAfterMove(currentCell, Direction::Down, 1);
+            lastDirection = Direction::Down;
             count++;
         }
 
         //left
-        if(isCellOk({currentCell.x-1, currentCell.y}, state)) 
+        if(checkForOkCellsInRange(killTunnelRange, Direction::Left, currentCell, state))
         {
-            nextCell = {currentCell.x-1, currentCell.y};
+            nextCell = coordAfterMove(currentCell, Direction::Left, 1);
+            lastDirection = Direction::Left;
             count++;
         }
 
         //right
-        if(isCellOk({currentCell.x+1, currentCell.y}, state)) 
+        if(checkForOkCellsInRange(killTunnelRange, Direction::Right, currentCell, state))
         {
-            nextCell = {currentCell.x+1, currentCell.y};
+            nextCell = coordAfterMove(currentCell, Direction::Right, 1);
+            lastDirection = Direction::Right;
             count++;
         }
 
@@ -85,7 +126,7 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
         int maxLoop = state.width() * state.height();
         
         //counter here so this CAN'T go infinite
-        Direction lastDirection = Direction::Up;
+
         while (count == 1 && bailOut < maxLoop)
         {           
 
@@ -93,47 +134,48 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
 
             cellPath.push_back(nextCell);
             currentCell = nextCell;
-
             //up
-            if(isCellOk({currentCell.x, currentCell.y-1}, state)) 
+            
+            if(checkForOkCellsInRange(killTunnelRange, Direction::Up, currentCell, state))
             {
-                nextCell = {currentCell.x, currentCell.y-1};
+                nextCell = coordAfterMove(currentCell, Direction::Up, 1);
                 lastDirection = Direction::Up;
                 count++;
             }
 
             //down
-            if(isCellOk({currentCell.x, currentCell.y+1}, state)) 
+            if(checkForOkCellsInRange(killTunnelRange, Direction::Down, currentCell, state))
             {
-                nextCell = {currentCell.x, currentCell.y+1};
+                nextCell = coordAfterMove(currentCell, Direction::Down, 1);
                 lastDirection = Direction::Down;
                 count++;
             }
 
             //left
-            if(isCellOk({currentCell.x-1, currentCell.y}, state)) 
+            if(checkForOkCellsInRange(killTunnelRange, Direction::Left, currentCell, state))
             {
-                nextCell = {currentCell.x-1, currentCell.y};
+                nextCell = coordAfterMove(currentCell, Direction::Left, 1);
                 lastDirection = Direction::Left;
                 count++;
             }
 
             //right
-            if(isCellOk({currentCell.x+1, currentCell.y}, state)) 
+            if(checkForOkCellsInRange(killTunnelRange, Direction::Right, currentCell, state))
             {
-                nextCell = {currentCell.x+1, currentCell.y};
+                nextCell = coordAfterMove(currentCell, Direction::Right, 1);
                 lastDirection = Direction::Right;
                 count++;
-            }         
+            }        
 
             bailOut++;    
         }
 
         if(cellPath.size() > 1) 
         {
-            Point targetCell = coordAfterMove(cellPath.back(), lastDirection);
-            std::cout << "TARGET CELL FOUND-->" << std::endl;
+            Point targetCell = coordAfterMove(cellPath.back(), lastDirection, 1);
+            std::cout << "TARGET CELL FOUND--> ";
             targetCell.prettyPrint();
+            std::cout << std::endl;
             Path myPath = shortestPath(me->head(), targetCell, state);
             if (!myPath.direction.hasValue)
             {

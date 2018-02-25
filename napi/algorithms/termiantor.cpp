@@ -24,10 +24,9 @@ void Terminator::start()
 
 Direction Terminator::move(GameState &state)
 {
-    auto killTunnelDir = closestKillTunnelTarget(state);
+    auto killTunnelDir = closestKillTunnelTarget(state, 2);
     if (killTunnelDir.hasValue)
     {
-        std::cout << "KILL TUNNEL ENGAGE: "  << std::endl;
         return killTunnelDir.value;
     }
 
