@@ -40,7 +40,6 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
     std::vector<Snake *> enemies = state.enemies();
     bool foundAnything = false;
 
-
     for (auto enemy : enemies)
     {
         Point head = enemy->head();
@@ -49,28 +48,28 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
         Point nextCell;
 
         int count = 0;
-        //north
+        //up
         if(isCellOk({currentCell.x, currentCell.y-1}, state)) 
         {
             nextCell = {currentCell.x, currentCell.y-1};
             count++;
         }
 
-        //south
+        //down
         if(isCellOk({currentCell.x, currentCell.y+1}, state)) 
         {
             nextCell = {currentCell.x, currentCell.y+1};
             count++;
         }
 
-        //west
+        //left
         if(isCellOk({currentCell.x-1, currentCell.y}, state)) 
         {
             nextCell = {currentCell.x-1, currentCell.y};
             count++;
         }
 
-        //east
+        //right
         if(isCellOk({currentCell.x+1, currentCell.y}, state)) 
         {
             nextCell = {currentCell.x+1, currentCell.y};
@@ -83,8 +82,9 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
         }   
 
         int bailOut = 0;
-        int maxLoop = std::max(state.width(), state.height());
-        //maybe a counter here so this can go infinite?
+        int maxLoop = state.width() * state.height();
+        
+        //counter here so this CAN'T go infinite
         Direction lastDirection;
         while (count == 1 && bailOut < maxLoop)
         {           
@@ -94,7 +94,7 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
             cellPath.push_back(nextCell);
             currentCell = nextCell;
 
-
+            //up
             if(isCellOk({currentCell.x, currentCell.y-1}, state)) 
             {
                 nextCell = {currentCell.x, currentCell.y-1};
@@ -102,27 +102,27 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
                 count++;
             }
 
-            //south
+            //down
             if(isCellOk({currentCell.x, currentCell.y+1}, state)) 
             {
                 nextCell = {currentCell.x, currentCell.y+1};
-                lastDirection = Direction::Up;
+                lastDirection = Direction::Down;
                 count++;
             }
 
-            //west
+            //left
             if(isCellOk({currentCell.x-1, currentCell.y}, state)) 
             {
                 nextCell = {currentCell.x-1, currentCell.y};
-                lastDirection = Direction::Up;
+                lastDirection = Direction::Left;
                 count++;
             }
 
-            //east
+            //right
             if(isCellOk({currentCell.x+1, currentCell.y}, state)) 
             {
                 nextCell = {currentCell.x+1, currentCell.y};
-                lastDirection = Direction::Up;
+                lastDirection = Direction::Right;
                 count++;
             }         
 
@@ -131,9 +131,8 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
 
         if(cellPath.size() > 1) 
         {
-
             Point targetCell = coordAfterMove(cellPath.back(), lastDirection);
-            std::cout << "TARGET CELL FOUND-->";
+            std::cout << "TARGET CELL FOUND-->" << std::endl;
             targetCell.prettyPrint();
             Path myPath = shortestPath(me->head(), targetCell, state);
             if (!myPath.direction.hasValue)
@@ -148,7 +147,6 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
 
             foundAnything = true;
             best = myPath;
-            
         }
     }
 
