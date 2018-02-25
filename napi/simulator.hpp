@@ -28,6 +28,7 @@ struct AlgorithmBranch
 {
     AlgorithmPair pair;
     MaybeDirection firstMove;
+    AxisBias enemyPathBindingBias;
 };
 
 struct Future
@@ -38,7 +39,11 @@ struct Future
     TerminationReason terminationReason;
     Direction move;
     uint32_t turns;
+
+    void prettyPrint();
 };
+
+std::string terminationReasonToString(TerminationReason reason);
 
 struct DirectionScore
 {
@@ -54,12 +59,12 @@ public:
         GameState &initialState,
         uint32_t maxTurns,
         uint32_t maxMillis,
-        uint32_t simNumber);
+        uint32_t simNumber,
+        AxisBias bias);
 
     bool next();
     Future result() { return _result; }
     uint32_t simNumber() { return _simNumber; }
-
 
 private:
     Direction getMyMove(GameState &state)
@@ -109,6 +114,7 @@ private:
     uint32_t _maxTurns;
     uint32_t _maxMillis;
     uint32_t _simNumber;
+    AxisBias _enemyPathfindingBias;
     uint32_t _turn;
     Future _result;
     std::unique_ptr<GameState> _newestState;

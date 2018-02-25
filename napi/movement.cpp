@@ -78,19 +78,22 @@ MaybeDirection bestFood(GameState &state)
 
         for (Snake *enemy : sortedEnemies)
         {
-            //std::cout << "loop2 " << distance(enemy->head(), food) << "\n";
             // If the shortest possible path with no barriers is longer than my
             // path then don't even bother with A* calculation. Furthermore,
             // since the snakes are already sorted by their distance from the
             // food, if this one is too far then so are all the rest.
             if (distance(food, enemy->head()) > myPath.size)
             {
-                //std::cout << "  BREAK\n";
                 break;
             }
 
-            GameState &enemyState = state.perspective(enemy);
-            auto enemyPath = shortestPath(enemy->head(), food, enemyState);
+            // In this case it doesn't matter whether axis bias
+            // is horizontal or vertical b/c we only care about
+            // the size of the path, not the route it takes.
+            GameState &enemyState = state.perspective(
+                enemy, AxisBias::Horizontal);
+            auto enemyPath = shortestPath(
+                enemy->head(), food, enemyState);
 
             if (!enemyPath.direction.hasValue)
             {

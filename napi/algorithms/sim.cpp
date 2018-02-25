@@ -9,6 +9,13 @@
 #include <functional>
 #include <unordered_map>
 
+Sim::Sim() : _maxTurns(10000), _maxMillis(100)
+{ }
+
+Sim::Sim(uint32_t maxTurns, uint32_t maxMillis) :
+    _maxTurns(maxTurns), _maxMillis(maxMillis)
+{ }
+
 Metadata Sim::meta()
 {
     return {
@@ -40,7 +47,7 @@ Direction Sim::move(GameState &state)
     std::vector<Algorithm *> enemyAlgorithms { &hungry, &inMyFace };
 
     std::vector<Future> futures = simulateFutures(
-    	state, 100000, 100, myAlgorithms, enemyAlgorithms);
+    	state, _maxTurns, _maxMillis, myAlgorithms, enemyAlgorithms);
 
     Direction best = bestMove(futures, state);
 

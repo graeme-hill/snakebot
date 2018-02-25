@@ -141,10 +141,20 @@ std::vector<uint32_t> getNeighbors(
     uint32_t down = index + state.width();
     uint32_t up = index - state.width();
 
-    if (isOkNeighbor(index, left, turn, state)) result.push_back(left);
-    if (isOkNeighbor(index, right, turn, state)) result.push_back(right);
-    if (isOkNeighbor(index, up, turn, state)) result.push_back(up);
-    if (isOkNeighbor(index, down, turn, state)) result.push_back(down);
+    if (state.pathfindingBias() == AxisBias::Vertical)
+    {
+        if (isOkNeighbor(index, up, turn, state)) result.push_back(up);
+        if (isOkNeighbor(index, down, turn, state)) result.push_back(down);
+        if (isOkNeighbor(index, left, turn, state)) result.push_back(left);
+        if (isOkNeighbor(index, right, turn, state)) result.push_back(right);
+    }
+    else
+    {
+        if (isOkNeighbor(index, left, turn, state)) result.push_back(left);
+        if (isOkNeighbor(index, right, turn, state)) result.push_back(right);
+        if (isOkNeighbor(index, up, turn, state)) result.push_back(up);
+        if (isOkNeighbor(index, down, turn, state)) result.push_back(down);
+    }
 
     return result;
 }

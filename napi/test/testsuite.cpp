@@ -5,6 +5,7 @@
 #include "../simulator.hpp"
 #include "../algorithms/sim.hpp"
 #include "../algorithms/inyourface.hpp"
+#include "../algorithms/cautious.hpp"
 #include <iostream>
 
 class OneDirAlgorithm : public Algorithm
@@ -614,9 +615,55 @@ void simulateFuturesTest1()
     f2.move = Direction::Up;
     f2.turns = 3;
 
-    std::vector<Future> expectedFutures = { f1, f2 };
+    Future f3 {};
+    f3.obituaries = { { "1", 3 }, { "0", 4 } };
+    f3.foodsEaten = { { "0", { 2, 3 } } };
+    f3.algorithm = &algo;
+    f3.terminationReason = TerminationReason::Loss;
+    f3.move = Direction::Left;
+    f3.turns = 4;
+
+    Future f4 {};
+    f4.obituaries = { { "1", 3 }, { "0", 3 } };
+    f4.foodsEaten = {};
+    f4.algorithm = &algo;
+    f4.terminationReason = TerminationReason::Loss;
+    f4.move = Direction::Up;
+    f4.turns = 3;
+
+    std::vector<Future> expectedFutures = { f1, f3, f2, f4 };
 
     assertEqual(actualFutures, expectedFutures, "simulateFuturesTest1()");
+}
+
+void simulateFuturesTest2()
+{
+    GameState state(parseWorld({
+        "_ _ _ _ _ _ _ _ _ > > > v _ _ _ _",
+        "_ _ _ _ _ _ _ v _ ^ _ _ > > v _ _",
+        "* _ _ _ _ _ _ v * ^ _ _ _ _ > > 0",
+        "* _ * _ * _ 2 > > > > > > > > v _",
+        "v < _ _ _ _ ^ _ _ _ _ _ _ _ _ v _",
+        "v ^ _ _ _ _ ^ _ _ _ * _ _ _ _ v _",
+        "v _ _ _ _ _ ^ _ _ _ _ _ _ _ _ > v",
+        "v _ _ _ _ * ^ _ _ 1 < _ _ _ _ _ v",
+        "v _ _ * * _ ^ _ * _ ^ < < _ _ _ v",
+        "v _ _ _ _ _ ^ _ _ _ _ _ ^ _ v < <",
+        "v _ _ _ * _ ^ _ _ _ * _ ^ < < _ _",
+        "> > > > > > ^ _ _ _ _ _ _ _ _ _ _"
+    }));
+
+    Cautious cautious;
+    AlgorithmPair pair { &cautious, &cautious };
+    AxisBias bias = AxisBias::Horizontal;
+    AlgorithmBranch branch { pair, MaybeDirection::just(Direction::Up), bias };
+    std::vector<AlgorithmBranch> branches { branch };
+    auto futures = runSimulationBranches(branches, state, 20, 1000);
+
+    assertEqual(futures.size(), 1, "simulateFuturesTest2() - one future");
+    Future future = futures.at(0);
+    TerminationReason reason = future.terminationReason;
+    assertEqual(reason, TerminationReason::MaxTurns, "simulateFuturesTest2() - should lose");
 }
 
 void bestMoveTest1()
@@ -816,23 +863,35 @@ void inYourFaceTest3()
 void simTest1()
 {
     GameState state(parseWorld({
-        "_ _ _ _ _ _ > > _ > > > v _ _ _ _",
-        "_ _ _ _ _ _ _ v _ ^ v _ > > v _ _",
-        "* _ _ _ _ _ _ v * ^ < _ _ _ 0 _ _",
-        "* _ * _ * _ _ > > > > > > > > v _",
-        "v < _ _ _ _ _ _ _ _ _ _ _ _ _ v _",
-        "v ^ _ _ _ _ 2 _ _ _ * _ _ _ _ v _",
+        // "_ _ _ _ _ _ > > _ > > > v _ _ _ _",
+        // "_ _ _ _ _ _ _ v _ ^ v _ > > v _ _",
+        // "* _ _ _ _ _ _ v * ^ < _ _ _ 0 _ _",
+        // "* _ * _ * _ _ > > > > > > > > v _",
+        // "v < _ _ _ _ _ _ _ _ _ _ _ _ _ v _",
+        // "v ^ _ _ _ _ 2 _ _ _ * _ _ _ _ v _",
+        // "v _ _ _ _ _ ^ _ _ _ _ _ _ _ _ > v",
+        // "v _ _ _ _ * ^ _ _ _ _ _ _ _ _ _ v",
+        // "v _ _ * * _ ^ _ * _ 1 < < _ _ _ v",
+        // "v _ _ _ _ _ ^ _ _ _ _ _ ^ _ v < <",
+        // "v _ _ _ * _ ^ _ _ _ * _ ^ < < _ _",
+        // "> > > > > > ^ _ _ _ _ _ _ _ _ _ _"
+        "_ _ _ _ _ _ _ _ _ > > > v _ _ _ _",
+        "_ _ _ _ _ _ _ v _ ^ _ _ > > v _ _",
+        "* _ _ _ _ _ _ v * ^ _ _ _ _ > > 0",
+        "* _ * _ * _ 2 > > > > > > > > v _",
+        "v < _ _ _ _ ^ _ _ _ _ _ _ _ _ v _",
+        "v ^ _ _ _ _ ^ _ _ _ * _ _ _ _ v _",
         "v _ _ _ _ _ ^ _ _ _ _ _ _ _ _ > v",
-        "v _ _ _ _ * ^ _ _ _ _ _ _ _ _ _ v",
-        "v _ _ * * _ ^ _ * _ 1 < < _ _ _ v",
+        "v _ _ _ _ * ^ _ _ 1 < _ _ _ _ _ v",
+        "v _ _ * * _ ^ _ * _ ^ < < _ _ _ v",
         "v _ _ _ _ _ ^ _ _ _ _ _ ^ _ v < <",
         "v _ _ _ * _ ^ _ _ _ * _ ^ < < _ _",
         "> > > > > > ^ _ _ _ _ _ _ _ _ _ _"
     }));
 
-    Sim sim;
+    Sim sim(20, 1000);
     Direction dir = sim.move(state);
-    assertEqual(dir, Direction::Left, "simTest1() - go left if you want to live");
+    assertEqual(dir, Direction::Up, "simTest1() - go up if you want to live");
 }
 
 void simTest2()
@@ -854,6 +913,27 @@ void simTest2()
     Sim sim;
     Direction dir = sim.move(state);
     assertEqual(dir, Direction::Right, "simTest2() - go right if you want to live");
+}
+
+void simTest3()
+{
+    GameState state(parseWorld({
+        "* _ _ _ _ * _ _ _ * _ * _ _",
+        "_ _ _ _ _ _ _ _ _ > v 1 < _",
+        "_ _ * _ _ _ > > > ^ v _ ^ _",
+        "v < < < _ _ _ _ _ _ v _ ^ *",
+        "> v _ _ * _ _ _ _ _ v _ ^ *",
+        "* v _ _ _ _ _ _ _ 2 > 0 ^ _",
+        "v < _ _ _ _ _ > > ^ _ _ ^ _",
+        "> v > > > > > ^ _ _ _ _ ^ *",
+        "_ > ^ _ _ _ _ _ _ * _ * ^ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _ ^ _",
+        "* _ _ _ _ _ * _ _ _ _ _ _ _"
+    }));
+
+    Sim sim;
+    Direction dir = sim.move(state);
+    assertEqual(dir, Direction::Down, "simTest3() - go down if you want to live");
 }
 
 void TestSuite::run()
@@ -884,6 +964,7 @@ void TestSuite::run()
     newStateAfterMovesTest6();
     newStateAfterMovesTest7();
     simulateFuturesTest1();
+    simulateFuturesTest2();
     bestMoveTest1();
     directionSetTests();
     arrayDictTest1();
@@ -894,4 +975,5 @@ void TestSuite::run()
     inYourFaceTest3();
     simTest1();
     simTest2();
+    simTest3();
 }
