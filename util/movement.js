@@ -174,7 +174,7 @@ function identifyEnemyTunnelTarget(enemies, gameState) {
             bailOutCounter++;
         }
 
-        const targetCell = cellPath.length > 1 ? cellPath[cellPath.length - 2] : null;
+        const targetCell = cellPath.length > 1 ? cellPath[cellPath.length - 1] : null;
         if(targetCell) {
             console.log(cellPath);
             console.log("TargetCell found: ");

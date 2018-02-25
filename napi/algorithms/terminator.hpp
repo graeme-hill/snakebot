@@ -2,7 +2,7 @@
 
 #include "../snakelib.hpp"
 
-class Hungry : public Algorithm
+class Terminator : public Algorithm
 {
 public:
     Metadata meta() override;

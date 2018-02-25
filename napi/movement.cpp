@@ -2,6 +2,159 @@
 #include "astar.hpp"
 #include "snakelib.hpp"
 
+
+bool is180(Point p, GameState &state)
+{
+    // If length of snake is 1 then nothing to worry about (... I think... might wanna test that)
+    if (state.mySnake()->length() <= 1)
+    {
+        return false;
+    }
+
+    Point neck = state.mySnake()->parts.at(1);
+
+    return neck == p;
+}
+
+bool isCellOk(Point p, GameState &state)
+{
+    return !outOfBounds(p, state)
+        && state.map().turnsUntilVacant(p) == 0
+        && !is180(p, state);
+}
+
+bool isCellSafe(Point p, GameState &state)
+{
+    return isCellOk(p, state) && !isCloseToEqualOrBiggerSnakeHead(p, state);
+}
+
+bool isCellRisky(Point p, GameState &state)
+{
+    return isCellOk(p, state) && isCloseToEqualOrBiggerSnakeHead(p, state);
+}
+
+MaybeDirection closestKillTunnelTarget(GameState &state)
+{
+    Snake *me = state.mySnake();
+    Path best = Path::none();
+    std::vector<Snake *> enemies = state.enemies();
+    bool foundAnything = false;
+
+
+    for (auto enemy : enemies)
+    {
+        Point head = enemy->head();
+        Point currentCell = { head.x, head.y };
+        std::vector<Point> cellPath;
+        Point nextCell;
+
+        int count = 0;
+        //north
+        if(isCellOk({currentCell.x, currentCell.y-1}, state)) 
+        {
+            nextCell = {currentCell.x, currentCell.y-1};
+            count++;
+        }
+
+        //south
+        if(isCellOk({currentCell.x, currentCell.y+1}, state)) 
+        {
+            nextCell = {currentCell.x, currentCell.y+1};
+            count++;
+        }
+
+        //west
+        if(isCellOk({currentCell.x-1, currentCell.y}, state)) 
+        {
+            nextCell = {currentCell.x-1, currentCell.y};
+            count++;
+        }
+
+        //east
+        if(isCellOk({currentCell.x+1, currentCell.y}, state)) 
+        {
+            nextCell = {currentCell.x+1, currentCell.y};
+            count++;
+        }
+
+        //a kill tunnel can only exist if only one neighbour cell is open
+        if(count != 1) {
+            continue;
+        }   
+
+        int bailOut = 0;
+        int maxLoop = std::max(state.width(), state.height());
+        //maybe a counter here so this can go infinite?
+        Direction lastDirection;
+        while (count == 1 && bailOut < maxLoop)
+        {           
+
+            count = 0;
+
+            cellPath.push_back(nextCell);
+            currentCell = nextCell;
+
+
+            if(isCellOk({currentCell.x, currentCell.y-1}, state)) 
+            {
+                nextCell = {currentCell.x, currentCell.y-1};
+                lastDirection = Direction::Up;
+                count++;
+            }
+
+            //south
+            if(isCellOk({currentCell.x, currentCell.y+1}, state)) 
+            {
+                nextCell = {currentCell.x, currentCell.y+1};
+                lastDirection = Direction::Up;
+                count++;
+            }
+
+            //west
+            if(isCellOk({currentCell.x-1, currentCell.y}, state)) 
+            {
+                nextCell = {currentCell.x-1, currentCell.y};
+                lastDirection = Direction::Up;
+                count++;
+            }
+
+            //east
+            if(isCellOk({currentCell.x+1, currentCell.y}, state)) 
+            {
+                nextCell = {currentCell.x+1, currentCell.y};
+                lastDirection = Direction::Up;
+                count++;
+            }         
+
+            bailOut++;    
+        }
+
+        if(cellPath.size() > 1) 
+        {
+
+            Point targetCell = coordAfterMove(cellPath.back(), lastDirection);
+            std::cout << "TARGET CELL FOUND-->";
+            targetCell.prettyPrint();
+            Path myPath = shortestPath(me->head(), targetCell, state);
+            if (!myPath.direction.hasValue)
+            {
+                continue;
+            }
+
+            if (myPath.size >= best.size && foundAnything)
+            {
+                continue;
+            }
+
+            foundAnything = true;
+            best = myPath;
+            
+        }
+    }
+
+    return best.direction;
+}
+
 MaybeDirection closestFood(GameState &state)
 {
     Snake *me = state.mySnake();
@@ -122,36 +275,6 @@ MaybeDirection bestFood(GameState &state)
     }
 
     return best.direction;
-}
-
-bool is180(Point p, GameState &state)
-{
-    // If length of snake is 1 then nothing to worry about (... I think... might wanna test that)
-    if (state.mySnake()->length() <= 1)
-    {
-        return false;
-    }
-
-    Point neck = state.mySnake()->parts.at(1);
-
-    return neck == p;
-}
-
-bool isCellOk(Point p, GameState &state)
-{
-    return !outOfBounds(p, state)
-        && state.map().turnsUntilVacant(p) == 0
-        && !is180(p, state);
-}
-
-bool isCellSafe(Point p, GameState &state)
-{
-    return isCellOk(p, state) && !isCloseToEqualOrBiggerSnakeHead(p, state);
-}
-
-bool isCellRisky(Point p, GameState &state)
-{
-    return isCellOk(p, state) && isCloseToEqualOrBiggerSnakeHead(p, state);
 }
 
 DirectionSet notImmediatelySuicidalMoves(GameState &state)

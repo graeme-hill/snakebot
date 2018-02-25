@@ -2,6 +2,7 @@
 #include "hungry.hpp"
 #include "cautious.hpp"
 #include "inyourface.hpp"
+#include "terminator.hpp"
 #include "../movement.hpp"
 #include "../astar.hpp"
 #include "../simulator.hpp"
@@ -42,8 +43,9 @@ Direction Sim::move(GameState &state)
     InYourFace inMyFace(state.mySnake());
     Hungry hungry;
     Cautious cautious;
+    Terminator terminator;
 
-    std::vector<Algorithm *> myAlgorithms { &cautious, &inYourFace };
+    std::vector<Algorithm *> myAlgorithms { &terminator };
     std::vector<Algorithm *> enemyAlgorithms { &hungry, &inMyFace };
 
     std::vector<Future> futures = simulateFutures(

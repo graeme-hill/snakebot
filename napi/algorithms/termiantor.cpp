@@ -1,4 +1,4 @@
-#include "hungry.hpp"
+#include "terminator.hpp"
 #include "../movement.hpp"
 #include "../astar.hpp"
 
@@ -22,8 +22,15 @@ void Terminator::start()
 {
 }
 
-Direction Hungry::move(GameState &state)
+Direction Terminator::move(GameState &state)
 {
+    auto killTunnelDir = closestKillTunnelTarget(state);
+    if (killTunnelDir.hasValue)
+    {
+        std::cout << "KILL TUNNEL ENGAGE: ";
+        return killTunnelDir.value;
+    }
+
     auto foodDir = closestFood(state);
     if (foodDir.hasValue)
     {
