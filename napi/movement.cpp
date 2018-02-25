@@ -85,7 +85,7 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
         int maxLoop = state.width() * state.height();
         
         //counter here so this CAN'T go infinite
-        Direction lastDirection;
+        Direction lastDirection = Direction::Up;
         while (count == 1 && bailOut < maxLoop)
         {           
 

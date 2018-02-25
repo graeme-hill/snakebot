@@ -2,6 +2,7 @@
 #include "snakelib.hpp"
 #include "algorithms/cautious.hpp"
 #include "algorithms/hungry.hpp"
+#include "algorithms/terminator.hpp"
 #include "algorithms/dog.hpp"
 #include "algorithms/sim.hpp"
 #include "algorithms/inyourface.hpp"
@@ -180,6 +181,7 @@ napi_value init(napi_env env, napi_value exports)
     // INITIALIZE AVAILABLE ALGORITHMS HERE!
     algorithms["cautious"] = std::unique_ptr<Algorithm>(new Cautious());
     algorithms["hungry"] = std::unique_ptr<Algorithm>(new Hungry());
+    algorithms["terminator"] = std::unique_ptr<Algorithm>(new Terminator());
     algorithms["dog"] = std::unique_ptr<Algorithm>(new Dog());
     algorithms["sim"] = std::unique_ptr<Algorithm>(new Sim());
     algorithms["inyourface"] = std::unique_ptr<Algorithm>(new InYourFace());
