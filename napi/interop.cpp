@@ -35,7 +35,7 @@ void assertEqual(std::string actual, std::string expected, std::string message)
 	napi_value jsActual, jsExpected;
 	napi_create_string_utf8(env, actual.c_str(), NAPI_AUTO_LENGTH, &jsActual);
 	napi_create_string_utf8(env, expected.c_str(), NAPI_AUTO_LENGTH, &jsExpected);
-	assertEqual(jsActual, jsExpected, message);	
+	assertEqual(jsActual, jsExpected, message);
 }
 
 void assertEqual(uint32_t actual, uint32_t expected, std::string message)
@@ -44,13 +44,20 @@ void assertEqual(uint32_t actual, uint32_t expected, std::string message)
 	napi_value jsActual, jsExpected;
 	napi_create_uint32(env, actual, &jsActual);
 	napi_create_uint32(env, expected, &jsExpected);
-	assertEqual(jsActual, jsExpected, message);	
+	assertEqual(jsActual, jsExpected, message);
 }
 
 void assertEqual(Direction actual, Direction expected, std::string message)
 {
     std::string actualStr = directionToString(actual);
     std::string expectedStr = directionToString(expected);
+    assertEqual(actualStr, expectedStr, message);
+}
+
+void assertEqual(TerminationReason actual, TerminationReason expected, std::string message)
+{
+    std::string actualStr = terminationReasonToString(actual);
+    std::string expectedStr = terminationReasonToString(expected);
     assertEqual(actualStr, expectedStr, message);
 }
 
@@ -182,7 +189,7 @@ void assertTrue(bool actual, std::string message)
 	napi_value jsActual, jsExpected;
 	napi_get_boolean(env, actual, &jsActual);
 	napi_get_boolean(env, true, &jsExpected);
-	assertEqual(jsActual, jsExpected, message);	
+	assertEqual(jsActual, jsExpected, message);
 }
 
 World parseWorld(std::vector<std::string> rows)
@@ -211,7 +218,7 @@ World parseWorld(std::vector<std::string> rows)
 	napi_value jsWorld;
 	status = napi_call_function(env, jsThis, Interop::parseWorldFn(), args.size(), args.data(), &jsWorld);
 	HANDLE_ERROR("cannot call parseWorldFn");
-	
+
 	World world = makeWorld(env, jsWorld);
 	return world;
 }

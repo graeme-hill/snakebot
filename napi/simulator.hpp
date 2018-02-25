@@ -1,9 +1,17 @@
 #pragma once
 
 #include "snakelib.hpp"
+#include "timing.hpp"
 #include <thread>
+#include <chrono>
 
 #define THREAD_COUNT 4
+
+// Sleep this amount of time each iteration of worker thread when in sleep mode.
+#define SLEEP_MODE_DELAY_MILLIS 10
+
+// Amount of time with no work before worker thread enters sleep mode.
+#define SECONDS_OF_NO_WORK_UNTIL_SLEEP 10.0
 
 enum class TerminationReason
 {
@@ -20,6 +28,7 @@ struct AlgorithmBranch
 {
     AlgorithmPair pair;
     MaybeDirection firstMove;
+    AxisBias enemyPathBindingBias;
 };
 
 struct Future
@@ -30,7 +39,11 @@ struct Future
     TerminationReason terminationReason;
     Direction move;
     uint32_t turns;
+
+    void prettyPrint();
 };
+
+std::string terminationReasonToString(TerminationReason reason);
 
 struct DirectionScore
 {
@@ -45,7 +58,9 @@ public:
         AlgorithmBranch branch,
         GameState &initialState,
         uint32_t maxTurns,
-        uint32_t simNumber);
+        uint32_t maxMillis,
+        uint32_t simNumber,
+        AxisBias bias);
 
     bool next();
     Future result() { return _result; }
@@ -97,7 +112,9 @@ private:
     AlgorithmBranch _branch;
     GameState &_initialState;
     uint32_t _maxTurns;
+    uint32_t _maxMillis;
     uint32_t _simNumber;
+    AxisBias _enemyPathfindingBias;
     uint32_t _turn;
     Future _result;
     std::unique_ptr<GameState> _newestState;
@@ -106,17 +123,20 @@ private:
 std::vector<Future> runSimulationBranches(
     std::vector<AlgorithmBranch> &branches,
     GameState &initialState,
-    uint32_t maxTurns);
+    uint32_t maxTurns,
+    uint32_t maxMillis);
 
 std::vector<Future> runSimulations(
     std::vector<AlgorithmPair> algorithmPairs,
     GameState &initialState,
     uint32_t maxTurns,
+    uint32_t maxMillis,
     DirectionSet firstMoves);
 
 std::vector<Future> simulateFutures(
     GameState &initialState,
     uint32_t maxTurns,
+    uint32_t maxMillis,
     std::vector<Algorithm *> myAlgorithms,
     std::vector<Algorithm *> enemyAlgorithms);
 
@@ -127,57 +147,25 @@ struct SimParams
     std::vector<AlgorithmBranch> branches;
     std::unique_ptr<GameState> state;
     uint32_t maxTurns;
+    uint32_t maxMillis;
 };
 
 class SimThread
 {
 public:
-    SimThread() : _hasWork(false), _quit(false), _thread(&SimThread::spin, this)
-    {
-    }
-
-    void startWork(SimParams params)
-    {
-        _params = std::move(params);
-        _hasWork = true;
-    }
-
-    void spin()
-    {
-        while (!_quit)
-        {
-            if (_hasWork)
-            {
-                _result = runSimulationBranches(_params.branches, *_params.state, _params.maxTurns);
-                _hasWork = false;
-            }
-            std::this_thread::yield();
-        }
-    }
-
-    std::vector<Future> &result()
-    {
-        return _result;
-    }
-
-    bool done()
-    {
-        return !_hasWork;
-    }
-
-    void kill()
-    {
-        _quit = true;
-    }
-
-    void join()
-    {
-        _thread.join();
-    }
+    SimThread();
+    void startWork(SimParams params);
+    void spin();
+    std::vector<Future> &result();
+    bool done();
+    void kill();
+    void join();
+    void wakeUp();
+    void sleep();
 
     static std::array<SimThread, THREAD_COUNT> instances;
-
     static void stopAll();
+    static void wakeAll();
 
 private:
     std::vector<Future> _result;
@@ -185,4 +173,6 @@ private:
     volatile bool _hasWork;
     volatile bool _quit;
     std::thread _thread;
+    Clock::time_point _timeOfLastWork;
+    volatile bool _sleeping;
 };

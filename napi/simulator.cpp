@@ -1,11 +1,20 @@
 #include "simulator.hpp"
 #include "movement.hpp"
+#include <cmath>
 
 #include <numeric>
 
 #define IDEAL_HEALTH_AT_FOOD_TIME 100
 
 std::array<SimThread, THREAD_COUNT> SimThread::instances;
+
+SimThread::SimThread() :
+    _hasWork(false),
+    _quit(false),
+    _thread(&SimThread::spin, this),
+    _timeOfLastWork(Clock::now()),
+    _sleeping(true)
+{ }
 
 void SimThread::stopAll()
 {
@@ -20,16 +29,158 @@ void SimThread::stopAll()
     }
 }
 
+void SimThread::wakeAll()
+{
+    for (SimThread &simThread : SimThread::instances)
+    {
+        simThread.wakeUp();
+    }
+}
+
+std::vector<Future> &SimThread::result()
+{
+    return _result;
+}
+
+bool SimThread::done()
+{
+    return !_hasWork;
+}
+
+void SimThread::kill()
+{
+    _quit = true;
+}
+
+void SimThread::join()
+{
+    _thread.join();
+}
+
+void SimThread::wakeUp()
+{
+    _sleeping = false;
+}
+
+void SimThread::sleep()
+{
+    _sleeping = true;
+}
+
+void SimThread::startWork(SimParams params)
+{
+    _params = std::move(params);
+    _hasWork = true;
+}
+
+void SimThread::spin()
+{
+    while (!_quit)
+    {
+        if (_hasWork)
+        {
+            if (_sleeping)
+            {
+                wakeUp();
+            }
+
+            _result = runSimulationBranches(
+                _params.branches,
+                *_params.state,
+                _params.maxTurns,
+                _params.maxMillis);
+            _hasWork = false;
+            _timeOfLastWork = Clock::now();
+        }
+        else if (!_sleeping)
+        {
+            auto now = Clock::now();
+            Seconds diff = now - _timeOfLastWork;
+            if (diff > Seconds(SECONDS_OF_NO_WORK_UNTIL_SLEEP))
+            {
+                sleep();
+            }
+        }
+
+        if (_sleeping)
+        {
+            // Play very nice with other threads and take very little CPU
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds(SLEEP_MODE_DELAY_MILLIS));
+        }
+        else
+        {
+            // Play nice with other threads but take a lot of CPU
+            std::this_thread::yield();
+        }
+    }
+}
+
+std::string terminationReasonToString(TerminationReason reason)
+{
+    switch (reason)
+    {
+        case TerminationReason::Loss: return "Loss";
+        case TerminationReason::MaxTurns: return "MaxTurns";
+        case TerminationReason::OutOfTime: return "OutOfTime";
+        default: return "Unknown";
+    }
+}
+
+void Future::prettyPrint()
+{
+    std::cout << "Future: algo=" << algorithm->meta().name
+        << " turns=" << turns
+        << " move=" << directionToString(move)
+        << " termination=" << terminationReasonToString(terminationReason)
+        << std::endl;
+
+    if (!obituaries.empty())
+    {
+        std::cout << "  obituaries:";
+        for (auto it : obituaries)
+        {
+            std::cout << " " << it.first << "=" << it.second;
+        }
+        std::cout << std::endl;
+    }
+
+    if (!foodsEaten.empty())
+    {
+        std::cout << "  food:";
+        for (auto it : foodsEaten)
+        {
+            auto turns = it.second;
+            if (!turns.empty())
+            {
+                std::cout << " " << it.first << "=[";
+                std::string sep = "";
+                for (auto t : turns)
+                {
+                    std::cout << sep << t;
+                    sep = ",";
+                }
+                std::cout << "]";
+            }
+        }
+        std::cout << std::endl;
+    }
+}
+
 Simulation::Simulation(
     AlgorithmBranch branch,
     GameState &initialState,
     uint32_t maxTurns,
-    uint32_t simNumber)
+    uint32_t maxMillis,
+    uint32_t simNumber,
+    AxisBias bias)
     :
     _branch(branch),
     _initialState(initialState),
     _maxTurns(maxTurns),
+    _maxMillis(maxMillis),
     _simNumber(simNumber),
+    _enemyPathfindingBias(bias),
     _turn(0),
     _result(
         {{}, {}, branch.pair.myAlgorithm, TerminationReason::Unknown, Direction::Left, 0})
@@ -52,12 +203,13 @@ bool Simulation::next()
     // Enemy moves.
     for (Snake *enemy : currentState.enemies())
     {
-        GameState &enemyState = currentState.perspective(enemy);
+        GameState &enemyState = currentState.perspective(
+            enemy, _enemyPathfindingBias);
         Direction direction = _branch.pair.enemyAlgorithm->move(enemyState);
         moves.push_back({ enemy, direction });
     }
 
-    std::unique_ptr<GameState> newState = 
+    std::unique_ptr<GameState> newState =
         currentState.newStateAfterMoves(moves);
 
     updateObituaries(*newState, currentState);
@@ -89,8 +241,11 @@ TerminationReason coerceTerminationReason(
 std::vector<Future> runSimulationBranches(
     std::vector<AlgorithmBranch> &branches,
     GameState &initialState,
-    uint32_t maxTurns)
+    uint32_t maxTurns,
+    uint32_t maxMillis)
 {
+    auto start = Clock::now();
+    auto maxSeconds = Seconds(static_cast<double>(maxMillis) / 1000.0);
     uint32_t turn = 0;
     std::vector<Simulation> simulations;
     uint32_t simIndex = 0;
@@ -98,8 +253,10 @@ std::vector<Future> runSimulationBranches(
 
     for (AlgorithmBranch &branch : branches)
     {
+        AxisBias bias = branch.enemyPathBindingBias;
         simulations.push_back(
-                { branch, initialState, maxTurns, simIndex++ });
+            { branch, initialState, maxTurns, maxMillis, simIndex++, bias });
+
         results.push_back({
             {},
             {},
@@ -113,6 +270,8 @@ std::vector<Future> runSimulationBranches(
     // Keep track of simulations that are finished so we know when to stop
     std::unordered_set<uint32_t> completedSimulations;
 
+    bool outOfTime = false;
+
     while (completedSimulations.size() < simulations.size())
     {
         turn++;
@@ -125,7 +284,11 @@ std::vector<Future> runSimulationBranches(
                 continue;
             }
 
-            if (sim.next() || turn >= maxTurns)
+            auto now = Clock::now();
+            Seconds diff = now - start;
+            outOfTime = diff >= maxSeconds;
+
+            if (sim.next() || turn >= maxTurns || outOfTime)
             {
                 results[sim.simNumber()] = sim.result();
                 completedSimulations.insert(sim.simNumber());
@@ -140,7 +303,8 @@ std::vector<Future> runSimulationBranches(
             results[i].terminationReason, turn, maxTurns);
     }
 
-    //std::cout << "simulated " << turn << " turns" << std::endl;
+    std::cout << "simulated " << turn << " turns | oot: "
+        << outOfTime << std::endl;
 
     return results;
 }
@@ -149,6 +313,7 @@ std::vector<Future> runSimulations(
     std::vector<AlgorithmPair> algorithmPairs,
     GameState &initialState,
     uint32_t maxTurns,
+    uint32_t maxMillis,
     DirectionSet firstMoves)
 {
     uint32_t branchIndex = 0;
@@ -157,16 +322,22 @@ std::vector<Future> runSimulations(
     {
         for (Direction firstDir : firstMoves)
         {
-            uint32_t threadIndex = branchIndex++ % THREAD_COUNT;
             MaybeDirection maybeDir { true, firstDir };
-            AlgorithmBranch branch{ pair, maybeDir };
-            branches[threadIndex].push_back(branch);
+
+            uint32_t threadIndex1 = branchIndex++ % THREAD_COUNT;
+            AlgorithmBranch branch1{ pair, maybeDir, AxisBias::Horizontal };
+            branches[threadIndex1].push_back(branch1);
+
+            uint32_t threadIndex2 = branchIndex++ % THREAD_COUNT;
+            AlgorithmBranch branch2{ pair, maybeDir, AxisBias::Vertical };
+            branches[threadIndex2].push_back(branch2);
         }
     }
 
     for (uint32_t g = 0; g < THREAD_COUNT; g++)
     {
-        SimThread::instances[g].startWork({ branches[g], initialState.clone(), maxTurns });
+        SimThread::instances[g].startWork(
+            { branches[g], initialState.clone(), maxTurns, maxMillis });
     }
 
     bool anyIncomplete = true;
@@ -196,6 +367,7 @@ std::vector<Future> runSimulations(
 std::vector<Future> simulateFutures(
     GameState &initialState,
     uint32_t maxTurns,
+    uint32_t maxMillis,
     std::vector<Algorithm *> myAlgorithms,
     std::vector<Algorithm *> enemyAlgorithms)
 {
@@ -207,7 +379,7 @@ std::vector<Future> simulateFutures(
         {
             algorithmPairs.push_back({ a1, a2 });
         }
-    }    
+    }
 
     DirectionSet firstMoves = safeMoves(initialState);
 
@@ -217,7 +389,7 @@ std::vector<Future> simulateFutures(
     }
 
     std::vector<Future> futures = runSimulations(
-        algorithmPairs, initialState, maxTurns, firstMoves);
+        algorithmPairs, initialState, maxTurns, maxMillis, firstMoves);
 
     return futures;
 }
@@ -238,25 +410,65 @@ int foodScore(uint32_t foodTurn, GameState &state)
 
 int scoreFuture(Future &future, GameState &state)
 {
-    auto obitIt = future.obituaries.find(state.mySnake()->id);
-    auto foodIt = future.foodsEaten.find(state.mySnake()->id);
-    uint32_t survivedTurns = obitIt == future.obituaries.end()
-        ? future.turns
-        : obitIt->second;
-    uint32_t survivalScore = survivedTurns * 1000;
+    auto myId = state.mySnake()->id;
+    uint32_t survivalScore = 100000;
+    uint32_t murderScore = 0;
+    uint32_t foodScore = 0;
+    bool dies = false;
 
-    uint32_t foodPoints = 0;
+    for (auto pair : future.obituaries)
+    {
+        if (pair.first == myId)
+        {
+            survivalScore = pair.second * 100;
+            dies = true;
+        }
+        else
+        {
+            murderScore += (100U - (std::min(100U, pair.second))) * 100;
+        }
+    }
+
+    auto foodIt = future.foodsEaten.find(state.mySnake()->id);
     if (foodIt != future.foodsEaten.end())
     {
         std::vector<uint32_t> &foodTurns = foodIt->second;
         if (!foodTurns.empty())
         {
-            foodPoints += foodScore(foodTurns.at(0), state);// 100 - foodTurns.at(0);
+            foodScore += 100U - (std::min(100U, foodTurns.at(0)));
         }
     }
 
-    int score = survivalScore + foodPoints;
-    return score;
+    uint32_t finalScore = dies
+        ? survivalScore
+        : survivalScore + foodScore + murderScore;
+
+    // std::cout << "survive: " << survivalScore
+    //     << " murder: " << murderScore
+    //     << " food: " << foodScore
+    //     << " final: " << finalScore << std::endl;
+
+    return finalScore;
+
+    // auto obitIt = future.obituaries.find(state.mySnake()->id);
+    // auto foodIt = future.foodsEaten.find(state.mySnake()->id);
+    // uint32_t survivedTurns = obitIt == future.obituaries.end()
+    //     ? future.turns
+    //     : obitIt->second;
+    // uint32_t survivalScore = log2(survivedTurns) * 1000;
+    //
+    // uint32_t foodPoints = 0;
+    // if (foodIt != future.foodsEaten.end())
+    // {
+    //     std::vector<uint32_t> &foodTurns = foodIt->second;
+    //     if (!foodTurns.empty())
+    //     {
+    //         foodPoints += foodScore(foodTurns.at(0), state);// 100 - foodTurns.at(0);
+    //     }
+    // }
+    //
+    // int score = survivalScore + foodPoints;
+    // return score;
 }
 
 Direction bestMove(std::vector<Future> &futures, GameState &state)
@@ -267,15 +479,20 @@ Direction bestMove(std::vector<Future> &futures, GameState &state)
 
     // TODO: this key should be a struct with its own hash function, not string
     std::unordered_map<std::string, DirectionScore> worstScores;
+    std::unordered_map<std::string, DirectionScore> bestScores;
 
     for (Future &future : futures)
     {
+        //future.prettyPrint();
+
         // Should never have a zero move future, but if there is don't crash.
         if (future.turns == 0)
             continue;
 
         Direction direction = future.move;
         int score = scoreFuture(future, state);
+
+        //std::cout << "  score: " << score << std::endl;
 
         std::string algoName = future.algorithm->meta().name;
         std::string key = algoName + "_" + directionToString(direction);
@@ -287,26 +504,61 @@ Direction bestMove(std::vector<Future> &futures, GameState &state)
         else
         {
             DirectionScore existing = it->second;
-            if (score > existing.score)
+            if (score < existing.score)
             {
                 worstScores[key] = DirectionScore{ direction, score };
             }
         }
+
+        it = bestScores.find(key);
+        if (it == bestScores.end())
+        {
+            bestScores[key] = DirectionScore{ direction, score };
+        }
+        else
+        {
+            DirectionScore existing = it->second;
+            if (score > existing.score)
+            {
+                bestScores[key] = DirectionScore{ direction, score };
+            }
+        }
     }
 
-    DirectionScore best{ Direction::Up, -1 };
+    DirectionScore bestOfTheWorst{ Direction::Up, -1 };
+    DirectionScore bestOfTheBest{ Direction::Up, -1 };
 
     for (auto it : worstScores)
     {
-        if (best.score < 0)
+        if (bestOfTheWorst.score < 0)
         {
-            best = it.second;
+            bestOfTheWorst = it.second;
         }
-        else if (it.second.score > best.score)
+        else if (it.second.score > bestOfTheWorst.score)
         {
-            best = it.second;
+            bestOfTheWorst = it.second;
         }
     }
 
-    return best.direction;
+    for (auto it : bestScores)
+    {
+        if (bestOfTheBest.score < 0)
+        {
+            bestOfTheBest = it.second;
+        }
+        else if (it.second.score > bestOfTheBest.score)
+        {
+            bestOfTheBest = it.second;
+        }
+    }
+
+    if (bestOfTheWorst.score < 1500)
+    {
+        std::cout << "TAKING MY CHANCES!!!\n";
+        return bestOfTheBest.direction;
+    }
+    else
+    {
+        return bestOfTheWorst.direction;
+    }
 }

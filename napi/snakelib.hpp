@@ -13,6 +13,12 @@
 
 #define MAX_SNAKES 10
 
+enum class AxisBias
+{
+    Vertical,
+    Horizontal
+};
+
 // Container for an instance of T that adds a flag to track whether the
 // value "exists". In reality the value always exists so there needs to
 // be a default state (ie: parameter-less ctor).
@@ -294,6 +300,7 @@ public:
     Algorithm();
     virtual Metadata meta() = 0;
     virtual Direction move(GameState &) = 0;
+    virtual void start() = 0;
     uint32_t id() { return _id; }
 
 private:
@@ -342,7 +349,7 @@ private:
 class GameState
 {
 public:
-    GameState(World w);
+    GameState(World w, AxisBias bias = AxisBias::Vertical);
 
     // delete move and copy ctors for now to avoid accidental copies
     GameState(const GameState &) = delete;
@@ -356,8 +363,9 @@ public:
     std::vector<Point> &food() { return _food; }
     Snake *mySnake();
     Map &map() { return _map; }
+    AxisBias pathfindingBias() { return _pathfindingBias; }
 
-    GameState &perspective(Snake *enemy);
+    GameState &perspective(Snake *enemy, AxisBias bias);
     std::unique_ptr<GameState> newStateAfterMoves(
         std::vector<SnakeMove> &moves);
     std::unique_ptr<GameState> clone();
@@ -376,6 +384,7 @@ private:
     Snake *_mySnake;
     World _world;
     Map _map;
+    AxisBias _pathfindingBias;
 };
 
 inline Point coordAfterMove(Point p, Direction dir)
@@ -409,15 +418,15 @@ inline Point deconstructCellIndex(uint32_t index, GameState &state)
     return deconstructCellIndex(index, state.width());
 }
 
-inline bool outOfBounds(Point p, uint32_t width)
+inline bool outOfBounds(Point p, uint32_t width, uint32_t height)
 {
-    // Since x and y are unsigned so they wrap and become very large numbers.
-    return p.x >= width || p.y >= width;
+    // Since x and y are unsigned they wrap and become very large numbers.
+    return p.x >= width || p.y >= height;
 }
 
 inline bool outOfBounds(Point p, GameState &gameState)
 {
-    return outOfBounds(p, gameState.width());
+    return outOfBounds(p, gameState.width(), gameState.height());
 }
 
 inline Direction directionBetweenNodes(uint32_t fromIndex, uint32_t toIndex, uint32_t width)
@@ -437,6 +446,8 @@ inline uint32_t absDiff(uint32_t a, uint32_t b)
 }
 
 std::string directionToString(Direction direction);
+
+std::string axisBiasToString(AxisBias bias);
 
 void applyMoves(World &world, std::vector<SnakeMove> &moves);
 
@@ -474,4 +485,14 @@ inline bool isCloseToEqualOrBiggerSnakeHead(uint32_t index, GameState &state)
 inline bool isCloseToEqualOrBiggerSnakeHead(Point p, GameState &state)
 {
     return isCloseToEqualOrBiggerSnakeHead(cellIndex(p, state), state);
+}
+
+inline uint32_t distance(Point a, Point b)
+{
+    return absDiff(a.x, b.x) + absDiff(a.y, b.y);
+}
+
+inline bool cellIsEmpty(GameState &state, Point cell)
+{
+    return state.map().turnsUntilVacant(cell) == 0;
 }

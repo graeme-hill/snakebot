@@ -65,13 +65,14 @@ uint32_t Algorithm::nextId()
     return _nextId++;
 }
 
-GameState::GameState(World w) :
+GameState::GameState(World w, AxisBias bias) :
     _width(w.width),
     _height(w.height),
     _food(w.food),
     _mySnake(nullptr),
     _world(w),
-    _map(*this)
+    _map(*this),
+    _pathfindingBias(bias)
 {
     for (size_t i = 0; i < _world.snakes.size(); i++)
     {
@@ -90,17 +91,19 @@ GameState::GameState(World w) :
     _map.update();
 }
 
-GameState &GameState::perspective(Snake *enemy)
+GameState &GameState::perspective(Snake *enemy, AxisBias bias)
 {
     auto iter = _perspectiveCopies.find(enemy->id);
     if (iter != _perspectiveCopies.end())
     {
-        return *iter->second; 
+        return *iter->second;
     }
 
     World newWorld = _world;
     newWorld.you = enemy->id;
-    _perspectiveCopies.insert(std::make_pair(enemy->id, std::unique_ptr<GameState>(new GameState(newWorld))));
+    _perspectiveCopies.insert(
+        std::make_pair(enemy->id,
+            std::unique_ptr<GameState>(new GameState(newWorld, bias))));
     return *_perspectiveCopies[enemy->id];
 }
 
@@ -230,6 +233,18 @@ std::string directionToString(Direction direction)
     }
 }
 
+std::string axisBiasToString(AxisBias bias)
+{
+    if (bias == AxisBias::Vertical)
+    {
+        return "Vertical";
+    }
+    else
+    {
+        return "Horizontal";
+    }
+}
+
 void moveHeadsForward(World &world, std::vector<SnakeMove> &moves)
 {
     for (Snake &snake : world.snakes)
@@ -306,11 +321,23 @@ void eatFoodOrDie(World &world)
         }
         else
         {
+            // This snake just ate which means it needs to grow on the NEXT
+            // turn. Implement by moving current tail piece forward once to
+            // overlap new tail position. In this case length should always be
+            // at least two because it just ate, but at least make sure not to
+            // crash if that does somehow happen.
+            if (snake.parts.size() >= 2)
+            {
+                size_t oldTailIndex = snake.parts.size() - 1;
+                size_t newTailIndex = snake.parts.size() - 2;
+                snake.parts[oldTailIndex] = snake.parts.at(newTailIndex);
+            }
+
             //snake.parts.pop_back();
             // It did eat so remove the food it ate.
             world.food.erase(
                 std::remove(
-                    world.food.begin(), 
+                    world.food.begin(),
                     world.food.end(),
                     snake.head()),
                 world.food.end());
@@ -365,7 +392,7 @@ void markCrashersDead(World &world)
     // Find heads that ran into tails or went oob.
     for (Snake &snake : world.snakes)
     {
-        if (outOfBounds(snake.head(), world.width))
+        if (outOfBounds(snake.head(), world.width, world.height))
         {
             snake.dead = true;
         }
@@ -392,7 +419,7 @@ void removeDeadGuys(World &world)
 void applyMoves(World &world, std::vector<SnakeMove> &moves)
 {
     // Adds new part in direction of move. Does not handle collions, oob, etc.
-    moveHeadsForward(world, moves);    
+    moveHeadsForward(world, moves);
 
     // Removes tail part if didn't eat. Marks dead if got eaten.
     eatFoodOrDie(world);

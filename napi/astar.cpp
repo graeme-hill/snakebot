@@ -46,7 +46,7 @@ void clean(MemoryPool &pool)
 
 uint32_t heuristicCostEstimate(Point start, Point goal)
 {
-    return absDiff(start.x, goal.x) + absDiff(start.y, goal.y);
+    return distance(start, goal);
 }
 
 uint32_t lowestFScoreInSet(
@@ -121,7 +121,8 @@ bool is180(uint32_t index, uint32_t neighborIndex, GameState &state)
     return index == headIndex && neighborIndex == neckIndex;
 }
 
-bool isOkNeighbor(uint32_t index, uint32_t other, uint32_t turn, GameState &state)
+bool isOkNeighbor(
+    uint32_t index, uint32_t other, uint32_t turn, GameState &state)
 {
     bool result = indexIsSafe(other, turn, state)
         && !is180(index, other, state)
@@ -130,7 +131,8 @@ bool isOkNeighbor(uint32_t index, uint32_t other, uint32_t turn, GameState &stat
     return result;
 }
 
-std::vector<uint32_t> getNeighbors(uint32_t index, uint32_t turn, GameState &state)
+std::vector<uint32_t> getNeighbors(
+    uint32_t index, uint32_t turn, GameState &state)
 {
     std::vector<uint32_t> result;
 
@@ -139,10 +141,20 @@ std::vector<uint32_t> getNeighbors(uint32_t index, uint32_t turn, GameState &sta
     uint32_t down = index + state.width();
     uint32_t up = index - state.width();
 
-    if (isOkNeighbor(index, up, turn, state)) result.push_back(up);
-    if (isOkNeighbor(index, down, turn, state)) result.push_back(down);
-    if (isOkNeighbor(index, left, turn, state)) result.push_back(left);
-    if (isOkNeighbor(index, right, turn, state)) result.push_back(right);
+    if (state.pathfindingBias() == AxisBias::Vertical)
+    {
+        if (isOkNeighbor(index, up, turn, state)) result.push_back(up);
+        if (isOkNeighbor(index, down, turn, state)) result.push_back(down);
+        if (isOkNeighbor(index, left, turn, state)) result.push_back(left);
+        if (isOkNeighbor(index, right, turn, state)) result.push_back(right);
+    }
+    else
+    {
+        if (isOkNeighbor(index, left, turn, state)) result.push_back(left);
+        if (isOkNeighbor(index, right, turn, state)) result.push_back(right);
+        if (isOkNeighbor(index, up, turn, state)) result.push_back(up);
+        if (isOkNeighbor(index, down, turn, state)) result.push_back(down);
+    }
 
     return result;
 }
@@ -222,7 +234,8 @@ Path shortestPath(Point start, Point goal, GameState &state)
         openSet.erase(currentIndex);
         closedSet.insert(currentIndex);
 
-        std::vector<uint32_t> neighbors = getNeighbors(currentIndex, turns[currentIndex], state);
+        std::vector<uint32_t> neighbors = getNeighbors(
+            currentIndex, turns[currentIndex], state);
         for (uint32_t neighborIndex : neighbors)
         {
             if (closedSet.find(neighborIndex) != closedSet.end())

@@ -4,6 +4,7 @@
 #include "../algorithms/sim.hpp"
 #include "../timing.hpp"
 #include "../astar.hpp"
+#include "../movement.hpp"
 
 void simulatorOnBusyGrid1()
 {
@@ -20,8 +21,8 @@ void simulatorOnBusyGrid1()
         "_ _ _ _ _ _ _ _ _ _ _ > v _ _ _ _ _ _ _",
         "_ _ _ _ _ _ _ * _ _ _ _ > 4 _ _ _ _ _ _",
         "_ _ _ _ _ _ _ _ _ _ _ _ > > 5 _ _ _ _ _",
-        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _",
-        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 3 < < _",
+        "_ _ * * * * * * * * * * _ _ _ _ _ _ _ _",
+        "_ _ * * * * * * * * * * _ _ _ _ 3 < < _",
         "_ _ _ > > 1 _ _ _ _ _ _ _ _ _ _ _ _ _ _",
         "_ _ _ _ _ _ _ _ _ * _ _ _ _ _ _ _ _ _ *",
         "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _",
@@ -30,11 +31,16 @@ void simulatorOnBusyGrid1()
         "_ _ * _ _ _ _ _ _ _ > 6 _ _ _ _ _ _ _ _"
     }));
 
-    Sim sim;
+    Sim sim(100, 100000);
 
-    benchmark("sim - one turn on a big grid w/ a lot of food", [&sim, &state]()
+    benchmark("sim - 100 simulated turns on a big grid w/ a lot of food", [&sim, &state]()
     {
         sim.move(state);
+    });
+
+    benchmark("sim - bestFood()", [&state]()
+    {
+        bestFood(state);
     });
 }
 
@@ -98,32 +104,17 @@ void astar1()
 
     benchmark("A* - one path", [&state]()
     {
-        for (int i = 0; i < 100; i++)
-        {
-            shortestPath({ 2, 1 }, { 19, 15 }, state);
-        }
+        shortestPath({ 2, 1 }, { 19, 15 }, state);
     });
 }
 
 void BenchSuite::run()
 {
-    simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    astar1();
-
+    for (auto i = 0; i < 10; i++)
+    {
+        std::cout << "--- pass " << (i + 1) << " ---" << std::endl;
         simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    astar1();
-
-        simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    astar1();
-
-        simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    astar1();
-
-        simulatorOnBusyGrid1();
-    simulatorOnBusyGrid2();
-    astar1();
+        simulatorOnBusyGrid2();
+        astar1();
+    }
 }

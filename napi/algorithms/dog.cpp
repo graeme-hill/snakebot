@@ -18,6 +18,10 @@ Metadata Dog::meta()
     };
 }
 
+void Dog::start()
+{
+}
+
 Direction Dog::move(GameState &state)
 {
 

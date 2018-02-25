@@ -4,6 +4,7 @@
 #include "algorithms/hungry.hpp"
 #include "algorithms/dog.hpp"
 #include "algorithms/sim.hpp"
+#include "algorithms/inyourface.hpp"
 #include "test/testsuite.hpp"
 #include "benchmark/benchsuite.hpp"
 #include <memory>
@@ -71,6 +72,38 @@ napi_value move(napi_env env, napi_callback_info info)
     napi_create_string_utf8(env, directionStr.c_str(), directionStr.size(), &jsDirection);
 
     return jsDirection;
+}
+
+napi_value start(napi_env env, napi_callback_info info)
+{
+    napi_status status;
+
+    // Buffer to store arguments passed from JS land.
+    std::array<napi_value, 1> args;
+    size_t argCount = args.size();
+
+    // Fetch the arguments into args. Both reads AND writes argCount.
+    status = napi_get_cb_info(env, info, &argCount, args.data(), NULL, NULL);
+    HANDLE_ERROR("Cannot read args passed to move()");
+
+    napi_value jsAlgorithm = args[0];
+
+    char algorithmBuffer[200];
+    napi_get_value_string_utf8(env, jsAlgorithm, algorithmBuffer, 100, NULL);
+    std::string algorithmName(algorithmBuffer);
+
+    auto algoIter = algorithms.find(algorithmName);
+    if (algoIter == algorithms.end())
+    {
+        napi_throw_error(env, NULL, "C++ algorithm not found");
+    }
+
+    (*algoIter).second->start();
+
+    // Return undefined (ie: no return value)
+    napi_value result;
+    napi_get_undefined(env, &result);
+    return result;
 }
 
 napi_value test(napi_env env, napi_callback_info info)
@@ -149,6 +182,7 @@ napi_value init(napi_env env, napi_value exports)
     algorithms["hungry"] = std::unique_ptr<Algorithm>(new Hungry());
     algorithms["dog"] = std::unique_ptr<Algorithm>(new Dog());
     algorithms["sim"] = std::unique_ptr<Algorithm>(new Sim());
+    algorithms["inyourface"] = std::unique_ptr<Algorithm>(new InYourFace());
 
     // Make the move() function above available to be called by JS code.
     // Instead of exporting every algorithm's move function, just export this
@@ -156,12 +190,13 @@ napi_value init(napi_env env, napi_value exports)
     // the algorithm name (which needs to match the name used as the key in
     // algorithms unordered map.
     napi_status status;
-    std::array<napi_property_descriptor, 5> descriptors;
-    descriptors[0] = DECLARE_NAPI_METHOD("move", move);
-    descriptors[1] = DECLARE_NAPI_METHOD("meta", meta);
-    descriptors[2] = DECLARE_NAPI_METHOD("test", test);
-    descriptors[3] = DECLARE_NAPI_METHOD("benchmark", benchmark);
-    descriptors[4] = DECLARE_NAPI_METHOD("terminate", terminate);
+    std::array<napi_property_descriptor, 6> descriptors;
+    descriptors[0] = DECLARE_NAPI_METHOD("start", start);
+    descriptors[1] = DECLARE_NAPI_METHOD("move", move);
+    descriptors[2] = DECLARE_NAPI_METHOD("meta", meta);
+    descriptors[3] = DECLARE_NAPI_METHOD("test", test);
+    descriptors[4] = DECLARE_NAPI_METHOD("benchmark", benchmark);
+    descriptors[5] = DECLARE_NAPI_METHOD("terminate", terminate);
     status = napi_define_properties(
         env, exports, descriptors.size(), descriptors.data());
     HANDLE_ERROR("Failed to export functions from C++ to JS");

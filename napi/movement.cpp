@@ -34,8 +34,30 @@ MaybeDirection bestFood(GameState &state)
     Snake *me = state.mySnake();
     Path best = Path::none();
 
-    for (Point food : state.food())
+    // Make copy of food vec sorted by distance to me. That way we can start
+    // with the closest one.
+    Point myHead = me->head();
+    std::vector<Point> sortedFood = state.food();
+    std::sort(sortedFood.begin(), sortedFood.end(),
+        [myHead](Point a, Point b)
+        {
+            return distance(myHead, a) < distance(myHead, b);
+        });
+
+    for (Point food : sortedFood)
     {
+        if (best.direction.hasValue)
+        {
+            auto myDirectDistance = distance(me->head(), food);
+            if (myDirectDistance >= best.size)
+            {
+                // Since the foods are sorted by distance from me, and this one
+                // is too far away to possibly beat the current best food, we
+                // know that none of the next foods can beat it either.
+                break;
+            }
+        }
+
         auto myPath = shortestPath(me->head(), food, state);
 
         if (!myPath.direction.hasValue)
@@ -45,10 +67,33 @@ MaybeDirection bestFood(GameState &state)
             continue;
 
         bool enemyWillWin = false;
-        for (Snake *enemy : state.enemies())
+
+        // Copy enemies vec so that they can be sorted in-place without boneage.
+        std::vector<Snake *> sortedEnemies = state.enemies();
+        std::sort(sortedEnemies.begin(), sortedEnemies.end(),
+            [food](Snake *a, Snake *b)
+            {
+                return distance(a->head(), food) < distance(b->head(), food);
+            });
+
+        for (Snake *enemy : sortedEnemies)
         {
-            GameState &enemyState = state.perspective(enemy);
-            auto enemyPath = shortestPath(enemy->head(), food, enemyState);
+            // If the shortest possible path with no barriers is longer than my
+            // path then don't even bother with A* calculation. Furthermore,
+            // since the snakes are already sorted by their distance from the
+            // food, if this one is too far then so are all the rest.
+            if (distance(food, enemy->head()) > myPath.size)
+            {
+                break;
+            }
+
+            // In this case it doesn't matter whether axis bias
+            // is horizontal or vertical b/c we only care about
+            // the size of the path, not the route it takes.
+            GameState &enemyState = state.perspective(
+                enemy, AxisBias::Horizontal);
+            auto enemyPath = shortestPath(
+                enemy->head(), food, enemyState);
 
             if (!enemyPath.direction.hasValue)
             {
@@ -101,12 +146,12 @@ bool isCellOk(Point p, GameState &state)
 
 bool isCellSafe(Point p, GameState &state)
 {
-    return isCellOk(p, state) && !isCloseToEqualOrBiggerSnakeHead(p, state); 
+    return isCellOk(p, state) && !isCloseToEqualOrBiggerSnakeHead(p, state);
 }
 
 bool isCellRisky(Point p, GameState &state)
 {
-    return isCellOk(p, state) && isCloseToEqualOrBiggerSnakeHead(p, state); 
+    return isCellOk(p, state) && isCloseToEqualOrBiggerSnakeHead(p, state);
 }
 
 DirectionSet notImmediatelySuicidalMoves(GameState &state)
@@ -210,4 +255,3 @@ MaybeDirection chaseTail(GameState &state)
     Path path = shortestPath(myHead, myTail, state);
     return path.direction;
 }
-

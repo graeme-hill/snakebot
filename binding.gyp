@@ -1,5 +1,5 @@
 {
-	"targets": [
+    "targets": [
     	{
         	"target_name": "snakebot_native",
             "sources": [
@@ -9,6 +9,7 @@
                 "napi/algorithms/hungry.cpp",
                 "napi/algorithms/dog.cpp",
                 "napi/algorithms/sim.cpp",
+                "napi/algorithms/inyourface.cpp",
                 "napi/test/testsuite.cpp",
                 "napi/interop.cpp",
                 "napi/astar.cpp",
@@ -21,11 +22,15 @@
                 "-std=c++17"
             ],
             "lflags": [],
-            "cflags_cc!": [ "-fno-rtti" ],
+            "cflags!": [ "-fno-exceptions" ],
+            "cflags_cc!": [ "-fno-rtti", "-fno-exceptions" ],
             "conditions": [
                 [
                     'OS=="mac"',
-                    { "xcode_settings": { "GCC_ENABLE_CPP_RTTI": "YES" } }
+                    { "xcode_settings": {
+                        "GCC_ENABLE_CPP_RTTI": "YES",
+                        "GCC_ENABLE_CPP_EXCEPTIONS": "YES"
+                    } }
                 ]
             ]
         }

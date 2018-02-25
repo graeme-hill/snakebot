@@ -1,13 +1,20 @@
 #include "sim.hpp"
-#include "dog.hpp"
 #include "hungry.hpp"
 #include "cautious.hpp"
+#include "inyourface.hpp"
 #include "../movement.hpp"
 #include "../astar.hpp"
 #include "../simulator.hpp"
 
 #include <functional>
 #include <unordered_map>
+
+Sim::Sim() : _maxTurns(10000), _maxMillis(100)
+{ }
+
+Sim::Sim(uint32_t maxTurns, uint32_t maxMillis) :
+    _maxTurns(maxTurns), _maxMillis(maxMillis)
+{ }
 
 Metadata Sim::meta()
 {
@@ -22,16 +29,26 @@ Metadata Sim::meta()
     };
 }
 
+void Sim::start()
+{
+    // Make sure the simulation threads are all awake so that it's not slow on
+    // the first move.
+    SimThread::wakeAll();
+}
+
 Direction Sim::move(GameState &state)
 {
-    Dog dog;
+    InYourFace inYourFace;
+    InYourFace inMyFace(state.mySnake());
     Hungry hungry;
     Cautious cautious;
 
-    std::vector<Algorithm *> myAlgorithms { &cautious };
-    std::vector<Algorithm *> enemyAlgorithms { &hungry };
+    std::vector<Algorithm *> myAlgorithms { &cautious, &inYourFace };
+    std::vector<Algorithm *> enemyAlgorithms { &hungry, &inMyFace };
+
     std::vector<Future> futures = simulateFutures(
-    	state, 100, myAlgorithms, enemyAlgorithms);
+    	state, _maxTurns, _maxMillis, myAlgorithms, enemyAlgorithms);
+
     Direction best = bestMove(futures, state);
 
     return best;
