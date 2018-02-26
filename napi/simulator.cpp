@@ -42,7 +42,7 @@ void SimThread::startAll()
 {
     if (SimThread::instances.empty())
     {
-        unsigned cores = 4;//std::thread::hardware_concurrency();
+        unsigned cores = std::thread::hardware_concurrency();
         std::cout << "Starting " << cores << " simulation threads" << std::endl;
         for (unsigned i = 0; i < cores; i++)
         {
