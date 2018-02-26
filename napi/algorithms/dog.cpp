@@ -18,7 +18,7 @@ Metadata Dog::meta()
     };
 }
 
-void Dog::start()
+void Dog::start(std::string id)
 {
 }
 

@@ -300,7 +300,7 @@ public:
     Algorithm();
     virtual Metadata meta() = 0;
     virtual Direction move(GameState &) = 0;
-    virtual void start() = 0;
+    virtual void start(std::string id) = 0;
     uint32_t id() { return _id; }
 
 private:

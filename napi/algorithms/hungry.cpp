@@ -18,7 +18,7 @@ Metadata Hungry::meta()
     };
 }
 
-void Hungry::start()
+void Hungry::start(std::string id)
 {
 }
 

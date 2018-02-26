@@ -26,7 +26,7 @@ public:
         };
     }
 
-    void start() override
+    void start(std::string id) override
     { }
 
     Direction move(GameState &) override

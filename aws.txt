@@ -1,2 +1,0 @@
-sudo docker tag snakebot:latest 019778220269.dkr.ecr.us-west-2.amazonaws.com/snakebot
-sudo docker push 019778220269.dkr.ecr.us-west-2.amazonaws.com/snakebot

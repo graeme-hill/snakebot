@@ -32,7 +32,7 @@ Metadata Sim::meta()
     };
 }
 
-void Sim::start()
+void Sim::start(std::string id)
 {
     // Make sure the simulation threads are all awake so that it's not slow on
     // the first move.

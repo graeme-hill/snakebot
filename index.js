@@ -43,7 +43,7 @@ const algorithm = getAlgorithm(algorithmKey);
 app.post('/start', (req, res) => {
     // start() is optional
     if (algorithm.start) {
-        algorithm.start(req.body);
+        algorithm.start(req.body.game_id);
     }
     res.json(algorithm.meta);
 });

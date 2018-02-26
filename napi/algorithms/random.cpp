@@ -18,7 +18,7 @@ Metadata Random::meta()
     };
 }
 
-void Random::start()
+void Random::start(std::string id)
 {
 }
 

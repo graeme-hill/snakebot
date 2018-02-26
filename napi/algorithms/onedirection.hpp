@@ -2,15 +2,14 @@
 
 #include "../snakelib.hpp"
 
-class InYourFace : public Algorithm
+class OneDirection : public Algorithm
 {
 public:
-    InYourFace();
-    InYourFace(Snake *target);
+    OneDirection(Direction direction);
     Metadata meta() override;
     Direction move(GameState &state) override;
     void start(std::string id) override;
 
 private:
-    Snake *_target;
+    Direction _direction;
 };
