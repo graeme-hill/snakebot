@@ -66,7 +66,9 @@ Direction Sim::move(GameState &state)
     Dog dog;
 
     std::vector<PrefixedAlgorithm> myAlgorithms {
-        { &hungry, myPrefixMoves }
+        { &dog, myPrefixMoves },
+        { &cautious, {} },
+        { &inYourFace, {} },
     };
     std::vector<PrefixedAlgorithm> enemyAlgorithms {
         { &hungry, enemyPrefixMoves },

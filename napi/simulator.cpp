@@ -365,12 +365,18 @@ std::vector<Future> runSimulations(
         {
             branches[branchIndex++ % threads].push_back(
                 { pair.unprefixed(), { }, AxisBias::Horizontal });
+
+            branches[branchIndex++ % threads].push_back(
+                { pair.unprefixed(), { }, AxisBias::Vertical });
         }
 
         for (std::vector<Direction> &prefix : pair.myAlgorithm.prefixes)
         {
             branches[branchIndex++ % threads].push_back(
                 { pair.unprefixed(), prefix, AxisBias::Horizontal });
+
+            branches[branchIndex++ % threads].push_back(
+                { pair.unprefixed(), prefix, AxisBias::Vertical });
             // MaybeDirection maybeDir { true, firstDir };
             //
             // uint32_t threadIndex1 = branchIndex++ % THREAD_COUNT;
@@ -466,7 +472,7 @@ int scoreFuture(Future &future, GameState &state, MaybeDirection preferred)
     bool dies = false;
     bool isPreferredDirection =
         preferred.hasValue && preferred.value == future.move;
-    uint32_t bonus = isPreferredDirection ? 1000 : 0;
+    uint32_t bonus = isPreferredDirection ? 500 : 0;
     uint32_t nextFood = 1000; // a big number that indicates starvation
 
     auto foodIt = future.foodsEaten.find(state.mySnake()->id);
