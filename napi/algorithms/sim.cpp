@@ -2,6 +2,9 @@
 #include "hungry.hpp"
 #include "cautious.hpp"
 #include "inyourface.hpp"
+#include "terminator.hpp"
+#include "random.hpp"
+#include "dog.hpp"
 #include "../movement.hpp"
 #include "../astar.hpp"
 #include "../simulator.hpp"
@@ -38,18 +41,44 @@ void Sim::start()
 
 Direction Sim::move(GameState &state)
 {
+    std::vector<std::vector<Direction>> myPrefixMoves {
+        { Direction::Up, Direction::Up },
+        { Direction::Up, Direction::Left },
+        { Direction::Up, Direction::Right },
+        { Direction::Down, Direction::Down },
+        { Direction::Down, Direction::Left },
+        { Direction::Down, Direction::Right },
+        { Direction::Left, Direction::Left },
+        { Direction::Left, Direction::Up },
+        { Direction::Left, Direction::Down },
+        { Direction::Right, Direction::Right },
+        { Direction::Right, Direction::Up },
+        { Direction::Right, Direction::Down }
+    };
+
+    std::vector<std::vector<Direction>> enemyPrefixMoves {};
     InYourFace inYourFace;
     InYourFace inMyFace(state.mySnake());
     Hungry hungry;
     Cautious cautious;
+    Terminator terminator;
+    Random random;
+    Dog dog;
 
-    std::vector<Algorithm *> myAlgorithms { &cautious, &inYourFace };
-    std::vector<Algorithm *> enemyAlgorithms { &hungry, &inMyFace };
+    std::vector<PrefixedAlgorithm> myAlgorithms {
+        { &hungry, myPrefixMoves }
+    };
+    std::vector<PrefixedAlgorithm> enemyAlgorithms {
+        { &hungry, enemyPrefixMoves },
+        { &inMyFace, enemyPrefixMoves }
+    };
+
+    Direction preferred = dog.move(state);
 
     std::vector<Future> futures = simulateFutures(
     	state, _maxTurns, _maxMillis, myAlgorithms, enemyAlgorithms);
 
-    Direction best = bestMove(futures, state);
+    Direction best = bestMove(futures, state, MaybeDirection::just(preferred));
 
     return best;
 }

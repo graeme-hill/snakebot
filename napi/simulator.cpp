@@ -1,12 +1,17 @@
 #include "simulator.hpp"
 #include "movement.hpp"
 #include <cmath>
-
+#include <sstream>
 #include <numeric>
 
 #define IDEAL_HEALTH_AT_FOOD_TIME 100
 
 std::array<SimThread, THREAD_COUNT> SimThread::instances;
+
+AlgorithmPair PrefixedAlgorithmPair::unprefixed()
+{
+    return { myAlgorithm.algorithm, enemyAlgorithm.algorithm };
+}
 
 SimThread::SimThread() :
     _hasWork(false),
@@ -127,11 +132,26 @@ std::string terminationReasonToString(TerminationReason reason)
     }
 }
 
+std::string prefixToString(std::vector<Direction> &prefix)
+{
+    std::stringstream ss;
+    ss << "[";
+    std::string sep = "";
+    for (Direction d : prefix)
+    {
+        ss << sep << directionToString(d);
+        sep = ", ";
+    }
+    ss << "]";
+    return ss.str();
+}
+
 void Future::prettyPrint()
 {
-    std::cout << "Future: algo=" << algorithm->meta().name
+    std::cout << "Future: myAlgo=" << source.pair.myAlgorithm->meta().name
         << " turns=" << turns
         << " move=" << directionToString(move)
+        << " prefix=" << prefixToString(source.firstMoves)
         << " termination=" << terminationReasonToString(terminationReason)
         << std::endl;
 
@@ -183,7 +203,7 @@ Simulation::Simulation(
     _enemyPathfindingBias(bias),
     _turn(0),
     _result(
-        {{}, {}, branch.pair.myAlgorithm, TerminationReason::Unknown, Direction::Left, 0})
+        {{}, {}, TerminationReason::Unknown, Direction::Left, 0, branch})
 { }
 
 bool Simulation::next()
@@ -260,10 +280,10 @@ std::vector<Future> runSimulationBranches(
         results.push_back({
             {},
             {},
-            branch.pair.myAlgorithm,
             TerminationReason::Unknown,
             Direction::Left,
-            0
+            0,
+            branch
         });
     }
 
@@ -303,34 +323,41 @@ std::vector<Future> runSimulationBranches(
             results[i].terminationReason, turn, maxTurns);
     }
 
-    std::cout << "simulated " << turn << " turns | oot: "
-        << outOfTime << std::endl;
+    std::cout << "simulated " << turn << " turns | oot: " << outOfTime
+        << " | branches: " << branches.size() << std::endl;
 
     return results;
 }
 
 std::vector<Future> runSimulations(
-    std::vector<AlgorithmPair> algorithmPairs,
+    std::vector<PrefixedAlgorithmPair> algorithmPairs,
     GameState &initialState,
     uint32_t maxTurns,
-    uint32_t maxMillis,
-    DirectionSet firstMoves)
+    uint32_t maxMillis)
 {
     uint32_t branchIndex = 0;
     std::vector<std::vector<AlgorithmBranch>> branches(THREAD_COUNT);
-    for (AlgorithmPair pair : algorithmPairs)
+    for (PrefixedAlgorithmPair pair : algorithmPairs)
     {
-        for (Direction firstDir : firstMoves)
+        if (pair.myAlgorithm.prefixes.empty())
         {
-            MaybeDirection maybeDir { true, firstDir };
+            branches[branchIndex++ % THREAD_COUNT].push_back(
+                { pair.unprefixed(), { }, AxisBias::Horizontal });
+        }
 
-            uint32_t threadIndex1 = branchIndex++ % THREAD_COUNT;
-            AlgorithmBranch branch1{ pair, maybeDir, AxisBias::Horizontal };
-            branches[threadIndex1].push_back(branch1);
-
-            uint32_t threadIndex2 = branchIndex++ % THREAD_COUNT;
-            AlgorithmBranch branch2{ pair, maybeDir, AxisBias::Vertical };
-            branches[threadIndex2].push_back(branch2);
+        for (std::vector<Direction> &prefix : pair.myAlgorithm.prefixes)
+        {
+            branches[branchIndex++ % THREAD_COUNT].push_back(
+                { pair.unprefixed(), prefix, AxisBias::Horizontal });
+            // MaybeDirection maybeDir { true, firstDir };
+            //
+            // uint32_t threadIndex1 = branchIndex++ % THREAD_COUNT;
+            // AlgorithmBranch branch1{ pair, maybeDir, AxisBias::Horizontal };
+            // branches[threadIndex1].push_back(branch1);
+            //
+            // uint32_t threadIndex2 = branchIndex++ % THREAD_COUNT;
+            // AlgorithmBranch branch2{ pair, maybeDir, AxisBias::Vertical };
+            // branches[threadIndex2].push_back(branch2);
         }
     }
 
@@ -368,59 +395,81 @@ std::vector<Future> simulateFutures(
     GameState &initialState,
     uint32_t maxTurns,
     uint32_t maxMillis,
-    std::vector<Algorithm *> myAlgorithms,
-    std::vector<Algorithm *> enemyAlgorithms)
+    std::vector<PrefixedAlgorithm> myAlgorithms,
+    std::vector<PrefixedAlgorithm> enemyAlgorithms)
 {
     // Make algorithm pairs
-    std::vector<AlgorithmPair> algorithmPairs;
-    for (Algorithm *a1 : myAlgorithms)
+    std::vector<PrefixedAlgorithmPair> algorithmPairs;
+    for (PrefixedAlgorithm a1 : myAlgorithms)
     {
-        for (Algorithm *a2 : enemyAlgorithms)
+        for (PrefixedAlgorithm a2 : enemyAlgorithms)
         {
             algorithmPairs.push_back({ a1, a2 });
         }
     }
 
-    DirectionSet firstMoves = safeMoves(initialState);
-
-    if (firstMoves.empty())
-    {
-        firstMoves = riskyMoves(initialState);
-    }
+    // DirectionSet firstMoves = safeMoves(initialState);
+    //
+    // if (firstMoves.empty())
+    // {
+    //     firstMoves = riskyMoves(initialState);
+    // }
 
     std::vector<Future> futures = runSimulations(
-        algorithmPairs, initialState, maxTurns, maxMillis, firstMoves);
+        algorithmPairs, initialState, maxTurns, maxMillis);
 
     return futures;
 }
 
-int foodScore(uint32_t foodTurn, GameState &state)
+int getFoodScore(uint32_t foodTurn, GameState &state)
 {
     int health = state.mySnake()->health;
     int healthAtFoodTime = health - foodTurn;
     int diff = healthAtFoodTime - IDEAL_HEALTH_AT_FOOD_TIME;
-    int multiplier = 2;
+    int multiplier = 200;
     if (diff < 0)
     {
-        multiplier = 1;
+        multiplier = 100;
     }
     int inverseDiff = IDEAL_HEALTH_AT_FOOD_TIME - std::abs(diff);
     return inverseDiff * multiplier;
 }
 
-int scoreFuture(Future &future, GameState &state)
+int scoreFuture(Future &future, GameState &state, MaybeDirection preferred)
 {
     auto myId = state.mySnake()->id;
     uint32_t survivalScore = 100000;
     uint32_t murderScore = 0;
     uint32_t foodScore = 0;
     bool dies = false;
+    bool isPreferredDirection =
+        preferred.hasValue && preferred.value == future.move;
+    uint32_t bonus = isPreferredDirection ? 1000 : 0;
+    uint32_t nextFood = 1000; // a big number that indicates starvation
+
+    auto foodIt = future.foodsEaten.find(state.mySnake()->id);
+    if (foodIt != future.foodsEaten.end())
+    {
+        std::vector<uint32_t> &foodTurns = foodIt->second;
+        if (!foodTurns.empty())
+        {
+            nextFood = foodTurns.at(0);
+            foodScore = getFoodScore(foodTurns.at(0), state);
+            //foodScore += 100U - (std::min(100U, foodTurns.at(0)));
+        }
+    }
+
+    if (nextFood > state.mySnake()->health)
+    {
+        survivalScore = state.mySnake()->health * 100;
+        dies = true;
+    }
 
     for (auto pair : future.obituaries)
     {
         if (pair.first == myId)
         {
-            survivalScore = pair.second * 100;
+            survivalScore = std::min(survivalScore, pair.second * 100);
             dies = true;
         }
         else
@@ -429,19 +478,20 @@ int scoreFuture(Future &future, GameState &state)
         }
     }
 
-    auto foodIt = future.foodsEaten.find(state.mySnake()->id);
-    if (foodIt != future.foodsEaten.end())
-    {
-        std::vector<uint32_t> &foodTurns = foodIt->second;
-        if (!foodTurns.empty())
-        {
-            foodScore += 100U - (std::min(100U, foodTurns.at(0)));
-        }
-    }
+    // auto foodIt = future.foodsEaten.find(state.mySnake()->id);
+    // if (foodIt != future.foodsEaten.end())
+    // {
+    //     std::vector<uint32_t> &foodTurns = foodIt->second;
+    //     if (!foodTurns.empty())
+    //     {
+    //         foodScore = getFoodScore(foodTurns.at(0), state);
+    //         //foodScore += 100U - (std::min(100U, foodTurns.at(0)));
+    //     }
+    // }
 
     uint32_t finalScore = dies
-        ? survivalScore
-        : survivalScore + foodScore + murderScore;
+        ? survivalScore + bonus
+        : survivalScore + foodScore + murderScore + bonus;
 
     // std::cout << "survive: " << survivalScore
     //     << " murder: " << murderScore
@@ -471,7 +521,25 @@ int scoreFuture(Future &future, GameState &state)
     // return score;
 }
 
-Direction bestMove(std::vector<Future> &futures, GameState &state)
+std::string directionScoreToString(DirectionScore ds)
+{
+    std::stringstream ss;
+    ss << directionToString(ds.direction)
+        << ", " << ds.score
+        << ", " << ds.source->source.pair.myAlgorithm->meta().name;
+    return ss.str();
+}
+
+std::string getKey(Future &f)
+{
+    std::stringstream ss;
+    ss << f.source.pair.myAlgorithm->meta().name
+        << ":" << prefixToString(f.source.firstMoves);
+    return ss.str();
+}
+
+Direction bestMove(
+    std::vector<Future> &futures, GameState &state, MaybeDirection preferred)
 {
     // 1. Get worst score per first-algorithm, direction pair and store as
     //    score, direction pair (where direction is NOT unique).
@@ -490,43 +558,44 @@ Direction bestMove(std::vector<Future> &futures, GameState &state)
             continue;
 
         Direction direction = future.move;
-        int score = scoreFuture(future, state);
+        int score = scoreFuture(future, state, preferred);
 
-        //std::cout << "  score: " << score << std::endl;
+        std::string key = getKey(future);
 
-        std::string algoName = future.algorithm->meta().name;
-        std::string key = algoName + "_" + directionToString(direction);
+        //std::cout << "  " << key << "=" << score << std::endl;
+
         auto it = worstScores.find(key);
         if (it == worstScores.end())
         {
-            worstScores[key] = DirectionScore{ direction, score };
+            worstScores[key] = { direction, score, &future };
         }
         else
         {
             DirectionScore existing = it->second;
             if (score < existing.score)
             {
-                worstScores[key] = DirectionScore{ direction, score };
+                worstScores[key] = { direction, score, &future };
             }
         }
 
         it = bestScores.find(key);
         if (it == bestScores.end())
         {
-            bestScores[key] = DirectionScore{ direction, score };
+            bestScores[key] = { direction, score, &future };
         }
         else
         {
             DirectionScore existing = it->second;
             if (score > existing.score)
             {
-                bestScores[key] = DirectionScore{ direction, score };
+                bestScores[key] = { direction, score, &future };
             }
         }
     }
 
-    DirectionScore bestOfTheWorst{ Direction::Up, -1 };
-    DirectionScore bestOfTheBest{ Direction::Up, -1 };
+    DirectionScore bestOfTheWorst{ Direction::Up, -1, nullptr };
+    DirectionScore bestOfTheBest{ Direction::Up, -1, nullptr };
+    DirectionScore result{ Direction::Up, -1, nullptr };
 
     for (auto it : worstScores)
     {
@@ -555,10 +624,14 @@ Direction bestMove(std::vector<Future> &futures, GameState &state)
     if (bestOfTheWorst.score < 1500)
     {
         std::cout << "TAKING MY CHANCES!!!\n";
-        return bestOfTheBest.direction;
+        result = bestOfTheBest;
     }
     else
     {
-        return bestOfTheWorst.direction;
+        result = bestOfTheWorst;
     }
+
+    std::cout << "Decision: " << directionScoreToString(result) << std::endl;
+
+    return result.direction;
 }

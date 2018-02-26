@@ -7,6 +7,8 @@
             	"napi/snakelib.cpp",
             	"napi/algorithms/cautious.cpp",
                 "napi/algorithms/hungry.cpp",
+                "napi/algorithms/termiantor.cpp",
+                "napi/algorithms/random.cpp",
                 "napi/algorithms/dog.cpp",
                 "napi/algorithms/sim.cpp",
                 "napi/algorithms/inyourface.cpp",

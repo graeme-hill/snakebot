@@ -101,6 +101,117 @@ function closestFood(gameState) {
     }
 }
 
+function identifyEnemyTunnelTarget(enemies, gameState) {
+    const myHead = gameState.mySnake.head();
+    function checkCell(previousCell, x, y) {
+        if(previousCell.x === x && previousCell.y === y) {
+            return 1;
+        }
+        var cellState = gameState.checkCell(x, y);
+        if(cellState.constructor === OpenCell) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
+    const cellDirectionMappings = [ 
+        (cell) => { //move north
+            console.log("map north");
+            return { x: cell.x, y: cell.y - 1 };
+        }, 
+        (cell) => { //move south
+            console.log("map south");
+            return { x: cell.x, y: cell.y + 1 };
+        }, 
+        (cell) => { //move west
+            console.log("map wwest");
+            return { x: cell.x - 1, y: cell.y };
+        }, 
+        (cell) => { //move east
+            console.log("map east");
+            return { x: cell.x + 1, y: cell.y };
+        }
+    ];
+
+    const sumFxn = (x, sum) => { 
+        sum += x;
+        return sum;
+    };
+
+    var closestKillPath = null;
+    enemies.forEach((enemy, enemyIndex) => {
+        const head = enemy.head();
+
+        let currentCell = { x: head.x, y: head.y };
+
+        const directionsOccupied = [0,0,0,0]; //north south west east
+        directionsOccupied[0] = checkCell({}, currentCell.x, currentCell.y-1);
+        directionsOccupied[1] = checkCell({},  currentCell.x, currentCell.y+1);
+        directionsOccupied[2] = checkCell({},  currentCell.x-1, currentCell.y);
+        directionsOccupied[3] = checkCell({},  currentCell.x+1, currentCell.y);
+        
+       // console.log("enemy: " + enemyIndex + " : " + directionsOccupied);
+        const cellPath = [];
+        let bailOutCounter = 0;
+        while (directionsOccupied.reduce(sumFxn, 0) === 3 && bailOutCounter < gameState.width) { //should check height too
+            console.log("loop " + directionsOccupied);
+            let indexOfCellWhoIsEmpty;
+            directionsOccupied.some((occupied, index) => { 
+                if(occupied === 0) {
+                    indexOfCellWhoIsEmpty = index;
+                    return true;
+                }
+            });
+            
+            let previousCell = { x: currentCell.x, y: currentCell.y };
+            currentCell = cellDirectionMappings[indexOfCellWhoIsEmpty](currentCell);            
+            cellPath.push({x: currentCell.x, y: currentCell.y });
+            directionsOccupied[0] = checkCell(previousCell, currentCell.x, currentCell.y-1);
+            directionsOccupied[1] = checkCell(previousCell, currentCell.x, currentCell.y+1);
+            directionsOccupied[2] = checkCell(previousCell, currentCell.x-1, currentCell.y);
+            directionsOccupied[3] = checkCell(previousCell, currentCell.x+1, currentCell.y);
+            bailOutCounter++;
+        }
+
+        const targetCell = cellPath.length > 1 ? cellPath[cellPath.length - 1] : null;
+        if(targetCell) {
+            console.log(cellPath);
+            console.log("TargetCell found: ");
+            console.log(targetCell);
+            var myPath = astar.shortestPath(myHead, targetCell, gameState);
+            if (!myPath) {
+                return;
+            }
+
+            if(myPath.length > cellPath.length) {//if it takes me longer to get there then for them to escape, ignore it
+                return
+            }
+
+            // if this path isn't even better than another already found then move on
+            if (closestKillPath !== null && myPath.length >= closestKillPath.length) {
+                return;
+            }
+
+            closestKillPath = myPath;
+        }
+    });
+    
+    if (closestKillPath) {
+        console.log("KILL PATH FOUND: " + closestKillPath);
+        return closestKillPath[0];
+    } else {
+        return null;
+    }
+}
+
+function closestKillTunnelTarget(gameState) {
+    const me = gameState.mySnake;
+    const enemies = gameState.enemies;
+    const candidatePath = identifyEnemyTunnelTarget(enemies, gameState);
+    return candidatePath;
+}
+
 function chaseTail(gameState) {
     const myHead = gameState.mySnake.head();
     const myTail = gameState.mySnake.tail();
@@ -116,5 +227,6 @@ module.exports = {
     notImmediatelySuicidalMoves,
     chaseTail,
     bestFood,
-    closestFood
+    closestFood,
+    closestKillTunnelTarget
 };
