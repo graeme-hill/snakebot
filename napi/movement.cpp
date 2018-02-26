@@ -170,7 +170,9 @@ MaybeDirection closestKillTunnelTarget(GameState &state, int killTunnelRange = 1
             bailOut++;
         }
 
-        if(cellPath.size() > 1)
+        uint32_t validRange = killTunnelRange;
+
+        if(cellPath.size() > validRange)
         {
             Point targetCell = coordAfterMove(cellPath.back(), lastDirection, 1);
             std::cout << "TARGET CELL FOUND--> ";
