@@ -36,30 +36,30 @@ bool isCellRisky(Point p, GameState &state)
 bool checkForOkCellsInRange(int range, Direction dir, Point cell, GameState &state)
 {
     bool isOk = true;
-    if (dir == Direction::Up) 
+    if (dir == Direction::Up)
     {
         for(int i = 1 ; i <= range ; i++) {
             isOk = isOk && isCellOk({cell.x, cell.y - i}, state);
         }
         return isOk;
-    } 
-    else if (dir == Direction::Down) 
+    }
+    else if (dir == Direction::Down)
     {
         for(int i = 1 ; i <= range ; i++) {
             isOk = isOk && isCellOk({cell.x, cell.y + i}, state);
-        }        
+        }
         return isOk;
     }
-    else if (dir == Direction::Left) 
+    else if (dir == Direction::Left)
     {
-        for(int i = 1 ; i <= range ; i++) {        
+        for(int i = 1 ; i <= range ; i++) {
             isOk = isOk && isCellOk({cell.x - i, cell.y}, state);
         }
         return isOk;
-    }    
-    else if (dir == Direction::Right) 
+    }
+    else if (dir == Direction::Right)
     {
-        for(int i = 1 ; i <= range ; i++) {        
+        for(int i = 1 ; i <= range ; i++) {
             isOk = isOk && isCellOk({cell.x + i, cell.y}, state);
         }
         return isOk;
@@ -85,7 +85,7 @@ MaybeDirection closestKillTunnelTarget(GameState &state, int killTunnelRange = 1
         int count = 0;
         Direction lastDirection = Direction::Up;
         //up
-        
+
         if(checkForOkCellsInRange(killTunnelRange, Direction::Up, currentCell, state))
         {
             nextCell = coordAfterMove(currentCell, Direction::Up, 1);
@@ -120,22 +120,22 @@ MaybeDirection closestKillTunnelTarget(GameState &state, int killTunnelRange = 1
         //a kill tunnel can only exist if only one neighbour cell is open
         if(count != 1) {
             continue;
-        }   
+        }
 
         int bailOut = 0;
         int maxLoop = state.width() * state.height();
-        
+
         //counter here so this CAN'T go infinite
 
         while (count == 1 && bailOut < maxLoop)
-        {           
+        {
 
             count = 0;
 
             cellPath.push_back(nextCell);
             currentCell = nextCell;
             //up
-            
+
             if(checkForOkCellsInRange(killTunnelRange, Direction::Up, currentCell, state))
             {
                 nextCell = coordAfterMove(currentCell, Direction::Up, 1);
@@ -165,14 +165,14 @@ MaybeDirection closestKillTunnelTarget(GameState &state, int killTunnelRange = 1
                 nextCell = coordAfterMove(currentCell, Direction::Right, 1);
                 lastDirection = Direction::Right;
                 count++;
-            }        
+            }
 
-            bailOut++;    
+            bailOut++;
         }
 
         uint32_t validRange = killTunnelRange;
 
-        if(cellPath.size() > validRange) 
+        if(cellPath.size() > validRange)
         {
             Point targetCell = coordAfterMove(cellPath.back(), lastDirection, 1);
             std::cout << "TARGET CELL FOUND--> ";
