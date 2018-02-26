@@ -20,7 +20,7 @@
                 "napi/timing.cpp",
                 "napi/benchmark/benchsuite.cpp"
             ],
-            "cflags": [
+            "cflags_cc": [
                 "-std=c++17"
             ],
             "lflags": [],

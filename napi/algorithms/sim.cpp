@@ -22,13 +22,13 @@ Sim::Sim(uint32_t maxTurns, uint32_t maxMillis) :
 Metadata Sim::meta()
 {
     return {
-        "#008800",
         "#FFFFFF",
-        "https://www.popoptiq.com/wp-content/uploads/2015/04/Timecop-1994-Movie-Picture-01.jpg",
-        "Time Cop",
+        "#FFFFFF",
+        "http://www.theglamnationnetwork.com/uploads/1/3/1/2/13123626/6958010.jpg",
+        "White Snake",
         "Hi",
         "shades",
-        "fat-rattle"
+        "pixel"
     };
 }
 

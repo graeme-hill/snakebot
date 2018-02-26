@@ -168,7 +168,6 @@ napi_value benchmark(napi_env env, napi_callback_info info)
 
 napi_value terminate(napi_env env, napi_callback_info info)
 {
-    std::cout << "Waiting for simulation threads to stop...\n";
     SimThread::stopAll();
 
     // Return undefined (ie: no return value)
@@ -179,14 +178,17 @@ napi_value terminate(napi_env env, napi_callback_info info)
 
 napi_value init(napi_env env, napi_value exports)
 {
+    // Launch sim threads now so there's less startup time when a game begins.
+    SimThread::startAll();
+
     // INITIALIZE AVAILABLE ALGORITHMS HERE!
-    algorithms["cautious"] = std::unique_ptr<Algorithm>(new Cautious());
-    algorithms["hungry"] = std::unique_ptr<Algorithm>(new Hungry());
-    algorithms["terminator"] = std::unique_ptr<Algorithm>(new Terminator());
-    algorithms["dog"] = std::unique_ptr<Algorithm>(new Dog());
-    algorithms["sim"] = std::unique_ptr<Algorithm>(new Sim());
-    algorithms["inyourface"] = std::unique_ptr<Algorithm>(new InYourFace());
-    algorithms["random"] = std::unique_ptr<Algorithm>(new Random());
+    algorithms["cautious"] = std::make_unique<Cautious>();
+    algorithms["hungry"] = std::make_unique<Hungry>();
+    algorithms["terminator"] = std::make_unique<Terminator>();
+    algorithms["dog"] = std::make_unique<Dog>();
+    algorithms["sim"] = std::make_unique<Sim>();
+    algorithms["inyourface"] = std::make_unique<InYourFace>();
+    algorithms["random"] = std::make_unique<Random>();
 
     // Make the move() function above available to be called by JS code.
     // Instead of exporting every algorithm's move function, just export this
