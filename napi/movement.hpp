@@ -18,7 +18,7 @@ MaybeDirection notImmediatelySuicidal(GameState &gameState);
 
 MaybeDirection chaseTail(GameState &state);
 
-MaybeDirection closestKillTunnelTarget(GameState &state);
+MaybeDirection closestKillTunnelTarget(GameState &state, int killTunnelRange);
 
 uint32_t checkCell(Point previousCell, uint32_t x, uint32_t y);
 
