@@ -27,18 +27,32 @@ struct AlgorithmPair
 struct AlgorithmBranch
 {
     AlgorithmPair pair;
-    MaybeDirection firstMove;
+    std::vector<Direction> firstMoves;
     AxisBias enemyPathBindingBias;
+};
+
+struct PrefixedAlgorithm
+{
+    Algorithm *algorithm;
+    std::vector<std::vector<Direction>> prefixes;
+};
+
+struct PrefixedAlgorithmPair
+{
+    PrefixedAlgorithm myAlgorithm;
+    PrefixedAlgorithm enemyAlgorithm;
+
+    AlgorithmPair unprefixed();
 };
 
 struct Future
 {
     std::unordered_map<std::string, uint32_t> obituaries;
     std::unordered_map<std::string, std::vector<uint32_t>> foodsEaten;
-    Algorithm *algorithm;
     TerminationReason terminationReason;
     Direction move;
     uint32_t turns;
+    AlgorithmBranch source;
 
     void prettyPrint();
 };
@@ -49,6 +63,7 @@ struct DirectionScore
 {
     Direction direction;
     int score;
+    Future *source;
 };
 
 class Simulation
@@ -69,9 +84,9 @@ public:
 private:
     Direction getMyMove(GameState &state)
     {
-        if (_turn == 1 && _branch.firstMove.hasValue)
+        if (_turn <= _branch.firstMoves.size())
         {
-            return _branch.firstMove.value;
+            return _branch.firstMoves.at(_turn - 1);
         }
         else
         {
@@ -127,20 +142,22 @@ std::vector<Future> runSimulationBranches(
     uint32_t maxMillis);
 
 std::vector<Future> runSimulations(
-    std::vector<AlgorithmPair> algorithmPairs,
+    std::vector<PrefixedAlgorithmPair> algorithmPairs,
     GameState &initialState,
     uint32_t maxTurns,
-    uint32_t maxMillis,
-    DirectionSet firstMoves);
+    uint32_t maxMillis);
 
 std::vector<Future> simulateFutures(
     GameState &initialState,
     uint32_t maxTurns,
     uint32_t maxMillis,
-    std::vector<Algorithm *> myAlgorithms,
-    std::vector<Algorithm *> enemyAlgorithms);
+    std::vector<PrefixedAlgorithm> myAlgorithms,
+    std::vector<PrefixedAlgorithm> enemyAlgorithms);
 
-Direction bestMove(std::vector<Future> &futures, GameState &state);
+Direction bestMove(
+    std::vector<Future> &futures,
+    GameState &state,
+    MaybeDirection preferred = MaybeDirection::none());
 
 struct SimParams
 {

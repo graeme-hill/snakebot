@@ -49,28 +49,28 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
 
         int count = 0;
         //up
-        if(isCellOk({currentCell.x, currentCell.y-1}, state)) 
+        if(isCellOk({currentCell.x, currentCell.y-1}, state))
         {
             nextCell = {currentCell.x, currentCell.y-1};
             count++;
         }
 
         //down
-        if(isCellOk({currentCell.x, currentCell.y+1}, state)) 
+        if(isCellOk({currentCell.x, currentCell.y+1}, state))
         {
             nextCell = {currentCell.x, currentCell.y+1};
             count++;
         }
 
         //left
-        if(isCellOk({currentCell.x-1, currentCell.y}, state)) 
+        if(isCellOk({currentCell.x-1, currentCell.y}, state))
         {
             nextCell = {currentCell.x-1, currentCell.y};
             count++;
         }
 
         //right
-        if(isCellOk({currentCell.x+1, currentCell.y}, state)) 
+        if(isCellOk({currentCell.x+1, currentCell.y}, state))
         {
             nextCell = {currentCell.x+1, currentCell.y};
             count++;
@@ -79,15 +79,15 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
         //a kill tunnel can only exist if only one neighbour cell is open
         if(count != 1) {
             continue;
-        }   
+        }
 
         int bailOut = 0;
         int maxLoop = state.width() * state.height();
-        
+
         //counter here so this CAN'T go infinite
         Direction lastDirection = Direction::Up;
         while (count == 1 && bailOut < maxLoop)
-        {           
+        {
 
             count = 0;
 
@@ -95,7 +95,7 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
             currentCell = nextCell;
 
             //up
-            if(isCellOk({currentCell.x, currentCell.y-1}, state)) 
+            if(isCellOk({currentCell.x, currentCell.y-1}, state))
             {
                 nextCell = {currentCell.x, currentCell.y-1};
                 lastDirection = Direction::Up;
@@ -103,7 +103,7 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
             }
 
             //down
-            if(isCellOk({currentCell.x, currentCell.y+1}, state)) 
+            if(isCellOk({currentCell.x, currentCell.y+1}, state))
             {
                 nextCell = {currentCell.x, currentCell.y+1};
                 lastDirection = Direction::Down;
@@ -111,7 +111,7 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
             }
 
             //left
-            if(isCellOk({currentCell.x-1, currentCell.y}, state)) 
+            if(isCellOk({currentCell.x-1, currentCell.y}, state))
             {
                 nextCell = {currentCell.x-1, currentCell.y};
                 lastDirection = Direction::Left;
@@ -119,20 +119,20 @@ MaybeDirection closestKillTunnelTarget(GameState &state)
             }
 
             //right
-            if(isCellOk({currentCell.x+1, currentCell.y}, state)) 
+            if(isCellOk({currentCell.x+1, currentCell.y}, state))
             {
                 nextCell = {currentCell.x+1, currentCell.y};
                 lastDirection = Direction::Right;
                 count++;
-            }         
+            }
 
-            bailOut++;    
+            bailOut++;
         }
 
-        if(cellPath.size() > 1) 
+        if(cellPath.size() > 1)
         {
             Point targetCell = coordAfterMove(cellPath.back(), lastDirection);
-            std::cout << "TARGET CELL FOUND-->" << std::endl;
+            //std::cout << "TARGET CELL FOUND-->" << std::endl;
             targetCell.prettyPrint();
             Path myPath = shortestPath(me->head(), targetCell, state);
             if (!myPath.direction.hasValue)

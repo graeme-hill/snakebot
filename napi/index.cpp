@@ -6,6 +6,7 @@
 #include "algorithms/dog.hpp"
 #include "algorithms/sim.hpp"
 #include "algorithms/inyourface.hpp"
+#include "algorithms/random.hpp"
 #include "test/testsuite.hpp"
 #include "benchmark/benchsuite.hpp"
 #include <memory>
@@ -185,6 +186,7 @@ napi_value init(napi_env env, napi_value exports)
     algorithms["dog"] = std::unique_ptr<Algorithm>(new Dog());
     algorithms["sim"] = std::unique_ptr<Algorithm>(new Sim());
     algorithms["inyourface"] = std::unique_ptr<Algorithm>(new InYourFace());
+    algorithms["random"] = std::unique_ptr<Algorithm>(new Random());
 
     // Make the move() function above available to be called by JS code.
     // Instead of exporting every algorithm's move function, just export this

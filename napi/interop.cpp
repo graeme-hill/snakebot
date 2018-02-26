@@ -162,7 +162,7 @@ void assertEqual(Future &f1, Future &f2, std::string msgPart)
         }
     }
 
-    assertEqual(f2.algorithm->meta().name, f1.algorithm->meta().name, msgPart + " - algorithm");
+    assertEqual(f2.source.pair.myAlgorithm->meta().name, f1.source.pair.myAlgorithm->meta().name, msgPart + " - algorithm");
     assertTrue(f2.terminationReason == f1.terminationReason, msgPart + " - termination reason");
     assertEqual(f2.turns, f1.turns, msgPart + " - turns");
     assertEqual(f2.move, f1.move, msgPart + " - move");
