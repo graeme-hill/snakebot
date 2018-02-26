@@ -6,7 +6,7 @@
 
 #define IDEAL_HEALTH_AT_FOOD_TIME 100
 
-std::array<SimThread, THREAD_COUNT> SimThread::instances;
+std::vector<std::unique_ptr<SimThread>> SimThread::instances;
 
 AlgorithmPair PrefixedAlgorithmPair::unprefixed()
 {
@@ -23,22 +23,43 @@ SimThread::SimThread() :
 
 void SimThread::stopAll()
 {
-    for (SimThread &simThread : SimThread::instances)
+    std::cout << "Waiting for simulation threads to stop...\n";
+
+    for (std::unique_ptr<SimThread> &simThread : SimThread::instances)
     {
-        simThread.kill();
+        simThread->kill();
     }
 
-    for (SimThread &simThread : SimThread::instances)
+    for (std::unique_ptr<SimThread> &simThread : SimThread::instances)
     {
-        simThread.join();
+        simThread->join();
+    }
+
+    SimThread::instances.clear();
+}
+
+void SimThread::startAll()
+{
+    if (SimThread::instances.empty())
+    {
+        unsigned cores = std::thread::hardware_concurrency();
+        std::cout << "Starting " << cores << " simulation threads" << std::endl;
+        for (unsigned i = 0; i < cores; i++)
+        {
+            instances.push_back(std::make_unique<SimThread>());
+        }
     }
 }
 
 void SimThread::wakeAll()
 {
-    for (SimThread &simThread : SimThread::instances)
+    // Call this just in case it hasn't already been called. It does nothing
+    // after the first time.
+    SimThread::startAll();
+
+    for (std::unique_ptr<SimThread> &simThread : SimThread::instances)
     {
-        simThread.wakeUp();
+        simThread->wakeUp();
     }
 }
 
@@ -336,18 +357,19 @@ std::vector<Future> runSimulations(
     uint32_t maxMillis)
 {
     uint32_t branchIndex = 0;
-    std::vector<std::vector<AlgorithmBranch>> branches(THREAD_COUNT);
+    size_t threads = SimThread::instances.size();
+    std::vector<std::vector<AlgorithmBranch>> branches(threads);
     for (PrefixedAlgorithmPair pair : algorithmPairs)
     {
         if (pair.myAlgorithm.prefixes.empty())
         {
-            branches[branchIndex++ % THREAD_COUNT].push_back(
+            branches[branchIndex++ % threads].push_back(
                 { pair.unprefixed(), { }, AxisBias::Horizontal });
         }
 
         for (std::vector<Direction> &prefix : pair.myAlgorithm.prefixes)
         {
-            branches[branchIndex++ % THREAD_COUNT].push_back(
+            branches[branchIndex++ % threads].push_back(
                 { pair.unprefixed(), prefix, AxisBias::Horizontal });
             // MaybeDirection maybeDir { true, firstDir };
             //
@@ -361,9 +383,9 @@ std::vector<Future> runSimulations(
         }
     }
 
-    for (uint32_t g = 0; g < THREAD_COUNT; g++)
+    for (uint32_t g = 0; g < threads; g++)
     {
-        SimThread::instances[g].startWork(
+        SimThread::instances[g]->startWork(
             { branches[g], initialState.clone(), maxTurns, maxMillis });
     }
 
@@ -371,9 +393,9 @@ std::vector<Future> runSimulations(
     while (anyIncomplete)
     {
         anyIncomplete = false;
-        for (SimThread &simThread : SimThread::instances)
+        for (std::unique_ptr<SimThread> &simThread : SimThread::instances)
         {
-            if (!simThread.done())
+            if (!simThread->done())
             {
                 anyIncomplete = true;
             }
@@ -382,9 +404,9 @@ std::vector<Future> runSimulations(
     }
 
     std::vector<Future> result;
-    for (SimThread &simThread : SimThread::instances)
+    for (std::unique_ptr<SimThread> &simThread : SimThread::instances)
     {
-        std::vector<Future> thisResult = simThread.result();
+        std::vector<Future> thisResult = simThread->result();
         result.insert(result.end(), thisResult.begin(), thisResult.end());
     }
 

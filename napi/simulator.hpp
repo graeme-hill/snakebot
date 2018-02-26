@@ -4,8 +4,7 @@
 #include "timing.hpp"
 #include <thread>
 #include <chrono>
-
-#define THREAD_COUNT 4
+#include <memory>
 
 // Sleep this amount of time each iteration of worker thread when in sleep mode.
 #define SLEEP_MODE_DELAY_MILLIS 10
@@ -180,7 +179,8 @@ public:
     void wakeUp();
     void sleep();
 
-    static std::array<SimThread, THREAD_COUNT> instances;
+    static std::vector<std::unique_ptr<SimThread>> instances;
+    static void startAll();
     static void stopAll();
     static void wakeAll();
 
