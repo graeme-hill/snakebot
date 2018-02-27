@@ -7,6 +7,7 @@
 #include "algorithms/sim.hpp"
 #include "algorithms/inyourface.hpp"
 #include "algorithms/random.hpp"
+#include "algorithms/onedirection.hpp"
 #include "test/testsuite.hpp"
 #include "benchmark/benchsuite.hpp"
 #include <memory>
@@ -81,7 +82,7 @@ napi_value start(napi_env env, napi_callback_info info)
     napi_status status;
 
     // Buffer to store arguments passed from JS land.
-    std::array<napi_value, 1> args;
+    std::array<napi_value, 2> args;
     size_t argCount = args.size();
 
     // Fetch the arguments into args. Both reads AND writes argCount.
@@ -89,10 +90,16 @@ napi_value start(napi_env env, napi_callback_info info)
     HANDLE_ERROR("Cannot read args passed to move()");
 
     napi_value jsAlgorithm = args[0];
+    napi_value jsGameId = args[1];
 
     char algorithmBuffer[200];
-    napi_get_value_string_utf8(env, jsAlgorithm, algorithmBuffer, 100, NULL);
+    napi_get_value_string_utf8(env, jsAlgorithm, algorithmBuffer, 200, NULL);
     std::string algorithmName(algorithmBuffer);
+
+    char gameIdBuffer[200];
+    size_t idLength;
+    napi_get_value_string_utf8(env, jsGameId, gameIdBuffer, 200, &idLength);
+    std::string gameId(gameIdBuffer);
 
     auto algoIter = algorithms.find(algorithmName);
     if (algoIter == algorithms.end())
@@ -100,7 +107,7 @@ napi_value start(napi_env env, napi_callback_info info)
         napi_throw_error(env, NULL, "C++ algorithm not found");
     }
 
-    (*algoIter).second->start();
+    (*algoIter).second->start(gameId);
 
     // Return undefined (ie: no return value)
     napi_value result;
@@ -189,6 +196,10 @@ napi_value init(napi_env env, napi_value exports)
     algorithms["sim"] = std::make_unique<Sim>();
     algorithms["inyourface"] = std::make_unique<InYourFace>();
     algorithms["random"] = std::make_unique<Random>();
+    algorithms["onedirection_left"] = std::make_unique<OneDirection>(Direction::Left);
+    algorithms["onedirection_right"] = std::make_unique<OneDirection>(Direction::Right);
+    algorithms["onedirection_up"] = std::make_unique<OneDirection>(Direction::Up);
+    algorithms["onedirection_down"] = std::make_unique<OneDirection>(Direction::Down);
 
     // Make the move() function above available to be called by JS code.
     // Instead of exporting every algorithm's move function, just export this

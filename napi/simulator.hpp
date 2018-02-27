@@ -70,6 +70,7 @@ class Simulation
 public:
     Simulation(
         AlgorithmBranch branch,
+        uint32_t branchId,
         GameState &initialState,
         uint32_t maxTurns,
         uint32_t maxMillis,
@@ -81,7 +82,7 @@ public:
     uint32_t simNumber() { return _simNumber; }
 
 private:
-    Direction getMyMove(GameState &state)
+    Direction getMyMove(GameState &state, uint32_t branchId)
     {
         if (_turn <= _branch.firstMoves.size())
         {
@@ -89,7 +90,7 @@ private:
         }
         else
         {
-            return _branch.pair.myAlgorithm->move(state);
+            return _branch.pair.myAlgorithm->move(state, branchId);
         }
     }
 
@@ -124,6 +125,7 @@ private:
     }
 
     AlgorithmBranch _branch;
+    uint32_t _branchId;
     GameState &_initialState;
     uint32_t _maxTurns;
     uint32_t _maxMillis;
@@ -157,6 +159,8 @@ Direction bestMove(
     std::vector<Future> &futures,
     GameState &state,
     MaybeDirection preferred = MaybeDirection::none());
+
+std::string fakeGameId();
 
 struct SimParams
 {

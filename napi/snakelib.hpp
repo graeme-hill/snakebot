@@ -277,6 +277,7 @@ struct World
     uint32_t width;
     uint32_t height;
     std::string you;
+    std::string id;
 
     void prettyPrint();
 };
@@ -300,7 +301,8 @@ public:
     Algorithm();
     virtual Metadata meta() = 0;
     virtual Direction move(GameState &) = 0;
-    virtual void start() = 0;
+    virtual Direction move(GameState &state, uint32_t branchId);
+    virtual void start(std::string id) = 0;
     uint32_t id() { return _id; }
 
 private:
@@ -364,6 +366,7 @@ public:
     Snake *mySnake();
     Map &map() { return _map; }
     AxisBias pathfindingBias() { return _pathfindingBias; }
+    std::string gameId() { return _world.id; }
 
     GameState &perspective(Snake *enemy, AxisBias bias);
     std::unique_ptr<GameState> newStateAfterMoves(

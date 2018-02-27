@@ -16,7 +16,7 @@ const meta = {
     tail_type: "pixel"
 };
 
-function start(info) {
+function start(id) {
     // I think there is nothing to do here unless we want to track some state throughout the game???
 }
 

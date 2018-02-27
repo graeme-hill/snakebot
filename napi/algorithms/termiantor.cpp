@@ -18,7 +18,7 @@ Metadata Terminator::meta()
     };
 }
 
-void Terminator::start()
+void Terminator::start(std::string id)
 {
 }
 

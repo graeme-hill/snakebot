@@ -282,7 +282,7 @@ World makeWorld(napi_env env, napi_value jsWorld)
 {
     World world {};
 
-    napi_value jsFood, jsfoodArray, jsSnakes, jsSnakesArray, jsYou, jsWidth, jsHeight;
+    napi_value jsFood, jsfoodArray, jsSnakes, jsSnakesArray, jsYou, jsWidth, jsHeight, jsId;
     napi_get_named_property(env, jsWorld, "food", &jsFood);
     napi_get_named_property(env, jsFood, "data", &jsfoodArray);
     napi_get_named_property(env, jsWorld, "snakes", &jsSnakes);
@@ -290,9 +290,14 @@ World makeWorld(napi_env env, napi_value jsWorld)
     napi_get_named_property(env, jsWorld, "you", &jsYou);
     napi_get_named_property(env, jsWorld, "width", &jsWidth);
     napi_get_named_property(env, jsWorld, "height", &jsHeight);
+	napi_get_named_property(env, jsWorld, "id", &jsId);
 
     napi_get_value_uint32(env, jsWidth, &world.width);
     napi_get_value_uint32(env, jsHeight, &world.height);
+
+	char idBuffer[100];
+    napi_get_value_string_utf8(env, jsId, idBuffer, 100, NULL);
+    world.id = std::string(idBuffer);
 
     uint32_t foodCount;
     napi_get_array_length(env, jsfoodArray, &foodCount);

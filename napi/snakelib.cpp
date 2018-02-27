@@ -65,6 +65,11 @@ uint32_t Algorithm::nextId()
     return _nextId++;
 }
 
+Direction Algorithm::move(GameState &state, uint32_t branchId)
+{
+    return move(state);
+}
+
 GameState::GameState(World w, AxisBias bias) :
     _width(w.width),
     _height(w.height),
