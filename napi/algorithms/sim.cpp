@@ -23,8 +23,8 @@ Sim::Sim(uint32_t maxTurns, uint32_t maxMillis) :
 Metadata Sim::meta()
 {
     return {
-        "#FFFFFF",
-        "#FFFFFF",
+        "#FF00FF",
+        "#FF00FF",
         "http://www.theglamnationnetwork.com/uploads/1/3/1/2/13123626/6958010.jpg",
         "White Snake",
         "Hi",
@@ -42,22 +42,29 @@ void Sim::start(std::string id)
 
 Direction Sim::move(GameState &state)
 {
+    Direction l = Direction::Left;
+    Direction r = Direction::Right;
+    Direction u = Direction::Up;
+    Direction d = Direction::Down;
+
     std::vector<std::vector<Direction>> myPrefixMoves {
-        { Direction::Up, Direction::Up },
-        { Direction::Up, Direction::Left },
-        { Direction::Up, Direction::Right },
-        { Direction::Down, Direction::Down },
-        { Direction::Down, Direction::Left },
-        { Direction::Down, Direction::Right },
-        { Direction::Left, Direction::Left },
-        { Direction::Left, Direction::Up },
-        { Direction::Left, Direction::Down },
-        { Direction::Right, Direction::Right },
-        { Direction::Right, Direction::Up },
-        { Direction::Right, Direction::Down }
+        { u, u },
+        { u, l },
+        { u, r },
+        { d, d },
+        { d, l },
+        { d, r },
+        { l, l },
+        { l, u },
+        { l, d },
+        { r, r },
+        { r, u },
+        { r, d }
     };
 
-    std::vector<std::vector<Direction>> enemyPrefixMoves {};
+    std::vector<std::vector<Direction>> enemyPrefixMoves {
+        {l},{r},{u},{d}
+    };
     InYourFace inYourFace;
     InYourFace inMyFace(state.mySnake());
     Hungry hungry;
