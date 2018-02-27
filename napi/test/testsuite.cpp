@@ -947,6 +947,19 @@ void simTest3()
     assertEqual(dir, Direction::Down, "simTest3() - go down if you want to live");
 }
 
+void countAccessibleCellsTest1()
+{
+    GameState state(parseWorld({
+        "_ _ 0 v <",
+        "_ _ ^ v _",
+        "_ _ ^ v _",
+        "_ _ ^ < _",
+    }));
+
+    uint32_t count = countAccessibleCellsAfterMove(state, state.mySnake(), Direction::Left);
+    assertEqual(count, 8, "countAccessibleCellsTest1() - 8 cells");
+}
+
 void TestSuite::run()
 {
     outOfBoundsTests();
@@ -987,4 +1000,5 @@ void TestSuite::run()
     simTest1();
     simTest2();
     simTest3();
+    countAccessibleCellsTest1();
 }

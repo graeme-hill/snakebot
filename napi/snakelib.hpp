@@ -390,6 +390,17 @@ private:
     AxisBias _pathfindingBias;
 };
 
+// uint32_t countAccessibleCells(
+//     GameState &state,
+//     Point p,
+//     uint32_t turn,
+//     std::unordered_set<uint32_t> &visited);
+
+uint32_t countAccessibleCells(GameState &state, Point start);
+
+uint32_t countAccessibleCellsAfterMove(
+    GameState &state, Snake *snake, Direction move);
+
 inline Point coordAfterMove(Point p, Direction dir, int range = 1)
 {
     switch (dir)

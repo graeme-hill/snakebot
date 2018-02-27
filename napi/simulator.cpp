@@ -484,7 +484,7 @@ int getFoodScore(uint32_t foodTurn, GameState &state)
 int scoreFuture(Future &future, GameState &state, MaybeDirection preferred)
 {
     auto myId = state.mySnake()->id;
-    uint32_t survivalScore = 100000;
+    uint32_t survivalScore = 1000000000;
     uint32_t murderScore = 0;
     uint32_t foodScore = 0;
     bool dies = false;

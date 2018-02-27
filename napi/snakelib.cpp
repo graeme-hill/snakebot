@@ -1,4 +1,5 @@
 #include "snakelib.hpp"
+#include <queue>
 
 void Point::prettyPrint()
 {
@@ -361,7 +362,7 @@ void markCrashersDead(World &world)
         // Head
         auto it = headCells.find(snake.head());
         if (it != headCells.end())
-        {
+            {
             Snake *other = it->second;
             if (snake.length() < other->length())
             {
@@ -434,4 +435,114 @@ void applyMoves(World &world, std::vector<SnakeMove> &moves)
 
     // Removes dead snakes from the board.
     removeDeadGuys(world);
+}
+
+// uint32_t countAccessibleCells(
+//     GameState &state,
+//     Point p,
+//     uint32_t turn,
+//     std::unordered_set<uint32_t> &visited)
+// {
+//     uint32_t index = cellIndex(p, state);
+//
+//     // Not even on the grid.
+//     if (outOfBounds(p, state))
+//     {
+//         return 0;
+//     }
+//
+//     // Check if already counted this cell.
+//     auto visitedIter = visited.find(index);
+//     if (visitedIter != visited.end())
+//     {
+//         return 0;
+//     }
+//
+//     // Check whether a snake is going to be occupying this space.
+//     uint32_t vacant = state.map().turnsUntilVacant(p);
+//     if (vacant < turn)
+//     {
+//         return 0;
+//     }
+//         p.prettyPrint();
+//         std::cout << std::endl;
+//
+//     visited.insert(index);
+//
+//     uint32_t left = countAccessibleCells(
+//         state, { p.x - 1, p.y }, turn + 1, visited);
+//     uint32_t right = countAccessibleCells(
+//         state, { p.x + 1, p.y }, turn + 1, visited);
+//     uint32_t up = countAccessibleCells(
+//         state, { p.x, p.y + 1 }, turn + 1, visited);
+//     uint32_t down = countAccessibleCells(
+//         state, { p.x, p.y - 1 }, turn + 1, visited);
+//
+//     return 1 + left + right + up + down;
+// }
+
+struct PointTurn
+{
+    Point point;
+    uint32_t turn;
+};
+
+uint32_t countAccessibleCells(GameState &state, Point start)
+{
+    std::queue<PointTurn> queue;
+    std::unordered_set<uint32_t> visited;
+    uint32_t count = 0;
+
+    queue.push({ start, 0 });
+
+    while (!queue.empty())
+    {
+        PointTurn next = queue.front();
+        uint32_t index = cellIndex(next.point, state);
+        queue.pop();
+        Point p = next.point;
+        uint32_t turn = next.turn;
+
+        // Check if already counted this cell.
+        auto visitedIter = visited.find(index);
+        if (visitedIter != visited.end())
+        {
+            continue;
+        }
+
+        // Not even on the grid.
+        if (outOfBounds(p, state))
+        {
+            continue;
+        }
+
+        // Check whether a snake is going to be occupying this space.
+        uint32_t vacant = state.map().turnsUntilVacant(p);
+        std::cout << "vacant: " << vacant << std::endl;
+        if (turn < vacant)
+        {
+            std::cout << "in the way\n";
+            continue;
+        }
+
+        p.prettyPrint();
+        std::cout << std::endl;
+
+        count++;
+        visited.insert(index);
+
+        queue.push({{ p.x - 1, p.y }, turn});
+        queue.push({{ p.x + 1, p.y }, turn});
+        queue.push({{ p.x, p.y + 1 }, turn});
+        queue.push({{ p.x, p.y - 1 }, turn});
+    }
+
+    return count;
+}
+
+uint32_t countAccessibleCellsAfterMove(
+    GameState &state, Snake *snake, Direction move)
+{
+    Point p = coordAfterMove(snake->head(), move);
+    return countAccessibleCells(state, p);
 }
