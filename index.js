@@ -23,7 +23,7 @@ function getAlgorithm(key) {
         return {
             meta: snakeBotNative.meta(cppKey),
             move: (world) => snakeBotNative.move(world, cppKey),
-            start: () => snakeBotNative.start(cppKey)
+            start: (id) => snakeBotNative.start(cppKey, id)
         };
     } else {
         // It's a normal JS algorithm implementation so just require() it.
@@ -43,13 +43,17 @@ const algorithm = getAlgorithm(algorithmKey);
 app.post('/start', (req, res) => {
     // start() is optional
     if (algorithm.start) {
-        algorithm.start(req.body.game_id);
+        algorithm.start(req.body.game_id.toString());
     }
     res.json(algorithm.meta);
 });
 
 app.post('/move', (req, res) => {
     const start = clock();
+
+    // docs say it is a string but actually it's an int, so just convert it to
+    // a string so it will work either way
+    req.body.id = req.body.id.toString();
     res.json({
         move: algorithm.move(req.body)
     });

@@ -97,7 +97,8 @@ napi_value start(napi_env env, napi_callback_info info)
     std::string algorithmName(algorithmBuffer);
 
     char gameIdBuffer[200];
-    napi_get_value_string_utf8(env, jsGameId, gameIdBuffer, 200, NULL);
+    size_t idLength;
+    napi_get_value_string_utf8(env, jsGameId, gameIdBuffer, 200, &idLength);
     std::string gameId(gameIdBuffer);
 
     auto algoIter = algorithms.find(algorithmName);

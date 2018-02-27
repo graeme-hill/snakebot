@@ -5,6 +5,7 @@
 #include "terminator.hpp"
 #include "random.hpp"
 #include "dog.hpp"
+#include "onedirection.hpp"
 #include "../movement.hpp"
 #include "../astar.hpp"
 #include "../simulator.hpp"
@@ -65,6 +66,11 @@ Direction Sim::move(GameState &state)
     Random random;
     Dog dog;
 
+    OneDirection left(Direction::Left);
+    OneDirection right(Direction::Right);
+    OneDirection up(Direction::Up);
+    OneDirection down(Direction::Down);
+
     std::vector<PrefixedAlgorithm> myAlgorithms {
         { &dog, myPrefixMoves },
         { &cautious, {} },
@@ -72,7 +78,11 @@ Direction Sim::move(GameState &state)
     };
     std::vector<PrefixedAlgorithm> enemyAlgorithms {
         { &hungry, enemyPrefixMoves },
-        { &inMyFace, enemyPrefixMoves }
+        { &inMyFace, enemyPrefixMoves },
+        { &left, { } },
+        { &right, { } },
+        { &up, { } },
+        { &down, { } },
     };
 
     Direction preferred = dog.move(state);

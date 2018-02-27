@@ -13,6 +13,15 @@ AlgorithmPair PrefixedAlgorithmPair::unprefixed()
     return { myAlgorithm.algorithm, enemyAlgorithm.algorithm };
 }
 
+std::string fakeGameId()
+{
+    static uint32_t count = 0;
+    count++;
+    std::stringstream ss;
+    ss << "sim_" << count;
+    return ss.str();
+}
+
 SimThread::SimThread() :
     _hasWork(false),
     _quit(false),
@@ -210,6 +219,7 @@ void Future::prettyPrint()
 
 Simulation::Simulation(
     AlgorithmBranch branch,
+    uint32_t branchId,
     GameState &initialState,
     uint32_t maxTurns,
     uint32_t maxMillis,
@@ -217,6 +227,7 @@ Simulation::Simulation(
     AxisBias bias)
     :
     _branch(branch),
+    _branchId(branchId),
     _initialState(initialState),
     _maxTurns(maxTurns),
     _maxMillis(maxMillis),
@@ -233,7 +244,8 @@ bool Simulation::next()
     GameState &currentState = _newestState ? *_newestState : _initialState;
 
     // My move.
-    SnakeMove myMove = { currentState.mySnake(), getMyMove(currentState) };
+    auto myMoveDir = getMyMove(currentState, _branchId);
+    SnakeMove myMove = { currentState.mySnake(), myMoveDir };
     std::vector<SnakeMove> moves { myMove };
     if (_result.turns == 0)
     {
@@ -246,7 +258,12 @@ bool Simulation::next()
     {
         GameState &enemyState = currentState.perspective(
             enemy, _enemyPathfindingBias);
-        Direction direction = _branch.pair.enemyAlgorithm->move(enemyState);
+
+        // Add bug number to branch id so it won't conflict with my move's
+        // branch id. It's a hack for when both use same algorithm and they
+        // need to be treated as their own instances.
+        Direction direction = _branch.pair.enemyAlgorithm->move(
+            enemyState, _branchId + 100000);
         moves.push_back({ enemy, direction });
     }
 
@@ -291,12 +308,13 @@ std::vector<Future> runSimulationBranches(
     std::vector<Simulation> simulations;
     uint32_t simIndex = 0;
     std::vector<Future> results;
+    uint32_t nextId = 1;
 
     for (AlgorithmBranch &branch : branches)
     {
         AxisBias bias = branch.enemyPathBindingBias;
         simulations.push_back(
-            { branch, initialState, maxTurns, maxMillis, simIndex++, bias });
+            { branch, nextId++, initialState, maxTurns, maxMillis, simIndex++, bias });
 
         results.push_back({
             {},
@@ -502,7 +520,7 @@ int scoreFuture(Future &future, GameState &state, MaybeDirection preferred)
         }
         else
         {
-            murderScore += (100U - (std::min(100U, pair.second))) * 100;
+            murderScore += (100U - (std::min(100U, pair.second))) * 10000;
         }
     }
 

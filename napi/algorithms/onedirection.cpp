@@ -1,9 +1,13 @@
 #include "onedirection.hpp"
+#include "cautious.hpp"
 #include "../movement.hpp"
 #include "../astar.hpp"
 
 #include <functional>
 #include <unordered_map>
+#include <sstream>
+
+std::unordered_map<std::string, bool> OneDirection::_finishMap;
 
 OneDirection::OneDirection(Direction direction) : _direction(direction)
 { }
@@ -24,7 +28,7 @@ Metadata OneDirection::meta()
         "#008888",
         "#FFFFFF",
         img,
-        "Hungry",
+        "OneDirection",
         "Yum",
         "pixel",
         "pixel"
@@ -33,6 +37,7 @@ Metadata OneDirection::meta()
 
 void OneDirection::start(std::string id)
 {
+    _finishMap[id] = false;
 }
 
 MaybeDirection tryMove(Direction direction, GameState &state)
@@ -49,31 +54,33 @@ MaybeDirection tryMove(Direction direction, GameState &state)
 
 Direction OneDirection::move(GameState &state)
 {
+    return move(state, 0);
+}
+
+Direction OneDirection::move(GameState &state, uint32_t branchId)
+{
+    std::stringstream ss;
+    ss << state.gameId() << "_" << branchId;
+    std::string key = ss.str();
+
+    // If already finished moving in this direction then switch to cautious.
+    auto finishIter = _finishMap.find(key);
+    if (finishIter != _finishMap.end() && finishIter->second)
+    {
+        Cautious cautious;
+        return cautious.move(state);
+    }
+
+    // Should already be in the dictionary from call to start() but just make
+    // sure in case server restarts or something.
+    _finishMap[key] = false;
+
+    // Try to move in specified direction.
     MaybeDirection attempt = tryMove(_direction, state);
     if (attempt.hasValue) return attempt.value;
 
-    if (_direction == Direction::Left || _direction == Direction::Right)
-    {
-        attempt = tryMove(Direction::Up, state);
-        if (attempt.hasValue) return attempt.value;
-
-        attempt = tryMove(Direction::Down, state);
-        if (attempt.hasValue) return attempt.value;
-
-        return _direction == Direction::Left
-            ? Direction::Right
-            : Direction::Left;
-    }
-    else
-    {
-        attempt = tryMove(Direction::Left, state);
-        if (attempt.hasValue) return attempt.value;
-
-        attempt = tryMove(Direction::Right, state);
-        if (attempt.hasValue) return attempt.value;
-
-        return _direction == Direction::Up
-            ? Direction::Down
-            : Direction::Up;
-    }
+    // Can't move in this direction anymore so change to backup algorithm.
+    _finishMap[key] = true;
+    Cautious cautious;
+    return cautious.move(state);
 }
