@@ -437,50 +437,6 @@ void applyMoves(World &world, std::vector<SnakeMove> &moves)
     removeDeadGuys(world);
 }
 
-// uint32_t countAccessibleCells(
-//     GameState &state,
-//     Point p,
-//     uint32_t turn,
-//     std::unordered_set<uint32_t> &visited)
-// {
-//     uint32_t index = cellIndex(p, state);
-//
-//     // Not even on the grid.
-//     if (outOfBounds(p, state))
-//     {
-//         return 0;
-//     }
-//
-//     // Check if already counted this cell.
-//     auto visitedIter = visited.find(index);
-//     if (visitedIter != visited.end())
-//     {
-//         return 0;
-//     }
-//
-//     // Check whether a snake is going to be occupying this space.
-//     uint32_t vacant = state.map().turnsUntilVacant(p);
-//     if (vacant < turn)
-//     {
-//         return 0;
-//     }
-//         p.prettyPrint();
-//         std::cout << std::endl;
-//
-//     visited.insert(index);
-//
-//     uint32_t left = countAccessibleCells(
-//         state, { p.x - 1, p.y }, turn + 1, visited);
-//     uint32_t right = countAccessibleCells(
-//         state, { p.x + 1, p.y }, turn + 1, visited);
-//     uint32_t up = countAccessibleCells(
-//         state, { p.x, p.y + 1 }, turn + 1, visited);
-//     uint32_t down = countAccessibleCells(
-//         state, { p.x, p.y - 1 }, turn + 1, visited);
-//
-//     return 1 + left + right + up + down;
-// }
-
 struct PointTurn
 {
     Point point;

@@ -390,12 +390,6 @@ private:
     AxisBias _pathfindingBias;
 };
 
-// uint32_t countAccessibleCells(
-//     GameState &state,
-//     Point p,
-//     uint32_t turn,
-//     std::unordered_set<uint32_t> &visited);
-
 uint32_t countAccessibleCells(GameState &state, Point start);
 
 uint32_t countAccessibleCellsAfterMove(
