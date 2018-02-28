@@ -23,8 +23,8 @@ Sim::Sim(uint32_t maxTurns, uint32_t maxMillis) :
 Metadata Sim::meta()
 {
     return {
-        "#FF00FF",
-        "#FF00FF",
+        "#698866",
+        "#698866",
         "http://www.theglamnationnetwork.com/uploads/1/3/1/2/13123626/6958010.jpg",
         "White Snake",
         "Hi",
