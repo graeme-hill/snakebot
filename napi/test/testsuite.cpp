@@ -588,66 +588,6 @@ void newStateAfterMovesTest7()
 void simulateFuturesTest1()
 {
     GameState state(parseWorld({
-        "* _ _ _",
-        "* _ _ _",
-        "_ 0 1 _",
-        "_ ^ ^ _"
-    }));
-
-    OneDirAlgorithm algo(Direction::Up);
-
-    std::vector<std::vector<Direction>> myPrefixes = {
-        { Direction::Left },
-        { Direction::Right },
-        { Direction::Up },
-        { Direction::Down }
-    };
-
-    std::vector<Future> actualFutures = simulateFutures(
-        state, 5, 100, { { &algo, myPrefixes } }, { { &algo, {} } });
-
-    assertEqual(actualFutures.size(), 4, "simulateFuturesTest1() - 4 futures");
-
-    // Future f1 {};
-    // f1.obituaries = { { "1", 3 }, { "0", 4 } };
-    // f1.foodsEaten = { { "0", { 2, 3 } } };
-    // f1.algorithm = &algo;
-    // f1.terminationReason = TerminationReason::Loss;
-    // f1.move = Direction::Left;
-    // f1.turns = 4;
-    //
-    // Future f2 {};
-    // f2.obituaries = { { "1", 3 }, { "0", 3 } };
-    // f2.foodsEaten = {};
-    // f2.algorithm = &algo;
-    // f2.terminationReason = TerminationReason::Loss;
-    // f2.move = Direction::Up;
-    // f2.turns = 3;
-    //
-    // Future f3 {};
-    // f3.obituaries = { { "1", 3 }, { "0", 4 } };
-    // f3.foodsEaten = { { "0", { 2, 3 } } };
-    // f3.algorithm = &algo;
-    // f3.terminationReason = TerminationReason::Loss;
-    // f3.move = Direction::Left;
-    // f3.turns = 4;
-    //
-    // Future f4 {};
-    // f4.obituaries = { { "1", 3 }, { "0", 3 } };
-    // f4.foodsEaten = {};
-    // f4.algorithm = &algo;
-    // f4.terminationReason = TerminationReason::Loss;
-    // f4.move = Direction::Up;
-    // f4.turns = 3;
-    //
-    // std::vector<Future> expectedFutures = { f2, f3, f1, f4 };
-    //
-    // assertEqual(actualFutures, expectedFutures, "simulateFuturesTest1()");
-}
-
-void simulateFuturesTest2()
-{
-    GameState state(parseWorld({
         "_ _ _ _ _ _ _ _ _ > > > v _ _ _ _",
         "_ _ _ _ _ _ _ v _ ^ _ _ > > v _ _",
         "* _ _ _ _ _ _ v * ^ _ _ _ _ > > 0",
@@ -960,6 +900,30 @@ void countAccessibleCellsTest1()
     assertEqual(count, 8, "countAccessibleCellsTest1() - 8 cells");
 }
 
+void countAccessibleCellsTest2()
+{
+    GameState state(parseWorld({
+        "v < _ _ _",
+        "> 0 _ _ _",
+        "_ _ _ _ _",
+        "_ _ _ _ _",
+    }));
+
+    uint32_t count = countAccessibleCellsAfterMove(state, state.mySnake(), Direction::Up);
+    assertEqual(count, 20, "countAccessibleCellsTest1() - 19 cells");
+}
+
+void countAccessibleCellsTest3()
+{
+    GameState state(parseWorld({
+        "v <",
+        "> 0",
+    }));
+
+    uint32_t count = countAccessibleCellsAfterMove(state, state.mySnake(), Direction::Up);
+    assertEqual(count, 4, "countAccessibleCellsTest1() - 3 cells");
+}
+
 void TestSuite::run()
 {
     outOfBoundsTests();
@@ -988,7 +952,6 @@ void TestSuite::run()
     newStateAfterMovesTest6();
     newStateAfterMovesTest7();
     simulateFuturesTest1();
-    simulateFuturesTest2();
     bestMoveTest1();
     directionSetTests();
     arrayDictTest1();
@@ -1001,4 +964,6 @@ void TestSuite::run()
     simTest2();
     simTest3();
     countAccessibleCellsTest1();
+    countAccessibleCellsTest2();
+    countAccessibleCellsTest3();
 }
