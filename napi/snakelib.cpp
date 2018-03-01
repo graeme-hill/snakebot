@@ -440,7 +440,7 @@ void applyMoves(World &world, std::vector<SnakeMove> &moves)
 struct PointTurn
 {
     Point point;
-    uint32_t turn;
+    int turn;
 };
 
 uint32_t countAccessibleCells(GameState &state, Point start)
@@ -457,7 +457,7 @@ uint32_t countAccessibleCells(GameState &state, Point start)
         uint32_t index = cellIndex(next.point, state);
         queue.pop();
         Point p = next.point;
-        uint32_t turn = next.turn;
+        int turn = next.turn;
 
         // Check if already counted this cell.
         auto visitedIter = visited.find(index);
@@ -473,24 +473,19 @@ uint32_t countAccessibleCells(GameState &state, Point start)
         }
 
         // Check whether a snake is going to be occupying this space.
-        uint32_t vacant = state.map().turnsUntilVacant(p);
-        std::cout << "vacant: " << vacant << std::endl;
+        int vacant = state.map().turnsUntilVacant(p);
         if (turn < vacant)
         {
-            std::cout << "in the way\n";
             continue;
         }
-
-        p.prettyPrint();
-        std::cout << std::endl;
 
         count++;
         visited.insert(index);
 
-        queue.push({{ p.x - 1, p.y }, turn});
-        queue.push({{ p.x + 1, p.y }, turn});
-        queue.push({{ p.x, p.y + 1 }, turn});
-        queue.push({{ p.x, p.y - 1 }, turn});
+        queue.push({{ p.x - 1, p.y }, turn + 1});
+        queue.push({{ p.x + 1, p.y }, turn + 1});
+        queue.push({{ p.x, p.y + 1 }, turn + 1});
+        queue.push({{ p.x, p.y - 1 }, turn + 1});
     }
 
     return count;

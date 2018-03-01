@@ -13,7 +13,7 @@
 #include <functional>
 #include <unordered_map>
 
-Sim::Sim() : _maxTurns(10000), _maxMillis(100)
+Sim::Sim() : _maxTurns(10000), _maxMillis(90)
 { }
 
 Sim::Sim(uint32_t maxTurns, uint32_t maxMillis) :
@@ -23,8 +23,8 @@ Sim::Sim(uint32_t maxTurns, uint32_t maxMillis) :
 Metadata Sim::meta()
 {
     return {
-        "#FF00FF",
-        "#FF00FF",
+        "#698866",
+        "#698866",
         "http://www.theglamnationnetwork.com/uploads/1/3/1/2/13123626/6958010.jpg",
         "White Snake",
         "Hi",
@@ -84,7 +84,7 @@ Direction Sim::move(GameState &state)
         { &inYourFace, {} },
     };
     std::vector<PrefixedAlgorithm> enemyAlgorithms {
-        { &hungry, enemyPrefixMoves },
+        { &hungry, { } },
         { &inMyFace, enemyPrefixMoves },
         { &left, { } },
         { &right, { } },
