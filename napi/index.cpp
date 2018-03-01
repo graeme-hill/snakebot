@@ -5,8 +5,6 @@
 #include "benchmark/benchsuite.hpp"
 #include <memory>
 
-//std::unordered_map<std::string, std::unique_ptr<Algorithm>> algorithms;
-
 napi_value meta(napi_env env, napi_callback_info info)
 {
     napi_status status;
