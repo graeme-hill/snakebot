@@ -1,3 +1,4 @@
+# to run nodejs version with C++ addon
 cd ~ && \
 apt-get update && \
 apt-get -y install vim build-essential git python2.7 && \
@@ -14,3 +15,15 @@ npm install -g mocha node-gyp && \
 npm install && \
 node-gyp configure && \
 node-gyp build
+
+
+# to run pure c++ version
+cd ~ && \
+apt-get update && \
+apt-get -y install vim build-essential git cmake libboost-all-dev && \
+git clone https://bitbucket.org/graemekh/snakebot && \
+cd ~/snakebot/nonode && \
+mkdir build && \
+cd build && \
+cmake .. && \
+make -j4

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include "timing.hpp"
 #include "snakelib.hpp"
 #include "dispatcher.hpp"
 #include "json.hpp"
@@ -68,6 +69,8 @@ World getWorld(std::string json)
 
 std::string Dispatcher::move(std::string json)
 {
+    auto start = Clock::now();
+
     World world = getWorld(json);
     GameState state(world);
     Direction direction = Dispatcher::algorithm->move(state);
@@ -75,6 +78,12 @@ std::string Dispatcher::move(std::string json)
     nlohmann::json jsonResult = {
         { "move", directionToString(direction) }
     };
+
+    auto end = Clock::now();
+    Seconds diff = end - start;
+    auto millis = diff.count() * 1000.0;
+
+    std::cout << millis << " millis" << std::endl;
 
     return jsonResult.dump();
 }
