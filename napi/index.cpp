@@ -1,18 +1,11 @@
 #include "interop.hpp"
 #include "snakelib.hpp"
-#include "algorithms/cautious.hpp"
-#include "algorithms/hungry.hpp"
-#include "algorithms/terminator.hpp"
-#include "algorithms/dog.hpp"
-#include "algorithms/sim.hpp"
-#include "algorithms/inyourface.hpp"
-#include "algorithms/random.hpp"
-#include "algorithms/onedirection.hpp"
+#include "algorithms.hpp"
 #include "test/testsuite.hpp"
 #include "benchmark/benchsuite.hpp"
 #include <memory>
 
-std::unordered_map<std::string, std::unique_ptr<Algorithm>> algorithms;
+//std::unordered_map<std::string, std::unique_ptr<Algorithm>> algorithms;
 
 napi_value meta(napi_env env, napi_callback_info info)
 {
@@ -32,12 +25,13 @@ napi_value meta(napi_env env, napi_callback_info info)
     napi_get_value_string_utf8(env, jsAlgorithm, algorithmBuffer, 100, NULL);
     std::string algorithmName(algorithmBuffer);
 
-    auto algoIter = algorithms.find(algorithmName);
-    if (algoIter == algorithms.end())
+    auto algo = Algorithms::get(algorithmName);
+    if (algo == nullptr)
     {
         napi_throw_error(env, NULL, "C++ algorithm not found");
     }
-    Metadata metadata = (*algoIter).second->meta();
+
+    Metadata metadata = algo->meta();
     return metadataToJsValue(env, metadata);
 }
 
@@ -60,15 +54,15 @@ napi_value move(napi_env env, napi_callback_info info)
     napi_get_value_string_utf8(env, jsAlgorithm, algorithmBuffer, 100, NULL);
     std::string algorithmName(algorithmBuffer);
 
-    auto algoIter = algorithms.find(algorithmName);
-    if (algoIter == algorithms.end())
+    auto algo = Algorithms::get(algorithmName);
+    if (algo == nullptr)
     {
         napi_throw_error(env, NULL, "C++ algorithm not found");
     }
 
     World world = makeWorld(env, jsWorld);
     GameState state(world);
-    Direction direction = (*algoIter).second->move(state);
+    Direction direction = algo->move(state);
     std::string directionStr = directionToString(direction);
 
     napi_value jsDirection;
@@ -101,13 +95,13 @@ napi_value start(napi_env env, napi_callback_info info)
     napi_get_value_string_utf8(env, jsGameId, gameIdBuffer, 200, &idLength);
     std::string gameId(gameIdBuffer);
 
-    auto algoIter = algorithms.find(algorithmName);
-    if (algoIter == algorithms.end())
+    auto algo = Algorithms::get(algorithmName);
+    if (algo == nullptr)
     {
         napi_throw_error(env, NULL, "C++ algorithm not found");
     }
 
-    (*algoIter).second->start(gameId);
+    algo->start(gameId);
 
     // Return undefined (ie: no return value)
     napi_value result;
@@ -187,19 +181,6 @@ napi_value init(napi_env env, napi_value exports)
 {
     // Launch sim threads now so there's less startup time when a game begins.
     SimThread::startAll();
-
-    // INITIALIZE AVAILABLE ALGORITHMS HERE!
-    algorithms["cautious"] = std::make_unique<Cautious>();
-    algorithms["hungry"] = std::make_unique<Hungry>();
-    algorithms["terminator"] = std::make_unique<Terminator>();
-    algorithms["dog"] = std::make_unique<Dog>();
-    algorithms["sim"] = std::make_unique<Sim>();
-    algorithms["inyourface"] = std::make_unique<InYourFace>();
-    algorithms["random"] = std::make_unique<Random>();
-    algorithms["onedirection_left"] = std::make_unique<OneDirection>(Direction::Left);
-    algorithms["onedirection_right"] = std::make_unique<OneDirection>(Direction::Right);
-    algorithms["onedirection_up"] = std::make_unique<OneDirection>(Direction::Up);
-    algorithms["onedirection_down"] = std::make_unique<OneDirection>(Direction::Down);
 
     // Make the move() function above available to be called by JS code.
     // Instead of exporting every algorithm's move function, just export this

@@ -15,6 +15,7 @@
                 "napi/algorithms/inyourface.cpp",
                 "napi/test/testsuite.cpp",
                 "napi/interop.cpp",
+                "napi/algorithms.cpp",
                 "napi/astar.cpp",
                 "napi/movement.cpp",
                 "napi/simulator.cpp",
