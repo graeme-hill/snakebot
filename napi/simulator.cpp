@@ -362,8 +362,8 @@ std::vector<Future> runSimulationBranches(
             results[i].terminationReason, turn, maxTurns);
     }
 
-    std::cout << "simulated " << turn << " turns | oot: " << outOfTime
-        << " | branches: " << branches.size() << std::endl;
+    // std::cout << "simulated " << turn << " turns | oot: " << outOfTime
+    //     << " | branches: " << branches.size() << std::endl;
 
     return results;
 }
@@ -507,7 +507,7 @@ int scoreFuture(Future &future, GameState &state, MaybeDirection preferred)
 
     if (nextFood > state.mySnake()->health)
     {
-        survivalScore = state.mySnake()->health * 100;
+        survivalScore = std::min(survivalScore, state.mySnake()->health * 100);
         dies = true;
     }
 
@@ -521,6 +521,19 @@ int scoreFuture(Future &future, GameState &state, MaybeDirection preferred)
         else
         {
             murderScore += (100U - (std::min(100U, pair.second))) * 10000;
+        }
+    }
+
+    if (!dies)
+    {
+        uint32_t accessible = countAccessibleCellsAfterMove(
+            state, state.mySnake(), future.move);
+        if (accessible < state.mySnake()->length())
+        {
+            std::cout << "TOO SMALL " << accessible << " | " << state.mySnake()->length()
+                << " | " << directionToString(future.move) << "\n";
+            survivalScore = std::min(survivalScore, accessible * 100U);
+            dies = true;
         }
     }
 
