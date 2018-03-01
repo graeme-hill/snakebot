@@ -18,7 +18,7 @@ Metadata Cautious::meta()
     };
 }
 
-void Cautious::start(std::string id)
+void Cautious::start(std::string /*id*/)
 {
 }
 

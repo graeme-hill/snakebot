@@ -26,7 +26,7 @@ Metadata InYourFace::meta()
     };
 }
 
-void InYourFace::start(std::string id)
+void InYourFace::start(std::string /*id*/)
 {
 }
 

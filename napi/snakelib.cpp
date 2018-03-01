@@ -66,7 +66,7 @@ uint32_t Algorithm::nextId()
     return _nextId++;
 }
 
-Direction Algorithm::move(GameState &state, uint32_t branchId)
+Direction Algorithm::move(GameState &state, uint32_t /*branchId*/)
 {
     return move(state);
 }
