@@ -69,3 +69,22 @@ In code the algorithm is NOT named `cpp_test`. It's just `test`!
 ## Adding a new bot
 
 Just add a new js file to the `algorithms/` directory and export `move`, `start`, and `meta`.
+
+## Running pure C++ without node js
+
+Install cmake and boost:
+
+```bash
+sudo apt-get install cmake libboost-all-dev
+```
+
+Do standard cmake build process:
+
+```bash
+cd nonode
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Debug .. # or Release
+make -j8 # replace 8 with # of cores or threads
+./snakebot <port> <algorithm> # do not use cpp_ prefix
+```
