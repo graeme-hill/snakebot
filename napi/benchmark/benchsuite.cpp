@@ -43,7 +43,7 @@ void simulatorOnBusyGrid1()
         sim.move(state);
     });
 
-    benchmark("sim - bestFood()", [&state]()
+    benchmark("bestFood() - big grid w/ a lot of food", [&state]()
     {
         bestFood(state);
     });
@@ -115,7 +115,7 @@ void astar1()
 
 void BenchSuite::run()
 {
-    for (auto i = 0; i < 10; i++)
+    for (auto i = 0; i < 1; i++)
     {
         std::cout << "--- pass " << (i + 1) << " ---" << std::endl;
         simulatorOnBusyGrid1();

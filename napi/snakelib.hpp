@@ -267,6 +267,12 @@ private:
     size_t _beginIndex;
 };
 
+// template <typename T>
+// class Quad
+// {
+//
+// }
+
 struct Snake
 {
     std::string id;

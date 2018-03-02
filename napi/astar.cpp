@@ -11,12 +11,12 @@
 struct MemoryPool
 {
     MemoryPool() :
-        closedSet(20),
-        openSet(20),
-        cameFrom(20),
-        gScore(20),
-        fScore(20),
-        turns(20)
+        closedSet(200),
+        openSet(200),
+        cameFrom(200),
+        gScore(200),
+        fScore(200),
+        turns(200)
     { }
 
     MemoryPool(const MemoryPool &) = delete;
@@ -44,12 +44,12 @@ void clean(MemoryPool &pool)
     pool.turns.clear();
 }
 
-uint32_t heuristicCostEstimate(Point start, Point goal)
+inline uint32_t heuristicCostEstimate(Point start, Point goal)
 {
     return distance(start, goal);
 }
 
-uint32_t lowestFScoreInSet(
+inline uint32_t lowestFScoreInSet(
     std::unordered_set<uint32_t> &set, std::unordered_map<uint32_t, uint32_t> &fScore)
 {
     uint32_t lowest = 0;
@@ -74,7 +74,7 @@ uint32_t lowestFScoreInSet(
     return lowestIndex;
 }
 
-Path reconstructPath(
+inline Path reconstructPath(
     std::unordered_map<uint32_t, uint32_t> &cameFrom, uint32_t currentIndex, uint32_t width)
 {
     MaybeDirection result = MaybeDirection::none();
@@ -93,7 +93,7 @@ Path reconstructPath(
     return Path{ size, result };
 }
 
-bool indexIsSafe(uint32_t index, uint32_t turn, GameState &state)
+inline bool indexIsSafe(uint32_t index, uint32_t turn, GameState &state)
 {
     Point coord = deconstructCellIndex(index, state);
     if (outOfBounds(coord, state))
@@ -104,7 +104,7 @@ bool indexIsSafe(uint32_t index, uint32_t turn, GameState &state)
     return turnsUntilCouldBeVacant < turn;
 }
 
-bool is180(uint32_t index, uint32_t neighborIndex, GameState &state)
+inline bool is180(uint32_t index, uint32_t neighborIndex, GameState &state)
 {
     // If length of snake is 1 then nothing to worry about (... I think... might wanna test that)
     if (state.mySnake()->length() <= 1)
@@ -121,7 +121,7 @@ bool is180(uint32_t index, uint32_t neighborIndex, GameState &state)
     return index == headIndex && neighborIndex == neckIndex;
 }
 
-bool isOkNeighbor(
+inline bool isOkNeighbor(
     uint32_t index, uint32_t other, uint32_t turn, GameState &state)
 {
     bool result = indexIsSafe(other, turn, state)
@@ -131,7 +131,7 @@ bool isOkNeighbor(
     return result;
 }
 
-std::vector<uint32_t> getNeighbors(
+inline std::vector<uint32_t> getNeighbors(
     uint32_t index, uint32_t turn, GameState &state)
 {
     std::vector<uint32_t> result;
@@ -159,7 +159,8 @@ std::vector<uint32_t> getNeighbors(
     return result;
 }
 
-uint32_t getGScore(std::unordered_map<uint32_t, uint32_t> &gScore, uint32_t index)
+inline uint32_t getGScore(
+    std::unordered_map<uint32_t, uint32_t> &gScore, uint32_t index)
 {
     auto iter = gScore.find(index);
     if (iter == gScore.end())
