@@ -146,6 +146,22 @@ struct MaybeDirection
     }
 };
 
+struct MaybePoint
+{
+    bool hasValue;
+    Point value;
+
+    static MaybePoint none()
+    {
+        return MaybePoint{ false, { 0, 0 } };
+    }
+
+    static MaybePoint just(Point p)
+    {
+        return MaybePoint{ true, p };
+    }
+};
+
 struct Path
 {
     size_t size;

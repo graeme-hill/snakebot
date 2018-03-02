@@ -1,5 +1,10 @@
-#include "testsuite.hpp"
+#ifdef NO_NODE
+#include "../../nonode/testing.hpp"
+#else
 #include "../interop.hpp"
+#endif
+
+#include "testsuite.hpp"
 #include "../astar.hpp"
 #include "../movement.hpp"
 #include "../simulator.hpp"
@@ -26,7 +31,7 @@ public:
         };
     }
 
-    void start(std::string id) override
+    void start(std::string /*id*/) override
     { }
 
     Direction move(GameState &) override
@@ -37,6 +42,36 @@ public:
 private:
     Direction _dir;
 };
+
+void parseWorldTest1()
+{
+    World w = parseWorld({
+        "> > 0 _",
+        "_ * _ *",
+        "_ 1 _ _",
+        "_ ^ < <",
+        "_ _ _ _"
+    });
+
+    assertEqual(w.width, 4, "parseWorldTest1() - width");
+    assertEqual(w.height, 5, "parseWorldTest1() - height");
+    assertEqual(w.snakes.size(), 2, "parseWorldTest1() - num snakes");
+    assertEqual(w.you, "0", "parseWorldTest1() - you");
+    assertEqual(w.snakes.at(0).id, "0", "parseWorldTest1() - 0th id");
+    assertEqual(w.snakes.at(1).id, "1", "parseWorldTest1() - 1st id");
+    assertEqual(w.food.size(), 2, "parseWorldTest1() - food count");
+    assertEqual(w.food.at(0), {1,1}, "parseWorldTest1() - 0th food pos");
+    assertEqual(w.food.at(1), {3,1}, "parseWorldTest1() - 1st food pos");
+    assertEqual(w.snakes.at(0).parts.size(), 3, "parseWorldTest1() - snake 0 size");
+    assertEqual(w.snakes.at(0).parts.at(0), {2,0}, "parseWorldTest1() - snake 0 part 0");
+    assertEqual(w.snakes.at(0).parts.at(1), {1,0}, "parseWorldTest1() - snake 0 part 1");
+    assertEqual(w.snakes.at(0).parts.at(2), {0,0}, "parseWorldTest1() - snake 0 part 2");
+    assertEqual(w.snakes.at(1).parts.size(), 4, "parseWorldTest1() - snake 1 size");
+    assertEqual(w.snakes.at(1).parts.at(0), {1,2}, "parseWorldTest1() - snake 1 part 0");
+    assertEqual(w.snakes.at(1).parts.at(1), {1,3}, "parseWorldTest1() - snake 1 part 1");
+    assertEqual(w.snakes.at(1).parts.at(2), {2,3}, "parseWorldTest1() - snake 1 part 2");
+    assertEqual(w.snakes.at(1).parts.at(3), {3,3}, "parseWorldTest1() - snake 1 part 3");
+}
 
 void basicGameStateTests()
 {
@@ -814,18 +849,6 @@ void inYourFaceTest3()
 void simTest1()
 {
     GameState state(parseWorld({
-        // "_ _ _ _ _ _ > > _ > > > v _ _ _ _",
-        // "_ _ _ _ _ _ _ v _ ^ v _ > > v _ _",
-        // "* _ _ _ _ _ _ v * ^ < _ _ _ 0 _ _",
-        // "* _ * _ * _ _ > > > > > > > > v _",
-        // "v < _ _ _ _ _ _ _ _ _ _ _ _ _ v _",
-        // "v ^ _ _ _ _ 2 _ _ _ * _ _ _ _ v _",
-        // "v _ _ _ _ _ ^ _ _ _ _ _ _ _ _ > v",
-        // "v _ _ _ _ * ^ _ _ _ _ _ _ _ _ _ v",
-        // "v _ _ * * _ ^ _ * _ 1 < < _ _ _ v",
-        // "v _ _ _ _ _ ^ _ _ _ _ _ ^ _ v < <",
-        // "v _ _ _ * _ ^ _ _ _ * _ ^ < < _ _",
-        // "> > > > > > ^ _ _ _ _ _ _ _ _ _ _"
         "_ _ _ _ _ _ _ _ _ > > > v _ _ _ _",
         "_ _ _ _ _ _ _ v _ ^ _ _ > > v _ _",
         "* _ _ _ _ _ _ v * ^ _ _ _ _ > > 0",
@@ -926,6 +949,7 @@ void countAccessibleCellsTest3()
 
 void TestSuite::run()
 {
+    parseWorldTest1();
     outOfBoundsTests();
     basicGameStateTests();
     mapTests();

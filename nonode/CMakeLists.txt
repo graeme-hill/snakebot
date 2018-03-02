@@ -9,12 +9,11 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
+set (CMAKE_CXX_STANDARD 17)
+
 find_package(Boost COMPONENTS system thread REQUIRED)
 
-set(SRCS
-    main.cpp
-    server.cpp
-    dispatcher.cpp
+set(SHARED_SRCS
     ${PROJECT_SOURCE_DIR}/../napi/snakelib.cpp
     ${PROJECT_SOURCE_DIR}/../napi/algorithms.cpp
     ${PROJECT_SOURCE_DIR}/../napi/astar.cpp
@@ -30,7 +29,21 @@ set(SRCS
     ${PROJECT_SOURCE_DIR}/../napi/algorithms/sim.cpp
     ${PROJECT_SOURCE_DIR}/../napi/algorithms/inyourface.cpp)
 
-add_executable(snakebot ${SRCS})
+set(TEST_SRCS
+    tests.cpp
+    testing.cpp
+    ${PROJECT_SOURCE_DIR}/../napi/test/testsuite.cpp)
+
+set(SERVER_SRCS
+    main.cpp
+    server.cpp
+    dispatcher.cpp)
+
+add_executable(snakebot ${SERVER_SRCS} ${SHARED_SRCS})
+add_executable(tests ${TEST_SRCS} ${SHARED_SRCS})
+
+target_compile_definitions(snakebot PRIVATE NO_NODE)
+target_compile_definitions(tests PRIVATE NO_NODE)
 
 include_directories("${PROJECT_SOURCE_DIR}/../napi")
 
@@ -38,6 +51,7 @@ include_directories("${PROJECT_SOURCE_DIR}/../napi")
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(snakebot Threads::Threads)
+target_link_libraries(tests Threads::Threads)
 
 target_link_libraries(snakebot
     ${Boost_SYSTEM_LIBRARY}
