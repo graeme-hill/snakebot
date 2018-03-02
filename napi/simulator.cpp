@@ -524,18 +524,18 @@ int scoreFuture(Future &future, GameState &state, MaybeDirection preferred)
         }
     }
 
-    if (!dies)
-    {
-        uint32_t accessible = countAccessibleCellsAfterMove(
-            state, state.mySnake(), future.move);
-        if (accessible < state.mySnake()->length())
-        {
-            std::cout << "TOO SMALL " << accessible << " | " << state.mySnake()->length()
-                << " | " << directionToString(future.move) << "\n";
-            survivalScore = std::min(survivalScore, accessible * 100U);
-            dies = true;
-        }
-    }
+    // if (!dies)
+    // {
+    //     uint32_t accessible = countAccessibleCellsAfterMove(
+    //         state, state.mySnake(), future.move);
+    //     if (accessible < state.mySnake()->length())
+    //     {
+    //         std::cout << "TOO SMALL " << accessible << " | " << state.mySnake()->length()
+    //             << " | " << directionToString(future.move) << "\n";
+    //         survivalScore = std::min(survivalScore, accessible * 100U);
+    //         dies = true;
+    //     }
+    // }
 
     // auto foodIt = future.foodsEaten.find(state.mySnake()->id);
     // if (foodIt != future.foodsEaten.end())

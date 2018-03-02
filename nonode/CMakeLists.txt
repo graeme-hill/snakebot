@@ -29,24 +29,33 @@ set(SHARED_SOURCES
     ${PROJECT_SOURCE_DIR}/../napi/algorithms/sim.cpp
     ${PROJECT_SOURCE_DIR}/../napi/algorithms/inyourface.cpp)
 
+set(SHARED_TEST_SOURCES testing.cpp)
+
 set(TEST_SOURCES
     tests.cpp
-    testing.cpp
     ${PROJECT_SOURCE_DIR}/../napi/test/testsuite.cpp)
 
 set(BENCH_SOURCES
     bench.cpp
-    testing.cpp
-${PROJECT_SOURCE_DIR}/../napi/benchmark/benchsuite.cpp)
+    ${PROJECT_SOURCE_DIR}/../napi/benchmark/benchsuite.cpp)
 
 set(SERVER_SOURCES
     main.cpp
     server.cpp
     dispatcher.cpp)
 
-add_executable(snakebot ${SERVER_SOURCES} ${SHARED_SOURCES})
-add_executable(tests ${TEST_SOURCES} ${SHARED_SOURCES})
-add_executable(bench ${BENCH_SOURCES} ${SHARED_SOURCES})
+add_library(sharedObjects OBJECT ${SHARED_SOURCES})
+add_library(sharedTestObjects OBJECT ${SHARED_TEST_SOURCES})
+
+add_executable(snakebot ${SERVER_SOURCES} $<TARGET_OBJECTS:sharedObjects>)
+add_executable(tests
+    ${TEST_SOURCES}
+    $<TARGET_OBJECTS:sharedObjects>
+    $<TARGET_OBJECTS:sharedTestObjects>)
+add_executable(bench
+    ${BENCH_SOURCES}
+    $<TARGET_OBJECTS:sharedObjects>
+    $<TARGET_OBJECTS:sharedTestObjects>)
 
 target_compile_definitions(snakebot PRIVATE NO_NODE)
 target_compile_definitions(tests PRIVATE NO_NODE)
