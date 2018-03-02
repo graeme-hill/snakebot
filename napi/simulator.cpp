@@ -690,7 +690,7 @@ Direction bestMove(
         result = bestOfTheWorst;
     }
 
-    //std::cout << "Decision: " << directionScoreToString(result) << std::endl;
+    std::cout << "Decision: " << directionScoreToString(result) << std::endl;
 
     return result.direction;
 }

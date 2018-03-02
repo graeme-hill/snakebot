@@ -11,12 +11,12 @@
 struct MemoryPool
 {
     MemoryPool() :
-        closedSet(200),
-        openSet(200),
-        cameFrom(200),
-        gScore(200),
-        fScore(200),
-        turns(200)
+        closedSet(20),
+        openSet(20),
+        cameFrom(20),
+        gScore(20),
+        fScore(20),
+        turns(20)
     { }
 
     MemoryPool(const MemoryPool &) = delete;
