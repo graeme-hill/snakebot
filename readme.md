@@ -88,3 +88,11 @@ cmake -DCMAKE_BUILD_TYPE=Debug .. # or Release
 make -j8 # replace 8 with # of cores or threads
 ./snakebot <port> <algorithm> # do not use cpp_ prefix
 ```
+
+## Running pure C++ tests
+
+The commands above also make an exe called `tests` so just run it.
+
+## Running pure C++ benchmarks
+
+The commands above also make an exe called `bench` so just run it.
