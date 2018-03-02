@@ -13,7 +13,7 @@
 #include <functional>
 #include <unordered_map>
 
-Sim::Sim() : _maxTurns(10000), _maxMillis(90)
+Sim::Sim() : _maxTurns(10000), _maxMillis(120)
 { }
 
 Sim::Sim(uint32_t maxTurns, uint32_t maxMillis) :
