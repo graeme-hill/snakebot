@@ -1,5 +1,10 @@
-#include "benchsuite.hpp"
+#ifdef NO_NODE
+#include "../../nonode/testing.hpp"
+#else
 #include "../interop.hpp"
+#endif
+
+#include "benchsuite.hpp"
 #include "../snakelib.hpp"
 #include "../algorithms/sim.hpp"
 #include "../timing.hpp"

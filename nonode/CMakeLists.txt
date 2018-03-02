@@ -13,7 +13,7 @@ set (CMAKE_CXX_STANDARD 17)
 
 find_package(Boost COMPONENTS system thread REQUIRED)
 
-set(SHARED_SRCS
+set(SHARED_SOURCES
     ${PROJECT_SOURCE_DIR}/../napi/snakelib.cpp
     ${PROJECT_SOURCE_DIR}/../napi/algorithms.cpp
     ${PROJECT_SOURCE_DIR}/../napi/astar.cpp
@@ -29,21 +29,28 @@ set(SHARED_SRCS
     ${PROJECT_SOURCE_DIR}/../napi/algorithms/sim.cpp
     ${PROJECT_SOURCE_DIR}/../napi/algorithms/inyourface.cpp)
 
-set(TEST_SRCS
+set(TEST_SOURCES
     tests.cpp
     testing.cpp
     ${PROJECT_SOURCE_DIR}/../napi/test/testsuite.cpp)
 
-set(SERVER_SRCS
+set(BENCH_SOURCES
+    bench.cpp
+    testing.cpp
+${PROJECT_SOURCE_DIR}/../napi/benchmark/benchsuite.cpp)
+
+set(SERVER_SOURCES
     main.cpp
     server.cpp
     dispatcher.cpp)
 
-add_executable(snakebot ${SERVER_SRCS} ${SHARED_SRCS})
-add_executable(tests ${TEST_SRCS} ${SHARED_SRCS})
+add_executable(snakebot ${SERVER_SOURCES} ${SHARED_SOURCES})
+add_executable(tests ${TEST_SOURCES} ${SHARED_SOURCES})
+add_executable(bench ${BENCH_SOURCES} ${SHARED_SOURCES})
 
 target_compile_definitions(snakebot PRIVATE NO_NODE)
 target_compile_definitions(tests PRIVATE NO_NODE)
+target_compile_definitions(bench PRIVATE NO_NODE)
 
 include_directories("${PROJECT_SOURCE_DIR}/../napi")
 
@@ -52,6 +59,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(snakebot Threads::Threads)
 target_link_libraries(tests Threads::Threads)
+target_link_libraries(bench Threads::Threads)
 
 target_link_libraries(snakebot
     ${Boost_SYSTEM_LIBRARY}
