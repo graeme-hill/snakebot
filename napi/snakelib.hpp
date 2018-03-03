@@ -49,8 +49,7 @@ private:
     T _value;
 };
 
-// T = type of values i.vscode/
-settings.jsonn dictionary (which will be wrapped in Maybe<T>)
+// T = type of values in dictionary (which will be wrapped in Maybe<T>)
 // N = maximum number of keys in dictionary
 // Keys are always integers b/w 0 and N-1.
 // Keys must be unique.
