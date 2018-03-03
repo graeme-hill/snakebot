@@ -497,3 +497,150 @@ uint32_t countAccessibleCellsAfterMove(
     Point p = coordAfterMove(snake->head(), move);
     return countAccessibleCells(state, p);
 }
+
+/*
+Numbers represent all the positions that are in the danger zone.
+ie: they could move into a corner-adjacent position to the '+'
+snake which is super dangerous. s, t, u, v, w, x, y, z are the
+destination points that we do not want the enemy snake to move to.
+_ _ _ _ _ _ _ _ _
+_ _ _ 3 _ 4 _ _ _
+_ _ 2 t _ u 5 _ _
+_ 1 s _ _ _ v 6 _
+_ _ _ _ + _ _ _ _
+_ c z _ _ _ w 7 _
+_ _ b y _ x 8 _ _
+_ _ _ a _ 9 _ _ _
+_ _ _ _ _ _ _ _ _
+*/
+
+bool isTooBigForMeToEat(GameState &state, Snake *snake)
+{
+    uint32_t myLength = state.mySnake()->length();
+    uint32_t theirLength = snake->length();
+    return myLength <= theirLength;
+}
+
+bool spaceIsOpen(GameState &state, Point destination)
+{
+    return !outOfBounds(destination, state) && state.map().turnsUntilVacant(destination) == 0;
+}
+
+// bool isInDangerZone(GameState &state, std::array<Point, 6> &dangerPoints, Snake *snake)
+// {
+//     Point head = snake->head();
+//     return dangerPoints.at(0) == head
+//         || dangerPoints.at(1) == head
+//         || dangerPoints.at(2) == head
+//         || dangerPoints.at(3) == head
+//         || dangerPoints.at(4) == head
+//         || dangerPoints.at(5) == head;
+// }
+
+bool anyBigSnakeIsInOneOfTheseSpots(GameState &state, Point a, Point b)
+{
+    for (Snake *snake : state.enemies())
+    {
+        Point head = snake->head();
+        if (isTooBigForMeToEat(state, snake) && (head == a || head == b))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool couldEndUpCornerAdjacentToBiggerSnake(
+    GameState &state,
+    std::array<Point, 4> &dangerPoints,
+    std::array<Point, 2> &dangerDestinationPoints)
+{
+    bool isOpen1 = spaceIsOpen(state, dangerDestinationPoints.at(0));
+    bool isOpen2 = spaceIsOpen(state, dangerDestinationPoints.at(1));
+
+    if (isOpen1 && anyBigSnakeIsInOneOfTheseSpots(state, dangerPoints.at(0), dangerPoints.at(1)))
+        return true;
+
+    if (isOpen2 && anyBigSnakeIsInOneOfTheseSpots(state, dangerPoints.at(2), dangerPoints.at(3)))
+        return true;
+
+    return false;
+}
+
+bool couldEndUpCornerAdjacentToBiggerSnake(GameState &state, Direction direction)
+{
+    Point me = state.mySnake()->head();
+    
+    if (direction == Direction::Up)
+    {
+        Point p2 = { me.x - 2, me.y - 2 };
+        Point p3 = { me.x - 1, me.y - 3 };
+
+        Point p4 = { me.x + 1, me.y - 3 };
+        Point p5 = { me.x + 2, me.y - 2 };
+
+        Point pt = { me.x - 1, me.y - 2 };
+
+        Point pu = { me.x + 1, me.y - 2 };
+
+        std::array<Point, 4> dangerPoints { p2, p3, p4, p5 };
+        std::array<Point, 2> dangerDestPoints { pt, pu };
+
+        return couldEndUpCornerAdjacentToBiggerSnake(
+            state, dangerPoints, dangerDestPoints);
+    }
+    else if (direction == Direction::Right)
+    {
+        Point p5 = { me.x + 2, me.y - 2 };
+        Point p6 = { me.x + 3, me.y - 1 };
+
+        Point p7 = { me.x + 3, me.y + 1 };
+        Point p8 = { me.x + 2, me.y + 2 };
+
+        Point pv = { me.x + 2, me.y - 1 };
+
+        Point pw = { me.x + 2, me.y + 1 };
+
+        std::array<Point, 4> dangerPoints { p5, p6, p7, p8 };
+        std::array<Point, 2> dangerDestPoints { pv, pw };
+
+        return couldEndUpCornerAdjacentToBiggerSnake(
+            state, dangerPoints, dangerDestPoints);
+    }
+    else if (direction == Direction::Down)
+    {
+        Point p8 = { me.x + 2, me.y + 2 };
+        Point p9 = { me.x + 1, me.y + 3 };
+
+        Point pa = { me.x - 1, me.y + 3 };
+        Point pb = { me.x - 2, me.y + 2 };
+
+        Point px = { me.x + 1, me.y + 2 };
+
+        Point py = { me.x - 1, me.y + 2 };
+
+        std::array<Point, 4> dangerPoints { p8, p9, pa, pb };
+        std::array<Point, 2> dangerDestPoints { px, py };
+
+        return couldEndUpCornerAdjacentToBiggerSnake(
+            state, dangerPoints, dangerDestPoints);
+    }
+    else
+    {
+        Point pb = { me.x - 2, me.y + 2 };
+        Point pc = { me.x - 3, me.y + 1 };
+
+        Point p1 = { me.x - 3, me.y - 1 };
+        Point p2 = { me.x - 2, me.y - 2 };
+
+        Point pz = { me.x - 2, me.y + 2 };
+
+        Point ps = { me.x - 1, me.y + 2 };
+
+        std::array<Point, 4> dangerPoints { pb, pc, p1, p2 };
+        std::array<Point, 2> dangerDestPoints { pz, ps };
+
+        return couldEndUpCornerAdjacentToBiggerSnake(
+            state, dangerPoints, dangerDestPoints);
+    }
+}

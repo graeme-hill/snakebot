@@ -526,3 +526,5 @@ inline bool cellIsEmpty(GameState &state, Point cell)
 {
     return state.map().turnsUntilVacant(cell) == 0;
 }
+
+bool couldEndUpCornerAdjacentToBiggerSnake(GameState &state, Direction direction);

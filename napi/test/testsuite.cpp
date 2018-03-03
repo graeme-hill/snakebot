@@ -1156,6 +1156,72 @@ void dontDie8()
     assertEqual(move, Direction::Up, "dontDie8() - Don't die");
 }
 
+void couldEndUpCornerAdjacentToBiggerSnakeTest1()
+{
+    GameState state(parseWorld({
+        "> 1 _ _ _",
+        "_ _ _ _ _",
+        "_ _ _ _ _",
+        "_ _ 0 < _"
+    }));
+
+    bool upIsBad = couldEndUpCornerAdjacentToBiggerSnake(state, Direction::Up);
+    bool leftIsBad = couldEndUpCornerAdjacentToBiggerSnake(state, Direction::Left);
+    assertEqual(upIsBad, true, "couldEndUpCornerAdjacentToBiggerSnakeTest1() - up is bad");
+    assertEqual(leftIsBad, false, "couldEndUpCornerAdjacentToBiggerSnakeTest1() - left is not bad");
+}
+
+void couldEndUpCornerAdjacentToBiggerSnakeTest2()
+{
+    GameState state(parseWorld({
+        "_ _ _ v _",
+        "_ _ _ 0 _",
+        "1 _ _ _ _",
+        "^ _ _ _ _"
+    }));
+
+    bool leftIsBad = couldEndUpCornerAdjacentToBiggerSnake(state, Direction::Left);
+    bool rightIsBad = couldEndUpCornerAdjacentToBiggerSnake(state, Direction::Right);
+    bool downIsBad = couldEndUpCornerAdjacentToBiggerSnake(state, Direction::Down);
+    assertEqual(leftIsBad, true, "couldEndUpCornerAdjacentToBiggerSnakeTest2() - left is bad");
+    assertEqual(rightIsBad, false, "couldEndUpCornerAdjacentToBiggerSnakeTest2() - right is not bad");
+    assertEqual(downIsBad, false, "couldEndUpCornerAdjacentToBiggerSnakeTest2() - down is not bad");
+}
+
+void couldEndUpCornerAdjacentToBiggerSnakeTest3()
+{
+    GameState state(parseWorld({
+        "_ _ > v _",
+        "_ _ _ 0 _",
+        "1 _ _ _ _",
+        "^ _ _ _ _"
+    }));
+
+    bool leftIsBad = couldEndUpCornerAdjacentToBiggerSnake(state, Direction::Left);
+    bool rightIsBad = couldEndUpCornerAdjacentToBiggerSnake(state, Direction::Right);
+    bool downIsBad = couldEndUpCornerAdjacentToBiggerSnake(state, Direction::Down);
+    assertEqual(leftIsBad, false, "couldEndUpCornerAdjacentToBiggerSnakeTest3() - left is not bad");
+    assertEqual(rightIsBad, false, "couldEndUpCornerAdjacentToBiggerSnakeTest3() - right is not bad");
+    assertEqual(downIsBad, false, "couldEndUpCornerAdjacentToBiggerSnakeTest3() - down is not bad");
+}
+
+void couldEndUpCornerAdjacentToBiggerSnakeTest4()
+{
+    GameState state(parseWorld({
+        "_ _ _ v _",
+        "1 _ _ 0 _",
+        "^ _ _ _ _",
+        "^ _ _ _ _"
+    }));
+
+    bool leftIsBad = couldEndUpCornerAdjacentToBiggerSnake(state, Direction::Left);
+    bool rightIsBad = couldEndUpCornerAdjacentToBiggerSnake(state, Direction::Right);
+    bool downIsBad = couldEndUpCornerAdjacentToBiggerSnake(state, Direction::Down);
+    assertEqual(leftIsBad, false, "couldEndUpCornerAdjacentToBiggerSnakeTest2() - left is not bad");
+    assertEqual(rightIsBad, false, "couldEndUpCornerAdjacentToBiggerSnakeTest2() - right is not bad");
+    assertEqual(downIsBad, false, "couldEndUpCornerAdjacentToBiggerSnakeTest2() - down is not bad");
+}
+
 void TestSuite::run()
 {
     parseWorldTest1();
@@ -1208,4 +1274,9 @@ void TestSuite::run()
     dontDie6();
     dontDie7();
     dontDie8();
+
+    couldEndUpCornerAdjacentToBiggerSnakeTest1();
+    couldEndUpCornerAdjacentToBiggerSnakeTest2();
+    couldEndUpCornerAdjacentToBiggerSnakeTest3();
+    couldEndUpCornerAdjacentToBiggerSnakeTest4();
 }
