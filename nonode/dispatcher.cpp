@@ -47,7 +47,7 @@ World getWorld(std::string json)
     w.id = idss.str();
 
     for (auto &jFood : j["food"]["data"])
-    {   
+    {
         w.food.push_back({ jFood["x"], jFood["y"] });
     }
 
