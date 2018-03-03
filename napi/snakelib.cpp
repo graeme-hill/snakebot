@@ -472,6 +472,8 @@ uint32_t countAccessibleCells(GameState &state, Point start)
             continue;
         }
 
+        visited.insert(index);
+
         // Check whether a snake is going to be occupying this space.
         int vacant = state.map().turnsUntilVacant(p);
         if (turn < vacant)
@@ -480,7 +482,6 @@ uint32_t countAccessibleCells(GameState &state, Point start)
         }
 
         count++;
-        visited.insert(index);
 
         queue.push({{ p.x - 1, p.y }, turn + 1});
         queue.push({{ p.x + 1, p.y }, turn + 1});

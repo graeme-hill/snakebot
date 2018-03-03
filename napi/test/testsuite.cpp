@@ -933,7 +933,7 @@ void countAccessibleCellsTest2()
     }));
 
     uint32_t count = countAccessibleCellsAfterMove(state, state.mySnake(), Direction::Up);
-    assertEqual(count, 20, "countAccessibleCellsTest1() - 19 cells");
+    assertEqual(count, 19, "countAccessibleCellsTest2() - 19 cells");
 }
 
 void countAccessibleCellsTest3()
@@ -944,7 +944,44 @@ void countAccessibleCellsTest3()
     }));
 
     uint32_t count = countAccessibleCellsAfterMove(state, state.mySnake(), Direction::Up);
-    assertEqual(count, 4, "countAccessibleCellsTest1() - 3 cells");
+    assertEqual(count, 3, "countAccessibleCellsTest2\3() - 3 cells");
+}
+
+void countAccessibleCellsTest_getter_1()
+{
+    GameState state(parseWorld({
+        "_ _ 0 v <",
+        "_ _ ^ v _",
+        "_ _ ^ v _",
+        "_ _ ^ < _",
+    }));
+
+    uint32_t count = state.getSpacesLeft();
+    assertEqual(count, 8, "countAccessibleCellsTest_getter_1() - 8 cells");
+}
+
+void countAccessibleCellsTest_getter_2()
+{
+    GameState state(parseWorld({
+        "v < _ _ _",
+        "> 0 _ _ _",
+        "_ _ _ _ _",
+        "_ _ _ _ _",
+    }));
+
+    uint32_t count = state.getSpacesUp();
+    assertEqual(count, 19, "countAccessibleCellsTest_getter_2() - 19 cells");
+}
+
+void countAccessibleCellsTest_getter_3()
+{
+    GameState state(parseWorld({
+        "v <",
+        "> 0",
+    }));
+
+    uint32_t count = state.getSpacesUp();
+    assertEqual(count, 3, "countAccessibleCellsTest_getter_3() - 3 cells");
 }
 
 void dontDie1()
@@ -1156,6 +1193,38 @@ void dontDie8()
     assertEqual(move, Direction::Up, "dontDie8() - Don't die");
 }
 
+void simulateAccessibleCellsTest1()
+{
+    GameState state(parseWorld({
+        "1 _ < < < _ _",
+        "^ < < _ ^ _ _",
+        "* _ _ 0 _ _ _",
+        "v < < ^ _ _ _",
+        "2 _ _ ^ _ _ _",
+        "_ _ _ ^ _ _ *",
+    }));
+
+    Sim sim(2, 5000);
+    Direction move = sim.move(state);
+    assertEqual(move, Direction::Right, "simulateAccessibleCellsTest1() - go right to live");
+}
+
+void simulateAccessibleCellsTest2()
+{
+    GameState state(parseWorld({
+        "1 _ < < < _ _",
+        "^ < < _ ^ _ _",
+        "* _ _ 0 _ _ _",
+        "v < < ^ _ _ _",
+        "2 _ _ ^ _ _ _",
+        "_ _ _ ^ _ _ *",
+    }));
+
+    Sim sim(1, 5000);
+    Direction move = sim.move(state);
+    assertEqual(move, Direction::Right, "simulateAccessibleCellsTest2() - go right to REALLY live");
+}
+
 void TestSuite::run()
 {
     parseWorldTest1();
@@ -1200,6 +1269,10 @@ void TestSuite::run()
     countAccessibleCellsTest2();
     countAccessibleCellsTest3();
 
+    countAccessibleCellsTest_getter_1();
+    countAccessibleCellsTest_getter_2();
+    countAccessibleCellsTest_getter_3();
+
     dontDie1();
     dontDie2();
     dontDie3();
@@ -1208,4 +1281,7 @@ void TestSuite::run()
     dontDie6();
     dontDie7();
     dontDie8();
+
+    simulateAccessibleCellsTest1();
+    simulateAccessibleCellsTest2();   
 }

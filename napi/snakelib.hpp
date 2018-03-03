@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <memory>
 #include <algorithm>
+#include <thread>
 
 #define MAX_SNAKES 10
 
@@ -301,6 +302,16 @@ struct World
     std::string you;
     std::string id;
 
+    uint32_t spacesUp = 0;
+    uint32_t spacesDown = 0;
+    uint32_t spacesLeft = 0;
+    uint32_t spacesRight = 0;
+    
+    bool hasFoundSpacesUp = false;
+    bool hasFoundSpacesDown = false;
+    bool hasFoundSpacesLeft = false;
+    bool hasFoundSpacesRight = false;
+
     void prettyPrint();
 };
 
@@ -370,6 +381,12 @@ private:
     std::vector<Cell> _cells;
 };
 
+
+uint32_t countAccessibleCells(GameState &state, Point start);
+
+uint32_t countAccessibleCellsAfterMove(
+    GameState &state, Snake *snake, Direction move);
+
 class GameState
 {
 public:
@@ -395,6 +412,46 @@ public:
         std::vector<SnakeMove> &moves);
     std::unique_ptr<GameState> clone();
 
+    uint32_t getSpacesUp() { 
+        if (_world.hasFoundSpacesUp) {
+            return _world.spacesUp;
+        } else {
+            _world.spacesUp = countAccessibleCellsAfterMove(*this, mySnake(), Direction::Up);
+            _world.hasFoundSpacesUp = true;
+            return _world.spacesUp;
+        }         
+    }
+
+    uint32_t getSpacesDown() { 
+        if (_world.hasFoundSpacesDown) {
+            return _world.spacesDown;
+        } else {
+            _world.spacesDown =countAccessibleCellsAfterMove(*this, mySnake(), Direction::Down);
+            _world.hasFoundSpacesDown = true;
+            return _world.spacesDown;
+        }         
+    }
+
+    uint32_t getSpacesLeft() { 
+        if (_world.hasFoundSpacesLeft) {
+            return _world.spacesLeft;
+        } else {
+            _world.spacesLeft = countAccessibleCellsAfterMove(*this, mySnake(), Direction::Left);
+            _world.hasFoundSpacesLeft = true;
+            return _world.spacesLeft;
+        }         
+    }
+
+    uint32_t getSpacesRight() { 
+        if (_world.hasFoundSpacesRight) {
+            return _world.spacesRight;
+        } else {
+            _world.spacesRight = countAccessibleCellsAfterMove(*this, mySnake(), Direction::Right);
+            _world.hasFoundSpacesRight = true;
+            return _world.spacesRight;
+        }         
+    }
+
     bool isLoss();
 
 private:
@@ -411,11 +468,6 @@ private:
     Map _map;
     AxisBias _pathfindingBias;
 };
-
-uint32_t countAccessibleCells(GameState &state, Point start);
-
-uint32_t countAccessibleCellsAfterMove(
-    GameState &state, Snake *snake, Direction move);
 
 inline Point coordAfterMove(Point p, Direction dir, int range = 1)
 {

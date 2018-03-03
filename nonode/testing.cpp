@@ -255,6 +255,7 @@ World parseWorld(std::vector<std::string> strings)
     World w;
     w.width = symbols.at(0).size();
     w.height = symbols.size();
+
     w.you = "0";
 
     std::array<ArrowOffset, 4> offsets;

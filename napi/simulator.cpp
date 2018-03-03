@@ -526,8 +526,24 @@ int scoreFuture(Future &future, GameState &state, MaybeDirection preferred)
 
     if (!dies)
     {
-        uint32_t accessible = countAccessibleCellsAfterMove(
-            state, state.mySnake(), future.move);
+        uint32_t accessible = 0;
+
+        if(future.move == Direction::Up)
+        {
+            accessible = state.getSpacesUp();
+        } 
+        else if(future.move == Direction::Down)
+        {
+            accessible = state.getSpacesDown();
+        } 
+        else if(future.move == Direction::Left)
+        {
+            accessible = state.getSpacesLeft();
+        } 
+        else 
+        {
+            accessible = state.getSpacesRight();
+        }
         if (accessible < state.mySnake()->length())
         {
             std::cout << "TOO SMALL " << accessible << " | " << state.mySnake()->length()
