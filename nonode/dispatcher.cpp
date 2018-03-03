@@ -48,7 +48,6 @@ World getWorld(std::string json)
 
     for (auto &jFood : j["food"]["data"])
     {   
-        w.foodCount++;
         w.food.push_back({ jFood["x"], jFood["y"] });
     }
 
