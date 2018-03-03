@@ -23,7 +23,7 @@ Snake getSnake(nlohmann::json jSnake)
 
     s.id = jSnake["id"];
     s.health = jSnake["health"];
-    s.dead = false;
+    s.dead = s.health == 0 ? true : false;
 
     for (auto &jPart : jSnake["body"]["data"])
     {
@@ -60,8 +60,12 @@ World getWorld(std::string json)
         std::string thisId = jSnake["id"];
         if (thisId == w.you)
             continue;
-
-        w.snakes.push_back(getSnake(jSnake));
+        
+        //don't bother with dead snakes
+        if(jSnake["health"] > 0) {
+            w.snakes.push_back(getSnake(jSnake));
+        }
+        
     }
 
     return w;
