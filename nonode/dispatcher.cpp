@@ -23,7 +23,7 @@ Snake getSnake(nlohmann::json jSnake)
 
     s.id = jSnake["id"];
     s.health = jSnake["health"];
-    s.dead = false;
+    s.dead = s.health == 0 ? true : false;
 
     for (auto &jPart : jSnake["body"]["data"])
     {
