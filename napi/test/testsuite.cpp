@@ -947,6 +947,115 @@ void countAccessibleCellsTest3()
     assertEqual(count, 4, "countAccessibleCellsTest1() - 3 cells");
 }
 
+void dontDie1()
+{
+    GameState state(parseWorld({
+        "_ * _ _ _ _ _ _ > > > > > > v _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ ^ _ _ _ _ 3 < _ _ _ _ _",
+        "_ * _ _ _ _ _ _ ^ v < _ > > > > > v _ _",
+        "* _ _ _ _ _ _ _ ^ < ^ _ ^ < _ _ _ > v _",
+        "_ _ _ _ _ _ > > v > ^ _ _ ^ < v < < < _",
+        "_ _ _ _ _ _ _ _ > ^ _ _ _ > ^ > > 0 _ _",
+        "_ _ _ _ _ _ v _ > v _ > > ^ _ _ _ _ _ _",
+        "* _ _ _ _ _ > > ^ v _ ^ < 2 < < < < < _",
+        "* _ _ _ _ _ _ _ _ v _ _ ^ v _ _ _ _ ^ *",
+        "* _ _ _ _ _ _ _ _ > > 1 _ v _ _ _ _ ^ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ v _ _ _ _ ^ _",
+        "_ _ _ _ _ * _ _ _ _ _ _ _ v _ _ _ _ ^ _",
+        "_ _ _ _ _ _ _ _ _ _ * _ _ v > > > > ^ _",
+        "_ _ _ _ _ _ _ * _ _ _ _ _ > ^ _ _ _ * _",
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ * _ _ _ _ _ _"
+    }));
+
+    Sim sim;
+    Direction move = sim.move(state);
+    assertEqual(move, Direction::Right, "dontDie1() - Don't die");
+}
+
+void dontDie2()
+{
+    GameState state(parseWorld({
+        "v < _ _ _ _ _ _ _ * _ _ _ * _",
+        "v ^ _ _ v < < < < < _ _ * _ *",
+        "v ^ v < < _ _ * > ^ _ _ _ _ _",
+        "v ^ < _ _ _ > > ^ _ * _ _ _ _",
+        "v _ _ > > v ^ v < < < < _ _ _",
+        "> 0 > ^ _ > ^ v _ _ _ ^ < _ _",
+        "_ _ _ _ _ _ _ v _ _ * _ ^ * _",
+        "_ _ _ * * _ _ v _ _ _ _ ^ _ _",
+        "* _ 1 < < < < < > v > > ^ _ _",
+        "_ _ _ _ _ _ > > ^ > ^ _ _ _ _",
+        "* _ _ _ _ > ^ _ _ _ _ _ _ _ _",
+        "* _ _ _ _ ^ < < < < < < _ _ _"
+    }));
+
+    Sim sim;
+    Direction move = sim.move(state);
+    assertEqual(move, Direction::Right, "dontDie2() - Don't die");
+}
+
+void dontDie3()
+{
+    GameState state(parseWorld({
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ > v _ _ _",
+        "v < < < _ _ _ _ _ _ _ v _ _ _",
+        "> 0 _ ^ _ _ _ v < < < < _ _ _",
+        "_ _ _ ^ 1 < < v _ _ _ _ _ _ _",
+        "_ _ _ _ _ _ ^ v _ _ _ _ _ 2 _",
+        "_ _ _ _ _ _ ^ v _ _ _ _ _ ^ _",
+        "_ _ _ _ _ * ^ v _ _ _ _ _ ^ *",
+        "_ _ _ _ _ > ^ > > > > > v ^ *",
+        "_ > > > v ^ _ _ _ _ _ _ v ^ _",
+        "_ _ _ _ v ^ _ _ v _ _ _ 3 ^ _",
+        "_ _ * v < ^ < _ v _ _ _ > ^ *",
+        "_ _ * > > > ^ v < _ _ > ^ * _",
+        "_ _ _ _ _ _ _ > > > > ^ _ _ _",
+        "_ _ _ _ _ _ _ * _ * _ * _ _ _",
+    }));
+
+    Sim sim;
+    Direction move = sim.move(state);
+    assertEqual(move, Direction::Down, "dontDie3() - Don't die");
+}
+
+void dontDie4()
+{
+    GameState state(parseWorld({
+        "_ * _ _ * v < < < < < < _ _ * _ _",
+        "_ _ _ _ v < _ _ _ _ _ ^ _ _ _ _ _",
+        "_ * _ _ > v _ _ _ _ _ ^ < < _ _ _",
+        "_ _ _ _ _ > 1 _ _ * _ _ > ^ * _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _ ^ < > > v",
+        "> v _ _ _ _ _ _ > > > > > ^ ^ _ v",
+        "^ v _ _ _ _ _ _ ^ _ * _ _ _ _ _ v",
+        "^ > v * > > > > ^ _ _ _ _ _ _ _ v",
+        "^ < v _ ^ _ _ _ _ _ _ _ _ _ _ _ v",
+        "* ^ v _ ^ _ _ _ _ _ _ _ _ _ _ _ v",
+        "_ ^ > > v _ _ _ _ _ * _ _ 0 < _ v",
+        "_ ^ _ _ > > > v _ _ _ _ _ _ ^ v <",
+        "_ ^ _ _ _ _ _ > > > > v _ _ ^ < _",
+        "_ ^ _ _ _ _ _ _ _ _ _ v 2 _ _ _ _",
+        "_ ^ _ _ _ _ _ _ _ _ _ v ^ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ > ^ _ _ _ _",
+        "_ _ * _ _ _ _ _ _ _ _ _ _ _ _ _ _",
+        "_ _ _ _ * _ _ _ * _ _ _ _ _ * _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ *"
+    }));
+
+    Sim sim;
+    Direction move = sim.move(state);
+    if (move == Direction::Up)
+    {
+        assertEqual(move, Direction::Up, "dontDie4() - Don't die");
+    }
+    else
+    {
+        assertEqual(move, Direction::Left, "dontDie4() - Don't die");
+    }
+}
+
 void TestSuite::run()
 {
     parseWorldTest1();
@@ -990,4 +1099,9 @@ void TestSuite::run()
     countAccessibleCellsTest1();
     countAccessibleCellsTest2();
     countAccessibleCellsTest3();
+
+    dontDie1();
+    dontDie2();
+    dontDie3();
+    dontDie4();
 }
