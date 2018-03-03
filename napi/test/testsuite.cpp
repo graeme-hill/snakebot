@@ -967,7 +967,7 @@ void dontDie1()
         "_ _ _ _ _ _ _ _ _ _ _ _ _ * _ _ _ _ _ _"
     }));
 
-    Sim sim;
+    Sim sim(5, 5000);
     Direction move = sim.move(state);
     assertEqual(move, Direction::Right, "dontDie1() - Don't die");
 }
@@ -989,7 +989,7 @@ void dontDie2()
         "* _ _ _ _ ^ < < < < < < _ _ _"
     }));
 
-    Sim sim;
+    Sim sim(50, 50000);
     Direction move = sim.move(state);
     assertEqual(move, Direction::Right, "dontDie2() - Don't die");
 }
@@ -1014,7 +1014,7 @@ void dontDie3()
         "_ _ _ _ _ _ _ * _ * _ * _ _ _",
     }));
 
-    Sim sim;
+    Sim sim(5, 5000);
     Direction move = sim.move(state);
     assertEqual(move, Direction::Down, "dontDie3() - Don't die");
 }
@@ -1044,7 +1044,7 @@ void dontDie4()
         "_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ *"
     }));
 
-    Sim sim;
+    Sim sim(40, 50000);
     Direction move = sim.move(state);
     if (move == Direction::Up)
     {
@@ -1054,6 +1054,36 @@ void dontDie4()
     {
         assertEqual(move, Direction::Left, "dontDie4() - Don't die");
     }
+}
+
+void dontDie5()
+{
+    GameState state(parseWorld({
+        "_ _ _ _ _ _ _ _ _ _ _ _",
+        "_ _ _ 3 < _ _ * _ _ _ _",
+        "_ _ v > ^ _ _ _ _ _ _ _",
+        "v < < ^ _ _ _ _ * _ _ _",
+        "> > > ^ _ _ * _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _",
+        "* _ * _ _ _ _ _ _ _ _ _",
+        "_ _ 2 _ _ _ _ _ _ _ _ _",
+        "_ _ ^ < _ _ _ _ _ _ _ _",
+        "_ _ _ ^ < _ _ _ _ _ * _",
+        "_ _ _ _ ^ _ _ _ _ _ _ _",
+        "_ v _ _ ^ _ _ _ _ _ _ _",
+        "_ v > > ^ _ > > > 1 _ _",
+        "_ > ^ _ _ > ^ _ _ _ _ _",
+        "_ _ _ _ > ^ _ 0 _ _ _ _",
+        "_ _ _ _ ^ _ _ ^ < v _ _",
+        "_ _ _ _ ^ _ _ _ ^ v _ _",
+        "_ _ _ _ _ _ _ _ ^ < _ _",
+        "_ _ _ _ _ _ _ _ _ _ _ _"
+    }));
+
+    Sim sim(5, 5000);
+    Direction move = sim.move(state);
+    assertEqual(move, Direction::Left, "dontDie5() - Don't die");
 }
 
 void TestSuite::run()
@@ -1104,4 +1134,5 @@ void TestSuite::run()
     dontDie2();
     dontDie3();
     dontDie4();
+    dontDie5();
 }
