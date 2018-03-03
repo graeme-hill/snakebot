@@ -47,7 +47,8 @@ World getWorld(std::string json)
     w.id = idss.str();
 
     for (auto &jFood : j["food"]["data"])
-    {
+    {   
+        w.foodCount++;
         w.food.push_back({ jFood["x"], jFood["y"] });
     }
 
@@ -60,8 +61,12 @@ World getWorld(std::string json)
         std::string thisId = jSnake["id"];
         if (thisId == w.you)
             continue;
-
-        w.snakes.push_back(getSnake(jSnake));
+        
+        //don't bother with dead snakes
+        if(jSnake["health"] > 0) {
+            w.snakes.push_back(getSnake(jSnake));
+        }
+        
     }
 
     return w;
