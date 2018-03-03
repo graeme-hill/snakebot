@@ -1086,6 +1086,76 @@ void dontDie5()
     assertEqual(move, Direction::Left, "dontDie5() - Don't die");
 }
 
+void dontDie6()
+{
+    GameState state(parseWorld({
+        "v < < _ > > > > > > > v",
+        "v > ^ _ ^ < < < _ v < <",
+        "v ^ _ _ _ _ _ ^ _ > > v",
+        "v 2 _ * _ _ > ^ v < < <",
+        "v ^ * > > v ^ _ 0 _ _ _",
+        "v ^ * ^ _ v ^ _ _ _ _ _",
+        "> ^ _ ^ _ v _ > 1 _ _ *",
+        "_ _ _ ^ _ v _ ^ _ V _ _",
+        "_ _ * ^ * > > ^ _ V > v",
+        "_ _ _ ^ _ _ _ _ _ v ^ v",
+        "_ _ _ ^ _ _ _ _ _ > ^ v",
+        "_ _ _ ^ < < < < < < < <"
+    }));
+
+    Sim sim(50, 5000);
+    Direction move = sim.move(state);
+    assertEqual(move, Direction::Left, "dontDie6() - Don't die");
+}
+
+void dontDie7()
+{
+    GameState state(parseWorld({
+        "_ _ _ _ _ _ _ _ _ _ 3 < < <",
+        "_ _ v < < _ _ _ _ _ _ _ _ ^",
+        "_ _ > > > v _ _ _ v _ _ _ ^",
+        "_ _ _ _ _ > v _ _ v > v _ ^",
+        "_ _ > > v * > > 5 > 2 v _ ^",
+        "_ > ^ _ > v _ _ * _ _ > > ^",
+        "_ ^ _ _ _ > 4 _ _ v < < < _",
+        "_ ^ _ _ _ > > v _ v _ _ _ _",
+        "_ ^ _ _ _ _ _ > 0 v _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ v _ _ _ _",
+        "_ _ _ _ _ _ _ _ _ v _ _ _ _",
+        "_ * _ _ _ 1 < < < < _ _ _ _"
+    }));
+
+    Sim sim(5, 5000);
+    Direction move = sim.move(state);
+    assertEqual(move, Direction::Down, "dontDie7() - Don't die");
+}
+
+void dontDie8()
+{
+    GameState state(parseWorld({
+        "_ _ v < < < < <",
+        "_ _ > v _ > > ^",
+        "v < < v _ ^ < <",
+        "> v ^ < > > v ^",
+        "v < > > 0 * > ^",
+        "> > ^ _ _ > v _",
+        "> > v _ _ _ > v",
+        "^ _ > > > 1 v <",
+        "^ _ _ _ _ _ v _",
+        "^ < < < < _ v _",
+        "_ _ _ _ ^ < v _",
+        "_ _ _ _ > ^ v _",
+        "_ _ _ _ ^ < v _",
+        "_ _ _ _ _ ^ v _",
+        "_ _ _ _ _ ^ v _",
+        "_ _ _ _ _ ^ < _"
+    }));
+
+    Sim sim(5, 5000);
+    Direction move = sim.move(state);
+    assertEqual(move, Direction::Up, "dontDie8() - Don't die");
+}
+
 void TestSuite::run()
 {
     parseWorldTest1();
@@ -1135,4 +1205,7 @@ void TestSuite::run()
     dontDie3();
     dontDie4();
     dontDie5();
+    dontDie6();
+    dontDie7();
+    dontDie8();
 }
