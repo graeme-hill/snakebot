@@ -537,6 +537,13 @@ int scoreFuture(Future &future, GameState &state, MaybeDirection preferred)
         }
     }
 
+    bool badCorner = couldEndUpCornerAdjacentToBiggerSnake(state, future.move);
+    if (badCorner)
+    {
+        survivalScore = std::min(survivalScore, 1000U); // ???
+        dies = true;
+    }
+
     // auto foodIt = future.foodsEaten.find(state.mySnake()->id);
     // if (foodIt != future.foodsEaten.end())
     // {
