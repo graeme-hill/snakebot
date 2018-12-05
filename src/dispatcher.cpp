@@ -38,15 +38,15 @@ World getWorld(std::string json)
     World w;
     auto j = nlohmann::json::parse(json);
 
-    w.width = j["width"];
-    w.height = j["height"];
+    w.width = j["board"]["width"];
+    w.height = j["board"]["height"];
 
     // coerce id to string
     std::stringstream idss;
-    idss << j["id"];
+    idss << j["game"]["id"];
     w.id = idss.str();
 
-    for (auto &jFood : j["food"])
+    for (auto &jFood : j["board"]["food"])
     {
         w.food.push_back({ jFood["x"], jFood["y"] });
     }
@@ -54,7 +54,7 @@ World getWorld(std::string json)
     w.snakes.push_back(getSnake(j["you"]));
     w.you = w.snakes[0].id;
 
-    for (auto &jSnake : j["snakes"])
+    for (auto &jSnake : j["board"]["snakes"])
     {
         // Make sure my snake (you) doesn't get added twice.
         std::string thisId = jSnake["id"];
