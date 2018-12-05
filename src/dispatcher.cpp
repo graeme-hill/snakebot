@@ -25,7 +25,7 @@ Snake getSnake(nlohmann::json jSnake)
     s.health = jSnake["health"];
     s.dead = s.health == 0 ? true : false;
 
-    for (auto &jPart : jSnake["body"]["data"])
+    for (auto &jPart : jSnake["body"])
     {
         s.parts.push_back({ jPart["x"], jPart["y"] });
     }
@@ -46,7 +46,7 @@ World getWorld(std::string json)
     idss << j["id"];
     w.id = idss.str();
 
-    for (auto &jFood : j["food"]["data"])
+    for (auto &jFood : j["food"])
     {
         w.food.push_back({ jFood["x"], jFood["y"] });
     }
@@ -54,7 +54,7 @@ World getWorld(std::string json)
     w.snakes.push_back(getSnake(j["you"]));
     w.you = w.snakes[0].id;
 
-    for (auto &jSnake : j["snakes"]["data"])
+    for (auto &jSnake : j["snakes"])
     {
         // Make sure my snake (you) doesn't get added twice.
         std::string thisId = jSnake["id"];

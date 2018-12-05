@@ -14,35 +14,35 @@ set (CMAKE_CXX_STANDARD 17)
 find_package(Boost COMPONENTS system thread REQUIRED)
 
 set(SHARED_SOURCES
-    ${PROJECT_SOURCE_DIR}/../napi/snakelib.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/algorithms.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/astar.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/movement.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/simulator.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/timing.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/algorithms/cautious.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/algorithms/hungry.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/algorithms/termiantor.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/algorithms/random.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/algorithms/onedirection.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/algorithms/dog.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/algorithms/sim.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/algorithms/inyourface.cpp)
+    src/snakelib.cpp
+    src/algorithms.cpp
+    src/astar.cpp
+    src/movement.cpp
+    src/simulator.cpp
+    src/timing.cpp
+    src/algorithms/cautious.cpp
+    src/algorithms/hungry.cpp
+    src/algorithms/termiantor.cpp
+    src/algorithms/random.cpp
+    src/algorithms/onedirection.cpp
+    src/algorithms/dog.cpp
+    src/algorithms/sim.cpp
+    src/algorithms/inyourface.cpp)
 
-set(SHARED_TEST_SOURCES testing.cpp)
+set(SHARED_TEST_SOURCES src/testing.cpp)
 
 set(TEST_SOURCES
-    tests.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/test/testsuite.cpp)
+    src/tests.cpp
+    src/test/testsuite.cpp)
 
 set(BENCH_SOURCES
-    bench.cpp
-    ${PROJECT_SOURCE_DIR}/../napi/benchmark/benchsuite.cpp)
+    src/bench.cpp
+    src/benchmark/benchsuite.cpp)
 
 set(SERVER_SOURCES
-    main.cpp
-    server.cpp
-    dispatcher.cpp)
+    src/main.cpp
+    src/server.cpp
+    src/dispatcher.cpp)
 
 add_library(sharedObjects OBJECT ${SHARED_SOURCES})
 add_library(sharedTestObjects OBJECT ${SHARED_TEST_SOURCES})
@@ -61,7 +61,7 @@ target_compile_definitions(snakebot PRIVATE NO_NODE)
 target_compile_definitions(tests PRIVATE NO_NODE)
 target_compile_definitions(bench PRIVATE NO_NODE)
 
-include_directories("${PROJECT_SOURCE_DIR}/../napi")
+include_directories("src")
 
 # This is to make some of the asio threading stuff not break I guess?
 set(THREADS_PREFER_PTHREAD_FLAG ON)

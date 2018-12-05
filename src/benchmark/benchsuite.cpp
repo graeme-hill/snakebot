@@ -1,5 +1,5 @@
 #ifdef NO_NODE
-#include "../../nonode/testing.hpp"
+#include "../testing.hpp"
 #else
 #include "../interop.hpp"
 #endif
