@@ -3,7 +3,7 @@
 #include "snakelib.hpp"
 
 MaybeDirection closestFood(GameState &state);
-
+int closestFoodDistance(GameState &state);
 MaybeDirection bestFoodBruteForce(GameState &state);
 MaybeDirection bestFood(GameState &state);
 MaybeDirection bestFoodSorted(GameState &state);

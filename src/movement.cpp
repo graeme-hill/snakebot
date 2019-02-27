@@ -319,6 +319,31 @@ MaybeDirection bestFood(GameState &state)
     return best.direction;
 }
 
+int closestFoodDistance(GameState &state)
+{
+    Snake *me = state.mySnake();
+    Path best = Path::none();
+
+    // Make copy of food vec sorted by distance to me. That way we can start
+    // with the closest one.
+    Point myHead = me->head();
+    std::vector<Point> sortedFood = state.food();
+    std::sort(sortedFood.begin(), sortedFood.end(),
+        [myHead](Point a, Point b)
+        {
+            return distance(myHead, a) < distance(myHead, b);
+        });
+
+    if (sortedFood.size() == 0)
+    {
+        return -1;
+    }
+    else
+    {
+        return distance(myHead, sortedFood.at(0));
+    }
+}
+
 DirectionSet notImmediatelySuicidalMoves(GameState &state)
 {
     Point myHead = state.mySnake()->head();

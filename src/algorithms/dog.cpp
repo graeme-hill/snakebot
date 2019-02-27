@@ -24,7 +24,6 @@ void Dog::start(std::string /*id*/)
 
 Direction Dog::move(GameState &state)
 {
-
     auto chaseDir = chaseTail(state);
     if (chaseDir.hasValue)
     {

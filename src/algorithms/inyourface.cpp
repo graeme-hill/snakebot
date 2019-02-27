@@ -85,51 +85,58 @@ MaybeDirection bestCutoff(GameState &state, Snake *target)
 
 Snake *getSnakeToAnnoy(GameState &state, Snake *fixedTarget)
 {
-    // If the creator of this class assigned a fixed target then just use that.
-    if (fixedTarget != nullptr)
+    auto enemies = state.enemies();
+    if (enemies.size() > 0)
     {
-        return fixedTarget;
+        return enemies.at(0);
     }
+    return nullptr;
+    // // If the creator of this class assigned a fixed target then just use that.
+    // if (fixedTarget != nullptr)
+    // {
+    //     return fixedTarget;
+    // }
 
-    auto myLength = state.mySnake()->length();
-    Snake *closestSnake = nullptr;
-    Snake *closestSmallerSnake = nullptr;
+    // auto myLength = state.mySnake()->length();
+    // Snake *closestSnake = nullptr;
+    // Snake *closestSmallerSnake = nullptr;
 
-    for (Snake *enemy : state.enemies())
-    {
-        if (closestSnake == nullptr || closestSnake->length() > enemy->length())
-        {
-            closestSnake = enemy;
-        }
+    // for (Snake *enemy : state.enemies())
+    // {
+    //     if (enemy->)
+    //     if (closestSnake == nullptr || closestSnake->length() > enemy->length())
+    //     {
+    //         closestSnake = enemy;
+    //     }
 
-        bool smaller = enemy->length() < myLength;
-        if (smaller && (closestSmallerSnake == nullptr || closestSmallerSnake->length() > enemy->length()))
-        {
-            closestSmallerSnake = enemy;
-        }
-    }
+    //     bool smaller = enemy->length() < myLength;
+    //     if (smaller && (closestSmallerSnake == nullptr || closestSmallerSnake->length() > enemy->length()))
+    //     {
+    //         closestSmallerSnake = enemy;
+    //     }
+    // }
 
-    return closestSmallerSnake == nullptr ? closestSnake : closestSmallerSnake;
+    // return closestSmallerSnake == nullptr ? closestSnake : closestSmallerSnake;
 }
 
 Direction InYourFace::move(GameState &state)
 {
-    if (state.mySnake()->health > 50)
-    {
-        Snake *target = getSnakeToAnnoy(state, _target);
-        auto cutoffDir = bestCutoff(state, target);
+    // if (state.mySnake()->health > 50)
+    // {
+    Snake *target = getSnakeToAnnoy(state, _target);
+    auto cutoffDir = bestCutoff(state, target);
 
-        if (cutoffDir.hasValue)
-        {
-            return cutoffDir.value;
-        }
-    }
-
-    auto foodDir = closestFood(state);
-    if (foodDir.hasValue)
+    if (cutoffDir.hasValue)
     {
-        return foodDir.value;
+        return cutoffDir.value;
     }
+    // }
+
+    // auto foodDir = closestFood(state);
+    // if (foodDir.hasValue)
+    // {
+    //     return foodDir.value;
+    // }
 
     auto alt = notImmediatelySuicidal(state);
     return alt.value;
