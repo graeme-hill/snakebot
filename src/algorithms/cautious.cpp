@@ -24,7 +24,7 @@ void Cautious::start(std::string /*id*/)
 
 Direction Cautious::move(GameState &state)
 {
-    auto distance = closestFoodDistance(state) + 5;
+    auto distance = static_cast<uint32_t>(closestFoodDistance(state) + 5);
     if (state.mySnake()->health < distance)
     {
         auto foodDir = bestFood(state);
