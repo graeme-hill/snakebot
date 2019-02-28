@@ -24,14 +24,14 @@ void Cautious::start(std::string /*id*/)
 
 Direction Cautious::move(GameState &state)
 {
-    auto distance = closestFoodDistance(state);
-    if (90 - state.mySnake()->health < distance)
+    auto distance = closestFoodDistance(state) + 5;
+    if (state.mySnake()->health < distance)
     {
-auto foodDir = bestFood(state);
-    if (foodDir.hasValue)
-    {
-        return foodDir.value;
-    }
+        auto foodDir = bestFood(state);
+        if (foodDir.hasValue)
+        {
+            return foodDir.value;
+        }
     } 
 
     auto chaseDir = chaseTail(state);
