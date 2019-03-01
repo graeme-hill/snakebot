@@ -85,58 +85,43 @@ MaybeDirection bestCutoff(GameState &state, Snake *target)
 
 Snake *getSnakeToAnnoy(GameState &state, Snake *fixedTarget)
 {
-    auto enemies = state.enemies();
-    if (enemies.size() > 0)
+    // If the creator of this class assigned a fixed target then just use that.
+    if (fixedTarget != nullptr)
     {
-        return enemies.at(0);
+        return fixedTarget;
     }
-    return nullptr;
-    // // If the creator of this class assigned a fixed target then just use that.
-    // if (fixedTarget != nullptr)
-    // {
-    //     return fixedTarget;
-    // }
 
-    // auto myLength = state.mySnake()->length();
-    // Snake *closestSnake = nullptr;
-    // Snake *closestSmallerSnake = nullptr;
+    Snake *closestSnake = nullptr;
 
-    // for (Snake *enemy : state.enemies())
-    // {
-    //     if (enemy->)
-    //     if (closestSnake == nullptr || closestSnake->length() > enemy->length())
-    //     {
-    //         closestSnake = enemy;
-    //     }
+    for (Snake *enemy : state.enemies())
+    {
+        if (closestSnake == nullptr || closestSnake->length() > enemy->length())
+        {
+            closestSnake = enemy;
+        }
+    }
 
-    //     bool smaller = enemy->length() < myLength;
-    //     if (smaller && (closestSmallerSnake == nullptr || closestSmallerSnake->length() > enemy->length()))
-    //     {
-    //         closestSmallerSnake = enemy;
-    //     }
-    // }
-
-    // return closestSmallerSnake == nullptr ? closestSnake : closestSmallerSnake;
+    return closestSnake;
 }
 
 Direction InYourFace::move(GameState &state)
 {
-    // if (state.mySnake()->health > 50)
-    // {
-    Snake *target = getSnakeToAnnoy(state, _target);
-    auto cutoffDir = bestCutoff(state, target);
-
-    if (cutoffDir.hasValue)
+    if (state.mySnake()->health > 90)
     {
-        return cutoffDir.value;
-    }
-    // }
+        Snake *target = getSnakeToAnnoy(state, _target);
+        auto cutoffDir = bestCutoff(state, target);
 
-    // auto foodDir = closestFood(state);
-    // if (foodDir.hasValue)
-    // {
-    //     return foodDir.value;
-    // }
+        if (cutoffDir.hasValue)
+        {
+            return cutoffDir.value;
+        }
+    }
+
+    auto foodDir = closestFood(state);
+    if (foodDir.hasValue)
+    {
+        return foodDir.value;
+    }
 
     auto alt = notImmediatelySuicidal(state);
     return alt.value;
