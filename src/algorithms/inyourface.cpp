@@ -113,7 +113,7 @@ Snake *getSnakeToAnnoy(GameState &state, Snake *fixedTarget)
 
 Direction InYourFace::move(GameState &state)
 {
-    if (state.mySnake()->health > 10)
+    if (state.mySnake()->health > 0)
     {
         Snake *target = getSnakeToAnnoy(state, _target);
         auto cutoffDir = bestCutoff(state, target);
