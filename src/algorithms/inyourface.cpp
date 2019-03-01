@@ -7,11 +7,13 @@
 
 // Create with no specific target in mind.
 InYourFace::InYourFace() : _target(nullptr)
-{ }
+{
+}
 
 // Create with a specific target.
 InYourFace::InYourFace(Snake *target) : _target(target)
-{ }
+{
+}
 
 Metadata InYourFace::meta()
 {
@@ -22,8 +24,7 @@ Metadata InYourFace::meta()
         "In your face",
         "bam!",
         "pixel",
-        "pixel"
-    };
+        "pixel"};
 }
 
 void InYourFace::start(std::string /*id*/)
@@ -39,10 +40,10 @@ MaybeDirection bestCutoff(GameState &state, Snake *target)
     Point mh = state.mySnake()->head();
 
     // Cells adjacent to target's head
-    Point l = { th.x - 1, th.y };
-    Point r = { th.x + 1, th.y };
-    Point u = { th.x, th.y + 1 };
-    Point d = { th.x, th.y - 1 };
+    Point l = {th.x - 1, th.y};
+    Point r = {th.x + 1, th.y};
+    Point u = {th.x, th.y + 1};
+    Point d = {th.x, th.y - 1};
 
     // Only target empty cells adjacent to enemy head
     bool lEmpty = cellIsEmpty(state, l);
@@ -95,6 +96,12 @@ Snake *getSnakeToAnnoy(GameState &state, Snake *fixedTarget)
 
     for (Snake *enemy : state.enemies())
     {
+        // don't attack other bounty snakes
+        if (enemy->id.size() > 2 && enemy->id.at(0) == '~' && enemy->id.at(1) == '~')
+        {
+            continue;
+        }
+
         if (closestSnake == nullptr || closestSnake->length() > enemy->length())
         {
             closestSnake = enemy;
