@@ -468,17 +468,25 @@ request_handler::request_handler(const std::string &doc_root)
 void request_handler::handle_request(const request &req, reply &rep)
 {
   std::cout << "RECEIVED '" << req.uri << "'" << std::endl;
-  if (req.uri == "/move")
+  try
   {
-    rep.content = Dispatcher::move(req.body);
+    if (req.uri == "/move")
+    {
+      rep.content = Dispatcher::move(req.body);
+    }
+    else if (req.uri == "/start")
+    {
+      rep.content = Dispatcher::start(req.body);
+    }
+    else
+    {
+      std::cout << "DEFAULT CONTENT" << std::endl;
+      rep.content = "{ \"message\": \"hi\" }";
+    }
   }
-  else if (req.uri == "/start")
+  catch (...)
   {
-    rep.content = Dispatcher::start(req.body);
-  }
-  else
-  {
-    rep.content = "{ \"message\": \"hi\" }";
+    std::cout << "RECOVERED FROM AN ERROR (probably bad json)" << std::endl;
   }
 
   rep.status = reply::ok;
