@@ -467,6 +467,7 @@ request_handler::request_handler(const std::string &doc_root)
 
 void request_handler::handle_request(const request &req, reply &rep)
 {
+  std::cout << "RECEIVED '" << req.uri << "'" << std::endl;
   if (req.uri == "/move")
   {
     rep.content = Dispatcher::move(req.body);
